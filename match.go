@@ -1,44 +1,28 @@
 //go:build ignore
 
-// match.go — Go's answer to Rust's match/destructuring.
-// No pattern destructuring: slice heads/tails are extracted by index.
-// Type switch is the closest to Rust's match on enums; conditionless switch
-// replaces chains of if/else if. Cases do NOT fall through by default.
-// Takeaway: switch on type for interface dispatch, switch {} for bool chains.
-
 package main
 
 import "fmt"
 
 func main() {
-	// No destructuring — extract by index manually.
-	s := []int{1, 2, 3, 4}
-	head, tail := s[0], s[1:]
+	// Rust slice patterns become explicit indexing and slicing.
+	values := []int{1, 2, 3, 4}
+	head, tail := values[0], values[1:]
 	fmt.Println("head:", head, "tail:", tail)
 
-	a, b := s[0], s[1]
-	fmt.Println("a,b:", a, b)
-
-	// Multi-assignment exists (functions, swaps) but it's not slice destructuring.
-	x, y := pair()
-	x, y = y, x
-	fmt.Println("swapped:", x, y)
-
-	// Type switch: closest to Rust's `match` on an enum / dyn Trait.
-	for _, v := range []any{42, "hi", true, 3.14} {
-		switch t := v.(type) {
+	// Interface type switches are open, not exhaustive like enum matches.
+	for _, value := range []any{42, "hi", true, 3.14} {
+		switch value := value.(type) {
 		case int:
-			fmt.Printf("int %d\n", t)
+			fmt.Printf("int %d\n", value)
 		case string:
-			fmt.Printf("string %q\n", t)
-		case bool:
-			fmt.Printf("bool %v\n", t)
+			fmt.Printf("string %q\n", value)
 		default:
-			fmt.Printf("other %v\n", t)
+			fmt.Printf("other %v\n", value)
 		}
 	}
 
-	// Conditionless switch: clean replacement for if/else chains.
+	// A conditionless switch replaces an if/else-if chain.
 	n := 7
 	switch {
 	case n < 0:
@@ -51,7 +35,7 @@ func main() {
 		fmt.Println("odd")
 	}
 
-	// Multi-value cases; no implicit fallthrough (unlike C).
+	// Value cases accept comma-separated values and do not fall through.
 	switch n {
 	case 1, 3, 5, 7, 9:
 		fmt.Println("small odd")
@@ -59,5 +43,3 @@ func main() {
 		fmt.Println("small even")
 	}
 }
-
-func pair() (int, int) { return 1, 2 }
