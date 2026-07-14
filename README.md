@@ -1,15 +1,72 @@
 # gofrs
 
-> **In the age of AI, code is cheap. Code you can trust is not.**
+**Go for Rustaceans: a minimal, runnable guide for senior Rust programmers.**
 
-**Go for Rustaceans, one runnable file at a time.**
+Each root `.go` file teaches one Go concept by comparing it with the Rust concept
+you already know. Read one file, run it, and inspect the output.
 
-`gofrs` shows what Go does where a Rustacean expects `Option`, `match`, tuples,
-iterators, or `Vec` methods. Each file asks one question, prints the answer, and
-stays small enough to read in one pass.
+There are no programming basics, framework conventions, or course machinery.
+The goal is to make a senior Rust developer productive in Go without teaching
+programming again.
 
-It is the executable companion to
-[Code Like Go](https://krons.fiu.wtf/lore/go): boring on purpose.
+## What it contains
+
+- Standalone demos for slices, pointers, ranges, sorting, generics, iterators,
+  multiple returns, and common collection operations.
+- Direct translations for Rust concepts such as `Vec`, `Option`, `match`,
+  tuples, trait bounds, and iterators.
+- Printed output for every runnable lesson.
+- Intentional compiler errors where the error is the lesson.
+- Minimal teaching implementations of Heap, Stack, Queue, and Set.
+
+This is not a production collections library. The code is deliberately small,
+direct, and incomplete where completeness would hide the concept.
+
+## What you get from it
+
+After working through the demos, you can:
+
+- open unfamiliar Go code and follow its data flow;
+- write Go without translating Rust syntax literally;
+- predict slice aliasing, backing-array retention, and `range` behavior;
+- use Go's explicit replacements for Rust conveniences;
+- review small Go changes and recognize the sharp edges;
+- decide when Go is the better default than Rust or Python.
+
+## Why Go
+
+Most application code is plumbing: HTTP, databases, queues, files, schemas,
+serialization, retries, and deployment. It needs to be quick to build, easy to
+operate, and fast enough that infrastructure does not become the product.
+
+Rust gives you control over allocation, layout, lifetimes, and every performance
+edge. Most services do not need that control. Python removes initial friction,
+but interpreter overhead can turn throughput limits and CPU use into deployment
+problems.
+
+Use Rust when control is the product. Use Go when the product is APIs, workers,
+CLIs, and data plumbing.
+
+Go takes the middle path:
+
+- a small language and fast build loop;
+- garbage collection instead of lifetime management;
+- goroutines and a production-ready standard library;
+- native code in one deployable binary;
+- enough performance headroom to keep a simple deployment for longer.
+
+There is no universal “Go is 100× faster” ratio. In one production example,
+Stream reported that Go was typically **40× faster than Python** for its
+workload. Its Python ranking code took three days to build and another two weeks
+to optimize; the Go version took four days and needed no further performance
+work. The useful result is not a benchmark trophy. It is less time tuning code
+and fewer machines doing the same job.
+([case study](https://go.dev/solutions/stream))
+
+The design attitude follows
+[Code Like Go](https://krons.fiu.wtf/lore/go): boring, explicit, and small.
+
+## Run it
 
 ```sh
 go run .                 # arrays, slices, aliasing, and sorting
@@ -21,12 +78,6 @@ go run datastructures.go # Heap, Stack, Queue, and Set
 Most demos have `//go:build ignore` so they can each declare their own `main`
 without colliding with the others. Passing a filename directly to `go run`
 runs that one demo.
-
-## Who this is for
-
-You should already be comfortable with Rust syntax and concepts such as
-`Vec<T>`, `Option<T>`, `Result<T, E>`, iterators, traits, and ownership. The
-demos teach the Go differences; they do not reteach programming from zero.
 
 You need Go 1.26 or newer, matching [`go.mod`](go.mod). Check your installation:
 
@@ -119,40 +170,6 @@ go run caseB.go  # the corrected pointer-element case
 | `HashSet<T>` | `map[T]struct{}` | Sets are conventionally represented with a map. |
 | `VecDeque<T>` | slice, ring, or local queue | The standard library has no generic deque. |
 | operator overloading | none | Operators keep their built-in meanings. |
-
-## Why Go now
-
-Across three randomized field experiments involving 4,867 developers, the
-combined estimate found **26.08%** more completed tasks with an AI assistant,
-although individual results were noisy. More code is coming. But when
-researchers expanded a popular code benchmark with stronger tests, reported LLM
-pass rates fell by up to **28.9%**. Generation got cheaper; verification did
-not. ([productivity study](https://doi.org/10.1287/mnsc.2025.00535),
-[correctness study](https://arxiv.org/abs/2305.01210))
-
-Go was designed for people who must “write—and read and debug and maintain”
-large systems. Its original targets included slow builds, uncontrolled
-dependencies, inconsistent language subsets, and poor program understanding.
-Those are now AI coding problems too.
-([Go at Google](https://go.dev/talks/2012/splash.article))
-
-- **One canonical format.** [`gofmt`](https://go.dev/blog/gofmt) makes generated
-  diffs about logic, not style.
-- **Fast, typed feedback.** The compiler, `go test`, and `go vet` reject many bad
-  guesses before review.
-- **Explicit control flow.** Errors, loops, and conversions stay visible in the
-  source.
-- **Fewer moving parts.** A broad standard library and the
-  [Go 1 compatibility promise](https://go.dev/doc/go1compat) reduce dependency
-  and version churn.
-- **Deliberately ordinary code.** Fewer ways to be clever make unfamiliar code
-  cheaper to inspect and own.
-
-The claim is not that every LLM writes Go better than every other language. The
-claim is narrower and more useful:
-
-> **Go's advantage in the AI age is not that models can write it. It is that
-> humans can still read it.**
 
 ## Repository rules
 
