@@ -1,10 +1,5 @@
 //go:build ignore
 
-// filtering slices: new-slice loop, in-place s[:0] trick, slices.DeleteFunc.
-// Rust analogue: iter().filter().collect() always allocates; s[:0] reuses backing storage.
-// Gotcha: slices.DeleteFunc predicate is "drop if true" — opposite of filter's "keep if true".
-// Takeaway: s[:0] is zero-allocation filter-in-place; use DeleteFunc for clean one-liners.
-
 package main
 
 import (
@@ -13,30 +8,30 @@ import (
 )
 
 func main() {
+	// Rust: nums.iter().copied().filter(|n| n % 2 == 0).collect().
+	// Collecting into Vec allocates; this loop likewise builds a new slice.
 	nums := []int{1, 2, 3, 4, 5, 6}
-	keep := func(n int) bool { return n%2 == 0 }
-
-	// 1. new slice — Rust: nums.iter().filter(|&&n| n%2==0).collect()
-	var out []int
+	var evens []int
 	for _, n := range nums {
-		if keep(n) {
-			out = append(out, n)
+		if n%2 == 0 {
+			evens = append(evens, n)
 		}
 	}
-	fmt.Println("new slice:", out)
+	fmt.Println("new slice:", evens)
 
-	// 2. in-place: s[:0] resets len to 0 but keeps the backing array; zero allocation
-	src := []int{1, 2, 3, 4, 5, 6}
-	filtered := src[:0]
-	for _, n := range src {
-		if keep(n) {
-			filtered = append(filtered, n)
+	// s[:0] aliases the input and does not clear the unused tail.
+	nums = []int{1, 2, 3, 4, 5, 6}
+	evens = nums[:0]
+	for _, n := range nums {
+		if n%2 == 0 {
+			evens = append(evens, n)
 		}
 	}
-	fmt.Println("in place:", filtered)
+	fmt.Println("in place:", evens, "stale tail:", nums[len(evens):])
 
-	// 3. slices.DeleteFunc: predicate means DROP (not keep) — easy to get backwards
-	xs := []int{1, 2, 3, 4, 5, 6}
-	xs = slices.DeleteFunc(xs, func(n int) bool { return n%2 == 0 })
-	fmt.Println("DeleteFunc (drops evens):", xs)
+	// DeleteFunc's predicate drops odds and clears the vacated tail.
+	nums = []int{1, 2, 3, 4, 5, 6}
+	evens = slices.DeleteFunc(nums, func(n int) bool { return n%2 != 0 })
+	full := evens[:cap(evens)]
+	fmt.Println("DeleteFunc:", evens, "cleared tail:", full[len(evens):])
 }

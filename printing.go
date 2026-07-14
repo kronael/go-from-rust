@@ -1,11 +1,5 @@
 //go:build ignore
 
-// printing.go — fmt package: Print/Println/Printf/Sprintf/Fprintln and common verbs.
-// Rust: println!("{}", x) / format!("{:?}", x). Go: fmt.Printf("%v", x) / %+v / %#v.
-// Key verbs: %v default, %+v with field names, %#v Go-syntax repr, %T type name,
-//            %d int, %s string, %q quoted string, %x hex, %t bool, %f float.
-// Takeaway: Fprintln(w, ...) writes to any io.Writer — use os.Stderr for errors.
-
 package main
 
 import (
@@ -13,24 +7,28 @@ import (
 	"os"
 )
 
-type Point struct{ X, Y int }
+type point struct {
+	X int
+	Y int
+}
 
 func main() {
-	fmt.Println("Println: args spaced, newline added", 1, 2, 3)
-	fmt.Print("Print: no newline, ", "no auto-spaces between strings\n")
-	fmt.Printf("Printf: formatted with verbs: %d and %s\n", 42, "hi")
+	// Rust's print! and println! map to Print and Println.
+	fmt.Print("Print")
+	fmt.Println(" + Println", 1, 2)
 
-	s := fmt.Sprintf("user #%d", 7) // format into a string, don't print
-	fmt.Println("Sprintf ->", s)
+	// Printf uses verbs, and the newline is explicit.
+	fmt.Printf("Printf: %s %d\n", "answer", 42)
 
-	p := Point{1, 2}
-	fmt.Printf("%%v   default:   %v\n", p)
-	fmt.Printf("%%+v  w/ fields:  %+v\n", p)
-	fmt.Printf("%%#v  Go syntax:  %#v\n", p)
-	fmt.Printf("%%T   type:       %T\n", p)
-	fmt.Printf("%%d %%s %%q:      %d %s %q\n", 10, "go", "go")
-	fmt.Printf("%%.2f %%t:        %.2f %t\n", 3.14159, true)
-	fmt.Printf("%%x hex:         %x\n", 255)
+	// These do not split directly into Rust's Display and Debug.
+	p := point{X: 3, Y: 4}
+	fmt.Printf("%%v: %v\n", p)
+	fmt.Printf("%%+v: %+v\n", p)
+	fmt.Printf("%%#v: %#v\n", p)
 
-	fmt.Fprintln(os.Stderr, "this goes to stderr") // any io.Writer works
+	message := fmt.Sprintf("Sprintf: point %v", p)
+	fmt.Println(message)
+
+	// Fprintln targets an io.Writer.
+	fmt.Fprintln(os.Stderr, "Fprintln: stderr")
 }

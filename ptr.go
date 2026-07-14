@@ -1,32 +1,30 @@
 //go:build ignore
 
-// indexing *[]int vs *[N]int: slice pointers require explicit deref; array pointers auto-deref.
-// Rust analogue: &mut Vec<T> and &mut [T; N] both index directly — Go's *[]T does not.
-// Takeaway: (*p)[i] for *[]T; ap[i] works for *[N]T because the spec auto-derefs array pointers.
-
 package main
 
 import "fmt"
 
 func main() {
+	// A []T argument normally suffices: it still refers to the same elements.
 	s := []int{10, 20, 30}
-	p := &s // *[]int — does NOT auto-deref on indexing
+	setFirst(s)
+	fmt.Println("slice argument:", s)
 
-	x := (*p)[0]
-	fmt.Println("read (*p)[0]:", x)
+	// *[]T is uncommon. Use it when replacing the caller's slice header.
+	replace(&s)
+	fmt.Println("replaced header:", s)
 
-	(*p)[1] = 99
-	fmt.Println("after (*p)[1]=99:", s)
+	// Array pointer indexing is special shorthand for (*p)[i] in the Go spec.
+	array := [3]int{1, 2, 3}
+	arrayPointer := &array
+	arrayPointer[0] = 9
+	fmt.Println("array pointer:", array)
+}
 
-	fmt.Println("len(*p):", len(*p))
+func setFirst(s []int) {
+	s[0] = 11
+}
 
-	for i, v := range *p {
-		fmt.Printf("  [%d]=%d\n", i, v)
-	}
-
-	// *[N]int DOES auto-deref — special rule for array pointers only
-	arr := [3]int{1, 2, 3}
-	ap := &arr // *[3]int
-	ap[0] = 7  // shorthand for (*ap)[0]; not allowed for *[]int
-	fmt.Println("array ptr direct index:", arr)
+func replace(s *[]int) {
+	*s = []int{7, 8}
 }
