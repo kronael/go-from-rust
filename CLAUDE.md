@@ -1,27 +1,76 @@
-# gofrs — Go for Rustaceans
+# Minimum Viable Go for Rust Engineers
 
-Teaching collection of minimal, runnable Go demos for people who already know Rust.
+## Purpose
 
-## Project intent
+This repository teaches practical Go mappings to readers who already know Rust.
+Every lesson is small enough for an LLM or human to read, predict, run, and
+compare without framework context.
 
-Every file is a single focused demo. No abstractions, no framework, no build system.
-The point is that a Rustacean can read one file and immediately understand one Go concept.
+## Repository Map
 
-## Style (modeled on gobyexample.com)
+- `main.go` is the default lesson for `go run .`.
+- Standalone lessons use `//go:build ignore` and run by explicit filename.
+- `badidx.go` intentionally fails because Go cannot index `*[]T`.
+- There is no nested `ds` package, framework, or build system.
 
-- **One concept per file** — self-contained, under ~80 lines
-- **Code-first** — minimal prose, no preamble; the code is the explanation
-- **Inline annotation only** — short comments between code blocks, not at the top
-- **Show output** — if it runs, the output matters; make it obvious
-- **Pragmatic, dry tone** — no flair, no padding, no marketing
-- **Rust→Go framing** — name the Rust thing, show the Go equivalent; don't explain both from scratch
-- **No helpers, no abstractions** — if you need a 3-line helper to make the demo cleaner, the demo is wrong
-- **Deliberate incompleteness is fine** — a file that won't compile (caseA.go, badidx.go) is a valid demo
+## How to Explore
 
-## What NOT to do
+1. Read `README.md` for the scope and complete learning path.
+2. List the final inventory with `rg --files -g '*.go' | sort`.
+3. Run the default lesson with `GOCACHE=/tmp/gofrs-go-cache go run .`.
+4. Read one lesson, predict its output or compiler error, then run that file.
+5. Check language claims against the [Go documentation](https://go.dev/doc/) or
+   [Go specification](https://go.dev/ref/spec), not README prose alone.
+6. Compare the observed output with the source and revise the prediction.
+7. Inspect `badidx.go` last and confirm its compiler failure is the lesson.
 
-- Don't add error handling that obscures the concept being demonstrated
-- Don't generalize a demo into a reusable pattern
-- Don't add commentary explaining what the code does (name it well instead)
-- Don't make demos longer to be "more complete"
-- Don't add a new file unless it demonstrates a genuinely distinct concept
+## Lesson Groups
+
+- **Slices and memory:** `main.go`, `demo.go`, `ptr.go`, `badidx.go`,
+  `sliceptrs.go`, `filter.go`, `pop.go`, `zero.go`, `shrink.go`, `edges.go`.
+- **Language mappings:** `printing.go`, `rangekw.go`, `option.go`, `match.go`,
+  `tuples.go`, `multireturn.go`, `ternary.go`.
+- **Ordering, iterators, and data structures:** `sortstruct.go`,
+  `genericsort.go`, `iters.go`, `datastructures.go`.
+- **Errors, logging, and panics:** `errors.go`, `logging.go`, `panic.go`.
+
+## Editing Contract
+
+- Keep one concept per self-contained file, usually under 80 lines.
+- Put code first. Never add a prose preamble at the top of a lesson.
+- Use short inline comments between code blocks to map Rust concepts to Go.
+- Keep output deterministic unless unspecified/nondeterministic behavior is itself the concept.
+- Avoid unnecessary helpers and abstractions. If a helper hides the concept,
+  keep the operation inline.
+- Do not add error handling, generalization, or completeness that obscures the
+  concept being taught.
+- Use a deliberate compiler failure only when the failure is the useful lesson.
+- Add no new file unless it demonstrates a genuinely distinct concept.
+- Keep the tone pragmatic, dry, and free of marketing language.
+
+## Validation
+
+Use a writable cache:
+
+```sh
+export GOCACHE=/tmp/gofrs-go-cache
+go test ./...
+go vet ./...
+go run .
+for file in *.go; do
+  case "$file" in main.go|badidx.go) continue ;; esac
+  go run "$file"
+done
+test -z "$(gofmt -l *.go)"
+```
+
+Run the intentional failure separately. It must report that `*[]int` cannot be
+indexed:
+
+```sh
+GOCACHE=/tmp/gofrs-go-cache go run badidx.go
+```
+
+Treat the Why Go section in `README.md` as project framing, not benchmark
+evidence. Never invent universal speed ratios or turn tradeoffs into universal
+performance claims.

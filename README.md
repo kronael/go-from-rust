@@ -1,92 +1,89 @@
 # Minimum Viable Go for Rust Engineers
 
-Complete Go books and tutorials are easy to find online. I made this for myself
-because I knew how to solve problems in Rust, but struggled to see how those
-concepts mapped to practical Go.
+Go books and tutorials teach the language from zero. This repository answers a
+narrower question for experienced Rust programmers: “I know how to do this in
+Rust—what should I actually write in Go?” I made it because mapping concepts I
+already knew in Rust to practical Go was the hard part.
 
-Twenty small programs focus on the differences that matter in practice: slices
-and backing arrays, aliasing, `range`, pointers, `nil`, and the conveniences Go
-deliberately leaves out. Read one, predict the output, run it, then change one
-value and run it again.
+Each `.go` file contains one small standalone lesson. Twenty-three are runnable;
+`badidx.go` is the single intentional compile failure. After working through all
+24, you should be able to reason about Go slices and memory, translate common
+Rust language patterns, use the standard ordering and collection tools, and
+handle errors, structured logs, and panics without importing Rust abstractions.
 
-## What it covers
+## Run It
 
-The demos give you a working model of:
-
-- slices, backing arrays, aliasing, pointers, and `range`;
-- the Go idioms used instead of `Option`, `match`, tuples, trait bounds, and
-  Rust-style iterators;
-- collection operations that need more explicit memory handling in Go;
-- the compiler errors and runtime surprises most likely to catch a Rust reader.
-
-This is lesson material, not a production collections library or a complete Go
-course.
-
-## Run it
+`go run .` runs the default lesson in `main.go`. Pass a standalone filename to
+run one focused lesson:
 
 ```sh
-go run .                 # arrays, slices, aliasing, and sorting
-go run filter.go         # three ways to filter a slice
-go run option.go         # comma-ok and nil instead of Option<T>
-go run datastructures.go # Heap, Stack, Queue, and Set
+go run .
+go run errors.go
+go run logging.go
+go run panic.go
+go run datastructures.go
 ```
 
-Most demos use `//go:build ignore` so each can declare its own `main`. Run one by
-passing its filename directly to `go run`.
+The standalone lessons use `//go:build ignore`, so they do not collide with the
+default `main`. Explicit filenames still run normally.
 
-Two demos are supposed to fail:
+Only `badidx.go` is intended to fail:
 
 ```sh
-go run badidx.go # cannot index a pointer to a slice
-go run caseA.go  # cannot dereference an int
+go run badidx.go # expected: a *[]int cannot be indexed
 ```
 
-`caseB.go` contrasts the second case with a slice that intentionally contains
-pointers.
+The repository requires Go 1.26, matching [`go.mod`](go.mod).
 
-You need Go 1.26 or newer, matching [`go.mod`](go.mod).
+## Learning Path
 
-## Learning path
-
-| Demo | Rust question it answers |
+| Lesson | What it maps from Rust to Go |
 |---|---|
-| [`printing.go`](printing.go) | How do `println!`-style formatting and output differ? |
-| [`main.go`](main.go) | How do arrays, `Vec<T>`, aliasing, and sorting translate? |
-| [`demo.go`](demo.go) | What replaces `copy_from_slice` and variadic expansion? |
-| [`rangekw.go`](rangekw.go) | What does `range` yield for slices, maps, strings, integers, and iterators? |
-| [`ptr.go`](ptr.go) | When does Go dereference a pointer automatically? |
-| [`badidx.go`](badidx.go) | Why does indexing `*[]T` fail? |
-| [`filter.go`](filter.go) | What replaces `iter().filter().collect()`? |
-| [`pop.go`](pop.go) | What replaces `Vec::pop`, `remove`, and `swap_remove`? |
-| [`zero.go`](zero.go) | Why does deleting pointer elements need zeroing? |
-| [`shrink.go`](shrink.go) | When does a short slice keep a large backing array alive? |
-| [`edges.go`](edges.go) | What happens when a loop appends to the slice it visits? |
-| [`option.go`](option.go) | What replaces `Option<T>`? |
-| [`match.go`](match.go) | What replaces `match` and destructuring? |
-| [`tuples.go`](tuples.go) | What replaces tuple values? |
-| [`multireturn.go`](multireturn.go) | Are multiple return values a tuple? |
-| [`ternary.go`](ternary.go) | What replaces expression-valued `if` and ternary helpers? |
-| [`caseA.go`](caseA.go), [`caseB.go`](caseB.go) | When is `*v` a valid dereference? |
-| [`sortstruct.go`](sortstruct.go) | What replaces `sort_by` and `sort_by_key`? |
-| [`genericsort.go`](genericsort.go) | What is the Go equivalent of an `Ord`-like bound? |
-| [`iters.go`](iters.go) | How do Go's push iterators differ from Rust's pull iterators? |
-| [`datastructures.go`](datastructures.go) | How do generic Heap, Stack, Queue, and Set APIs look in use? |
-| [`ds/ds.go`](ds/ds.go) | What do minimal teaching implementations look like? |
+| [`printing.go`](printing.go) | `print!`, `println!`, formatting verbs, and writer output |
+| [`main.go`](main.go) | Array value copies versus slice header copies and shared elements |
+| [`demo.go`](demo.go) | `copy_from_slice`, Go's shorter-copy rule, and variadic expansion |
+| [`rangekw.go`](rangekw.go) | `range` over slices, maps, strings, and integers, plus value-copy behavior |
+| [`ptr.go`](ptr.go) | Slice arguments, pointers to slice headers, and array pointer indexing |
+| [`badidx.go`](badidx.go) | The compiler error from indexing `*[]T` |
+| [`sliceptrs.go`](sliceptrs.go) | Nil checks and dereferencing elements of `[]*T` |
+| [`filter.go`](filter.go) | Allocating, in-place, and `slices.DeleteFunc` filtering |
+| [`pop.go`](pop.go) | `Vec::pop`, ordered removal, `swap_remove`, and front reslicing |
+| [`zero.go`](zero.go) | Pointer retention after reslicing versus tail clearing after deletion |
+| [`shrink.go`](shrink.go) | Backing-array retention, capacity, and `slices.Clone` |
+| [`edges.go`](edges.go) | Appending while `range` visits its original iteration length |
+| [`option.go`](option.go) | Map comma-ok results and `*T` when zero differs from absence |
+| [`match.go`](match.go) | Slice splitting, type switches, and value switches |
+| [`tuples.go`](tuples.go) | Named structs and fixed arrays instead of stored tuple values |
+| [`multireturn.go`](multireturn.go) | Multiple result lists and why they are not tuple values |
+| [`ternary.go`](ternary.go) | Branch assignment instead of expression-valued `if` |
+| [`sortstruct.go`](sortstruct.go) | Struct comparators, `cmp.Or`, and unstable sorting |
+| [`genericsort.go`](genericsort.go) | `cmp.Ordered`, generic sorting, and explicit struct ordering |
+| [`iters.go`](iters.go) | Push iterators, early stop, and slice and map iterator adapters |
+| [`datastructures.go`](datastructures.go) | Slice stacks and queues, set maps, and `container/heap` |
+| [`errors.go`](errors.go) | Value-plus-error results, `%w` wrapping, and `errors.Is` |
+| [`logging.go`](logging.go) | Structured `slog` fields and loggers with shared context |
+| [`panic.go`](panic.go) | `panic`, `recover`, and the goroutine recovery boundary |
 
 ## Why Go
 
-Go's omissions are part of the curriculum. Fewer constructs mean fewer ways to
-express the same operation, fewer hidden control paths, and fewer decisions in
-implementation and review. [Code Like Go](https://krons.fiu.wtf/lore/go) calls
-this approach *remove to accelerate*.
+For services, workers, CLIs, and data plumbing, development and operational
+simplicity usually matter more than extracting peak speed. Go offers static
+types, native binaries, garbage collection, a broad standard library, and
+straightforward deployment.
 
-That constraint also helps with AI-assisted code. Generated code still needs
-human verification; static types, visible control flow, one formatter, and fast
-compiler feedback make that review easier.
+Python and TypeScript remain useful choices, but long-running systems can meet
+runtime, packaging, or throughput limits. Rust, Java, and C# address broader or
+lower-level needs, but can require more language, runtime, or architecture work
+than a small service needs. Go is practical in the space between those tradeoffs.
 
-For APIs, workers, CLIs, and data plumbing, Go can be a useful middle ground:
-less low-level design work than Rust, no Python or JavaScript runtime to ship,
-and a smaller language surface than Java or C#.
+[Code Like Go](https://krons.fiu.wtf/lore/go) calls the underlying discipline
+“remove to accelerate”: fewer language choices leave fewer implementation and
+review decisions.
+
+AI makes producing code easier. It does not make generated code trustworthy.
+When production rises, verification becomes the bottleneck. Go's constrained
+language, visible control flow, `gofmt`, compiler, and tests can make generated
+changes cheaper to inspect.
 
 ## License
 
