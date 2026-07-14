@@ -1,16 +1,13 @@
-# Stop writing Rust in Go
+# Minimum Viable Go for Rust Engineers
 
-**The minimum viable Go mental model for Rust engineers.**
+Complete Go books and tutorials are easy to find online. I made this for myself
+because I knew how to solve problems in Rust, but struggled to see how those
+concepts mapped to practical Go.
 
-You already know how to program. You need to know where your Rust instincts
-help, where they mislead, and what Go expects instead.
-
-Twenty small programs compare Go's semantics and idioms with familiar Rust
-concepts: `Vec`, `Option`, `match`, tuples, trait bounds, and iterators. Read them
-before writing or reviewing Go, including AI-generated Go, so you do not have to
-guess about slices, pointers, `nil`, or `range`.
-
-Pick a file, predict the output, run it, then change one value and run it again.
+Twenty small programs focus on the differences that matter in practice: slices
+and backing arrays, aliasing, `range`, pointers, `nil`, and the conveniences Go
+deliberately leaves out. Read one, predict the output, run it, then change one
+value and run it again.
 
 ## What it covers
 
