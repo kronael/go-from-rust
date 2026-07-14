@@ -1,11 +1,15 @@
 # gofrs
 
-**Go for Rustaceans:** small, runnable Go programs for programmers who already
-know Rust.
+> **In the age of AI, code is cheap. Code you can trust is not.**
 
-This is not a book, framework, or application. Each `.go` file isolates one
-language concept and puts the Rust idea beside the Go equivalent. Read a file,
-predict its output, then run it.
+**Go for Rustaceans, one runnable file at a time.**
+
+`gofrs` shows what Go does where a Rustacean expects `Option`, `match`, tuples,
+iterators, or `Vec` methods. Each file asks one question, prints the answer, and
+stays small enough to read in one pass.
+
+It is the executable companion to
+[Code Like Go](https://krons.fiu.wtf/lore/go): boring on purpose.
 
 ```sh
 go run .                 # arrays, slices, aliasing, and sorting
@@ -116,44 +120,39 @@ go run caseB.go  # the corrected pointer-element case
 | `VecDeque<T>` | slice, ring, or local queue | The standard library has no generic deque. |
 | operator overloading | none | Operators keep their built-in meanings. |
 
-## The idea behind the project
+## Why Go now
 
-Go often answers a missing Rust feature with direct control flow: write the
-loop, return the second value, define the small struct, check the error. That is
-not merely missing syntax. It reduces the number of ways a codebase can express
-the same operation.
+Across three randomized field experiments involving 4,867 developers, the
+combined estimate found **26.08%** more completed tasks with an AI assistant,
+although individual results were noisy. More code is coming. But when
+researchers expanded a popular code benchmark with stronger tests, reported LLM
+pass rates fell by up to **28.9%**. Generation got cheaper; verification did
+not. ([productivity study](https://doi.org/10.1287/mnsc.2025.00535),
+[correctness study](https://arxiv.org/abs/2305.01210))
 
-The project follows the argument in
-[Code Like Go](https://krons.fiu.wtf/lore/go): Go teaches through subtraction.
-Fewer language features mean fewer hidden paths and fewer local style choices.
-The result is deliberately ordinary code whose behavior is visible in the
-source.
+Go was designed for people who must “write—and read and debug and maintain”
+large systems. Its original targets included slow builds, uncontrolled
+dependencies, inconsistent language subsets, and poor program understanding.
+Those are now AI coding problems too.
+([Go at Google](https://go.dev/talks/2012/splash.article))
 
-These demos make that trade concrete. They show both what Go removes and what
-the programmer must write instead.
+- **One canonical format.** [`gofmt`](https://go.dev/blog/gofmt) makes generated
+  diffs about logic, not style.
+- **Fast, typed feedback.** The compiler, `go test`, and `go vet` reject many bad
+  guesses before review.
+- **Explicit control flow.** Errors, loops, and conversions stay visible in the
+  source.
+- **Fewer moving parts.** A broad standard library and the
+  [Go 1 compatibility promise](https://go.dev/doc/go1compat) reduce dependency
+  and version churn.
+- **Deliberately ordinary code.** Fewer ways to be clever make unfamiliar code
+  cheaper to inspect and own.
 
-## Why Go works well with LLMs
+The claim is not that every LLM writes Go better than every other language. The
+claim is narrower and more useful:
 
-The same constraints that help a Rust programmer learn Go also help a coding
-model produce code that a human can inspect:
-
-- **A smaller solution space.** Fewer equivalent language constructs make
-  generated code more consistent.
-- **One canonical format.** `gofmt` removes formatting choices from prompts,
-  output, and review.
-- **Explicit control flow.** Loops, error checks, and conversions remain in the
-  source instead of hiding behind exceptions or implicit behavior.
-- **Fast, typed feedback.** `go test`, `go vet`, and the compiler quickly reject
-  invented names, wrong types, unused imports, and many incomplete edits.
-- **A broad standard library.** Common HTTP, JSON, I/O, testing, and concurrency
-  work needs fewer dependencies and fewer version-specific APIs to guess.
-- **Readable generated code.** Humans can audit plain code more reliably than a
-  dense chain of abstractions.
-
-This is an inference from the essay's “boring on purpose” principle, not a claim
-that an LLM makes Go code correct. Models still invent APIs, mishandle edge
-cases, and need tests and review. Go is useful here because it shortens the
-generate–compile–inspect loop and makes mistakes easier to see.
+> **Go's advantage in the AI age is not that models can write it. It is that
+> humans can still read it.**
 
 ## Repository rules
 
