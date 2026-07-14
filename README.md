@@ -1,14 +1,17 @@
-# gofrs
+# `.go` from `.rs`
 
-**Go for Rustaceans: twenty runnable demos and two useful compiler errors.**
+**A runnable map from Rust semantics to Go.**
 
-The files answer Rust-shaped questions about Go. Read one, predict the output,
-run it, then change one value and run it again.
+You already know how to program. What you need is where Go behaves differently.
 
-This guide assumes programming and Rust fluency. It covers Go basics only where
-their behavior or idiom differs from Rust.
+Twenty small programs compare Go's semantics and idioms with familiar Rust
+concepts: `Vec`, `Option`, `match`, tuples, trait bounds, and iterators. Read them
+before writing or reviewing Go, including AI-generated Go, so you do not have to
+guess about slices, pointers, `nil`, or `range`.
 
-## What you get
+Pick a file, predict the output, run it, then change one value and run it again.
+
+## What it covers
 
 The demos give you a working model of:
 
