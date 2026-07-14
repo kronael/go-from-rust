@@ -1,8 +1,9 @@
-# `.go` from `.rs`
+# Stop writing Rust in Go
 
-**A runnable map from Rust semantics to Go.**
+**The minimum viable Go mental model for Rust engineers.**
 
-You already know how to program. What you need is where Go behaves differently.
+You already know how to program. You need to know where your Rust instincts
+help, where they mislead, and what Go expects instead.
 
 Twenty small programs compare Go's semantics and idioms with familiar Rust
 concepts: `Vec`, `Option`, `match`, tuples, trait bounds, and iterators. Read them
