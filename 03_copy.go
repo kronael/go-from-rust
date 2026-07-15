@@ -19,16 +19,8 @@ func main() {
 	empty := make([]int, 0, 10)
 	fmt.Println("copy empty:", copy(empty, src), empty)
 
-	// Go variadics have no direct Rust parameter syntax; Rust takes a slice.
-	fmt.Println("variadic:", sum(1, 2, 3))
-	nums := []int{4, 5, 6}
-	fmt.Println("spread slice:", sum(nums...))
-}
-
-func sum(nums ...int) int {
-	total := 0
-	for _, n := range nums {
-		total += n
-	}
-	return total
+	// copy supports overlap, like Rust copy_within.
+	overlap := []int{1, 2, 3, 4}
+	copy(overlap[1:], overlap)
+	fmt.Println("copy overlap:", overlap)
 }

@@ -1,0 +1,40 @@
+//go:build ignore
+
+package main
+
+import (
+	"fmt"
+	"slices"
+)
+
+func main() {
+	// Go has no pop function: guard, read the end, clear it, then reslice.
+	stack := []int{1, 2, 3, 4}
+	if len(stack) > 0 {
+		index := len(stack) - 1
+		last := stack[index]
+		clear(stack[index:])
+		stack = stack[:index]
+		fmt.Println("pop back:", last, stack)
+	}
+
+	// slices.Delete is the ordered O(n-i) equivalent of Rust Vec::remove.
+	ordered := []int{10, 20, 30, 40}
+	i := 1
+	removed := ordered[i]
+	ordered = slices.Delete(ordered, i, i+1)
+	fmt.Println("delete:", removed, ordered)
+
+	// slices.Insert is the ordered O(n-i) equivalent of Rust Vec::insert.
+	ordered = slices.Insert(ordered, i, 25)
+	fmt.Println("insert:", ordered)
+
+	// Go has no swap-delete function; move the last value and clear its old slot.
+	unordered := []int{10, 20, 30, 40}
+	i = 1
+	removed = unordered[i]
+	unordered[i] = unordered[len(unordered)-1]
+	clear(unordered[len(unordered)-1:])
+	unordered = unordered[:len(unordered)-1]
+	fmt.Println("swap-delete:", removed, unordered)
+}

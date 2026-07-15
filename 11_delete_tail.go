@@ -24,4 +24,11 @@ func main() {
 	reslicedFull := resliced[:cap(resliced)]
 	fmt.Println("reslice tail nil:", reslicedFull[2] == nil)
 	fmt.Println("reslice tail value:", *reslicedFull[2])
+
+	// To remove references manually, clear the discarded tail before reslicing.
+	cleared := []*int{&a, &b, &c}
+	clear(cleared[2:])
+	cleared = cleared[:2]
+	clearedFull := cleared[:cap(cleared)]
+	fmt.Println("clear then reslice:", clearedFull[2] == nil)
 }
