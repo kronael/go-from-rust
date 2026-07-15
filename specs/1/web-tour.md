@@ -29,7 +29,10 @@ lesson source, or executing untrusted code on this server.
   the row count without gaps, and reject unmatched files, unmatched rows,
   duplicate IDs, duplicate filenames, or unequal link text/targets. The loaded
   catalog is immutable and safe for concurrent reads.
-  `V` is the README's editorial importance score (3–5); it never controls
+  Repository-only leading build constraints are removed from browser source;
+  each lesson carries a source hash for edit versioning, and lesson 35 is
+  marked as the expected compiler failure. `V` is the README's editorial
+  importance score (3–5); it never controls
   ordering and is displayed as `Value V/5` in the lesson header and navigation.
 
 ### 2. Guarded web API
@@ -39,7 +42,8 @@ lesson source, or executing untrusted code on this server.
   `/api/format` runs `go/format`; `/api/run` proxies the current Playground
   protocol without local execution; `/health` and `/ready` return useful
   status; unsupported methods and malformed or oversized input return stable
-  JSON errors. `/api/format` accepts `{"body":"<source>"}` and returns
+  JSON errors. Responses include security headers and a request ID.
+  `/api/format` accepts `{"body":"<source>"}` and returns
   `{"body":"<gofmt source>"}` with HTTP 200.
 - **Notes**: `/api/run` accepts JSON `{"body":"<source>"}` up to 128 KiB,
   then POSTs `application/x-www-form-urlencoded` fields `version=2`, `body`, and

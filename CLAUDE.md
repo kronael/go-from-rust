@@ -12,7 +12,8 @@ compare without framework context.
 - Standalone lessons use `//go:build ignore` and run by explicit filename.
 - `35_bad_pointer_index.go` intentionally fails because Go cannot index `*[]T`.
 - Numeric prefixes are the curriculum order and must stay contiguous.
-- There is no nested `ds` package, framework, or build system.
+- There is no nested `ds` package or framework. The Makefile only collects
+  build, validation, and smoke-test commands.
 - `internal/webapp/` and `web.go` (`-tags web`) add an optional interactive
   browser tour; `cmd/fakeplayground/` is a Playground stand-in for tests and
   smoke, never the public service. See the README's Interactive Web Tour
@@ -59,7 +60,9 @@ Use a writable cache:
 ```sh
 export GOCACHE=/tmp/go-from-rust-cache
 go test ./...
+go test -tags web ./...
 go vet ./...
+go vet -tags web ./...
 go run .
 for file in *.go; do
   case "$file" in 01_arrays_slices.go|35_bad_pointer_index.go) continue ;; esac
@@ -67,7 +70,7 @@ for file in *.go; do
 done
 go run -race 26_concurrent_maps.go
 go run -race 31_channels.go
-test -z "$(gofmt -l *.go)"
+test -z "$(gofmt -l $(find . -name '*.go' -not -path './.git/*'))"
 ```
 
 Run the intentional failure separately. It must report that `*[]int` cannot be

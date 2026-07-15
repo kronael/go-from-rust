@@ -90,7 +90,7 @@ narrower but still worth recognizing. The removed ternary helper scored 2.
 An optional `-tags web` build serves a browser tour of all 35 lessons: edit,
 format, run, and navigate by hash (`#01`–`#35`). It embeds the README,
 numbered lesson files, and `web/` assets into one binary; no lesson source is
-duplicated and nothing runs locally.
+duplicated. The production web server never executes submitted code locally.
 
 ```sh
 go build -tags web -o go-from-rust-web .
@@ -110,8 +110,9 @@ submitted code itself. `/api/run` forwards the submitted source to the
 Playground compile protocol at `PLAYGROUND_URL`, bounded by a 128 KiB request
 cap, a 12-second upstream timeout, 8 concurrent in-flight compiles, a 120
 requests/minute budget, and a 256-entry 10-minute result cache. Point
-`PLAYGROUND_URL` at `cmd/fakeplayground` for local development and tests so no
-traffic reaches the public Playground.
+`PLAYGROUND_URL` at `cmd/fakeplayground` for local development and tests. That
+loopback-only test helper executes code in a temporary directory; it is not a
+sandbox and must never be exposed as a public service.
 
 **Container deployment.** The multi-stage `Dockerfile` builds a static binary
 and ships only that binary in an `alpine` runtime image, running as a non-root
