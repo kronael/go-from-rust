@@ -8,7 +8,8 @@ func main() {
 	done := make(chan struct{})
 
 	go func() {
-		// recover only catches a panic in the same goroutine.
+		// Goroutines do not swallow panics. Without this same-goroutine recover,
+		// the unrecovered panic terminates the whole process.
 		defer func() {
 			recovered := recover()
 			fmt.Println("worker recovered:", recovered)
@@ -22,4 +23,8 @@ func main() {
 
 	<-done
 	fmt.Println("main still running")
+
+	// Go has no global panic handler. Wrap each goroutine boundary if recovery
+	// is required; re-panic after logging when the process should still crash.
+	// Libraries may recover internally: net/http does this around handlers.
 }
