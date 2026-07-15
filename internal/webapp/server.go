@@ -2,9 +2,7 @@ package webapp
 
 import (
 	"bytes"
-	"container/list"
 	"context"
-	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -13,7 +11,6 @@ import (
 	"go/format"
 	"io"
 	"io/fs"
-	"log"
 	"mime"
 	"net/http"
 	"net/url"
@@ -23,10 +20,8 @@ import (
 )
 
 const (
-	// DefaultPlaygroundURL is the official Go Playground compile endpoint.
-	DefaultPlaygroundURL = "https://go.dev/_/compile"
-	// DefaultUserAgent identifies this proxy to the Playground.
-	DefaultUserAgent = "go-from-rust/1 (+https://github.com/kronael/go-from-rust)"
+	defaultPlaygroundURL = "https://go.dev/_/compile"
+	defaultUserAgent     = "go-from-rust/1 (+https://github.com/kronael/go-from-rust)"
 
 	maxSourceBytes    = 128 * 1024
 	maxRequestBytes   = 512 * 1024
@@ -42,14 +37,11 @@ const (
 // tests override HTTPClient and Now to control timeouts and cache/budget expiry.
 type Config struct {
 	PlaygroundURL string
-	UserAgent     string
-	Logger        *log.Logger
 	HTTPClient    *http.Client
 	Now           func() time.Time
 }
 
 type cacheEntry struct {
-	key       string
 	value     []byte
 	expiresAt time.Time
 }
@@ -60,16 +52,14 @@ type Server struct {
 	lessons       []Lesson
 	webFS         fs.FS
 	playgroundURL string
-	userAgent     string
 	httpClient    *http.Client
-	logger        *log.Logger
 	now           func() time.Time
 	mux           *http.ServeMux
 
 	mu          sync.Mutex
-	cacheList   *list.List
-	cacheMap    map[string]*list.Element
-	budgetTimes []time.Time
+	cache       map[string]cacheEntry
+	budgetStart time.Time
+	budgetUsed  int
 	sem         chan struct{}
 }
 
@@ -78,15 +68,7 @@ type Server struct {
 func NewServer(lessons []Lesson, webFS fs.FS, cfg Config) *Server {
 	playgroundURL := cfg.PlaygroundURL
 	if playgroundURL == "" {
-		playgroundURL = DefaultPlaygroundURL
-	}
-	userAgent := cfg.UserAgent
-	if userAgent == "" {
-		userAgent = DefaultUserAgent
-	}
-	logger := cfg.Logger
-	if logger == nil {
-		logger = log.Default()
+		playgroundURL = defaultPlaygroundURL
 	}
 	httpClient := cfg.HTTPClient
 	if httpClient == nil {
@@ -101,12 +83,9 @@ func NewServer(lessons []Lesson, webFS fs.FS, cfg Config) *Server {
 		lessons:       lessons,
 		webFS:         webFS,
 		playgroundURL: playgroundURL,
-		userAgent:     userAgent,
 		httpClient:    httpClient,
-		logger:        logger,
 		now:           now,
-		cacheList:     list.New(),
-		cacheMap:      make(map[string]*list.Element),
+		cache:         make(map[string]cacheEntry),
 		sem:           make(chan struct{}, maxConcurrentRuns),
 	}
 
@@ -118,28 +97,14 @@ func NewServer(lessons []Lesson, webFS fs.FS, cfg Config) *Server {
 	mux.HandleFunc("/api/format", s.handleFormat)
 	mux.HandleFunc("/api/run", s.handleRun)
 	mux.HandleFunc("/health", s.handleHealth)
-	mux.HandleFunc("/ready", s.handleReady)
 	s.mux = mux
 
 	return s
 }
 
-// Handler returns the http.Handler serving all routes, wrapped with security
-// headers and request logging.
+// Handler returns all routes with browser security headers.
 func (s *Server) Handler() http.Handler {
-	return s.logRequests(s.securityHeaders(s.mux))
-}
-
-func (s *Server) logRequests(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		start := s.now()
-		reqID := requestID(r)
-		w.Header().Set("X-Request-ID", reqID)
-		rec := &statusRecorder{ResponseWriter: w, status: http.StatusOK}
-		next.ServeHTTP(rec, r)
-		s.logger.Printf("request_id=%s method=%s path=%q status=%d duration=%s",
-			reqID, r.Method, r.URL.Path, rec.status, s.now().Sub(start))
-	})
+	return s.securityHeaders(s.mux)
 }
 
 func (s *Server) securityHeaders(next http.Handler) http.Handler {
@@ -151,50 +116,6 @@ func (s *Server) securityHeaders(next http.Handler) http.Handler {
 		w.Header().Set("X-Frame-Options", "DENY")
 		next.ServeHTTP(w, r)
 	})
-}
-
-type statusRecorder struct {
-	http.ResponseWriter
-	status int
-	wrote  bool
-}
-
-func (r *statusRecorder) WriteHeader(status int) {
-	if r.wrote {
-		return
-	}
-	r.wrote = true
-	r.status = status
-	r.ResponseWriter.WriteHeader(status)
-}
-
-func requestID(r *http.Request) string {
-	id := r.Header.Get("X-Request-ID")
-	if validRequestID(id) {
-		return id
-	}
-	return newRequestID()
-}
-
-func validRequestID(id string) bool {
-	if len(id) == 0 || len(id) > 64 {
-		return false
-	}
-	for _, char := range id {
-		if char >= 'a' && char <= 'z' || char >= 'A' && char <= 'Z' || char >= '0' && char <= '9' || strings.ContainsRune("._-", char) {
-			continue
-		}
-		return false
-	}
-	return true
-}
-
-func newRequestID() string {
-	b := make([]byte, 8)
-	if _, err := rand.Read(b); err != nil {
-		return "unknown"
-	}
-	return hex.EncodeToString(b)
 }
 
 // --- error envelope ---
@@ -258,7 +179,7 @@ func (s *Server) serveEmbedded(w http.ResponseWriter, name, contentType, cacheCo
 	_, _ = w.Write(data)
 }
 
-// --- health/ready ---
+// --- health ---
 
 func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
@@ -266,14 +187,6 @@ func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
-}
-
-func (s *Server) handleReady(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		writeError(w, http.StatusMethodNotAllowed, "method_not_allowed", "only GET is supported")
-		return
-	}
-	writeJSON(w, http.StatusOK, map[string]bool{"ready": true})
 }
 
 // --- lessons ---
@@ -404,11 +317,11 @@ func (s *Server) runUpstream(ctx context.Context, source string) ([]byte, int, s
 		return nil, http.StatusBadGateway, "upstream_failed", "failed to build upstream request"
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	req.Header.Set("User-Agent", s.userAgent)
+	req.Header.Set("User-Agent", defaultUserAgent)
 
 	resp, err := s.httpClient.Do(req)
 	if err != nil {
-		if errors.Is(err, context.DeadlineExceeded) || isTimeoutErr(err) {
+		if errors.Is(err, context.DeadlineExceeded) {
 			return nil, http.StatusGatewayTimeout, "upstream_timeout", "upstream request timed out"
 		}
 		return nil, http.StatusBadGateway, "upstream_failed", "upstream request failed"
@@ -433,32 +346,20 @@ func (s *Server) runUpstream(ctx context.Context, source string) ([]byte, int, s
 	return body, http.StatusOK, "", ""
 }
 
-func isTimeoutErr(err error) bool {
-	type timeouter interface{ Timeout() bool }
-	var t timeouter
-	if errors.As(err, &t) {
-		return t.Timeout()
-	}
-	return strings.Contains(err.Error(), "context deadline exceeded") || strings.Contains(err.Error(), "Client.Timeout")
-}
-
 // --- cache ---
 
 func (s *Server) cacheGet(key string) ([]byte, bool) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	elem, ok := s.cacheMap[key]
+	entry, ok := s.cache[key]
 	if !ok {
 		return nil, false
 	}
-	entry := elem.Value.(*cacheEntry)
 	if s.now().After(entry.expiresAt) {
-		s.cacheList.Remove(elem)
-		delete(s.cacheMap, key)
+		delete(s.cache, key)
 		return nil, false
 	}
-	s.cacheList.MoveToFront(elem)
 	return entry.value, true
 }
 
@@ -466,40 +367,16 @@ func (s *Server) cachePut(key string, value []byte) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	s.purgeExpiredLocked()
-
-	if elem, ok := s.cacheMap[key]; ok {
-		entry := elem.Value.(*cacheEntry)
-		entry.value = value
-		entry.expiresAt = s.now().Add(cacheTTL)
-		s.cacheList.MoveToFront(elem)
-		return
-	}
-
-	if s.cacheList.Len() >= cacheCapacity {
-		back := s.cacheList.Back()
-		if back != nil {
-			be := back.Value.(*cacheEntry)
-			delete(s.cacheMap, be.key)
-			s.cacheList.Remove(back)
+	now := s.now()
+	for cachedKey, entry := range s.cache {
+		if now.After(entry.expiresAt) {
+			delete(s.cache, cachedKey)
 		}
 	}
-
-	entry := &cacheEntry{key: key, value: value, expiresAt: s.now().Add(cacheTTL)}
-	elem := s.cacheList.PushFront(entry)
-	s.cacheMap[key] = elem
-}
-
-func (s *Server) purgeExpiredLocked() {
-	var next *list.Element
-	for e := s.cacheList.Front(); e != nil; e = next {
-		next = e.Next()
-		entry := e.Value.(*cacheEntry)
-		if s.now().After(entry.expiresAt) {
-			s.cacheList.Remove(e)
-			delete(s.cacheMap, entry.key)
-		}
+	if _, exists := s.cache[key]; !exists && len(s.cache) >= cacheCapacity {
+		clear(s.cache)
 	}
+	s.cache[key] = cacheEntry{value: value, expiresAt: now.Add(cacheTTL)}
 }
 
 // --- budget ---
@@ -508,16 +385,14 @@ func (s *Server) reserveBudget() bool {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	cutoff := s.now().Add(-time.Minute)
-	i := 0
-	for i < len(s.budgetTimes) && s.budgetTimes[i].Before(cutoff) {
-		i++
+	now := s.now()
+	if s.budgetStart.IsZero() || !now.Before(s.budgetStart.Add(time.Minute)) {
+		s.budgetStart = now
+		s.budgetUsed = 0
 	}
-	s.budgetTimes = s.budgetTimes[i:]
-
-	if len(s.budgetTimes) >= runBudgetPerMin {
+	if s.budgetUsed >= runBudgetPerMin {
 		return false
 	}
-	s.budgetTimes = append(s.budgetTimes, s.now())
+	s.budgetUsed++
 	return true
 }

@@ -3,7 +3,6 @@ package webapp
 import (
 	"encoding/json"
 	"io"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -29,18 +28,12 @@ func testLessons() []Lesson {
 	}
 }
 
-func discardLogger() *log.Logger {
-	return log.New(io.Discard, "", 0)
-}
-
 // fakePlayground is a configurable in-process stand-in for the Go Playground
 // compile endpoint. Real network calls are never made in these tests.
 type fakePlayground struct {
-	mu       sync.Mutex
 	delay    time.Duration
 	status   int
 	response string
-	inFlight int32
 	requests int32
 }
 
@@ -51,23 +44,21 @@ func newFakePlayground() *fakePlayground {
 func (f *fakePlayground) server() *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		atomic.AddInt32(&f.requests, 1)
-		atomic.AddInt32(&f.inFlight, 1)
-		defer atomic.AddInt32(&f.inFlight, -1)
+		if r.Method != http.MethodPost || r.ParseForm() != nil || r.Form.Get("version") != "2" || r.Form.Get("withVet") != "true" || r.Header.Get("User-Agent") != defaultUserAgent {
+			http.Error(w, "bad playground request", http.StatusBadRequest)
+			return
+		}
 
-		f.mu.Lock()
-		delay, status, response := f.delay, f.status, f.response
-		f.mu.Unlock()
-
-		if delay > 0 {
+		if f.delay > 0 {
 			select {
-			case <-time.After(delay):
+			case <-time.After(f.delay):
 			case <-r.Context().Done():
 				return
 			}
 		}
 		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(status)
-		_, _ = w.Write([]byte(response))
+		w.WriteHeader(f.status)
+		_, _ = w.Write([]byte(f.response))
 	}))
 }
 
@@ -75,7 +66,6 @@ func newTestServer(t *testing.T, playgroundURL string, now func() time.Time) *Se
 	t.Helper()
 	cfg := Config{
 		PlaygroundURL: playgroundURL,
-		Logger:        discardLogger(),
 		HTTPClient:    &http.Client{Timeout: 2 * time.Second},
 		Now:           now,
 	}
@@ -92,8 +82,7 @@ func decodeError(t *testing.T, body io.Reader) errorEnvelope {
 }
 
 func TestLessonsEndpoint(t *testing.T) {
-	fp := newFakePlayground()
-	srv := httptest.NewServer(newTestServer(t, fp.server().URL, time.Now).Handler())
+	srv := httptest.NewServer(newTestServer(t, "http://unused.invalid", time.Now).Handler())
 	defer srv.Close()
 
 	resp, err := http.Get(srv.URL + "/api/lessons")
@@ -422,7 +411,6 @@ func TestRunUpstreamTimeout(t *testing.T) {
 
 	cfg := Config{
 		PlaygroundURL: fps.URL,
-		Logger:        discardLogger(),
 		HTTPClient:    &http.Client{Timeout: 20 * time.Millisecond},
 		Now:           time.Now,
 	}
@@ -510,19 +498,12 @@ func TestRunConcurrencyLimit(t *testing.T) {
 }
 
 func TestRunBudgetExhausted(t *testing.T) {
-	fp := newFakePlayground()
-	fps := fp.server()
-	defer fps.Close()
+	s := newTestServer(t, "http://unused.invalid", time.Now)
 
-	s := newTestServer(t, fps.URL, time.Now)
-
-	// Directly fill the rolling budget window to avoid firing 120 real requests.
+	// Fill the minute budget directly instead of firing 120 requests.
 	s.mu.Lock()
-	now := s.now()
-	s.budgetTimes = make([]time.Time, runBudgetPerMin)
-	for i := range s.budgetTimes {
-		s.budgetTimes[i] = now
-	}
+	s.budgetStart = s.now()
+	s.budgetUsed = runBudgetPerMin
 	s.mu.Unlock()
 
 	srv := httptest.NewServer(s.Handler())
@@ -566,11 +547,8 @@ func TestRunCacheHitBypassesBudget(t *testing.T) {
 
 	// Exhaust the budget after the entry is cached.
 	s.mu.Lock()
-	now := s.now()
-	s.budgetTimes = make([]time.Time, runBudgetPerMin)
-	for i := range s.budgetTimes {
-		s.budgetTimes[i] = now
-	}
+	s.budgetStart = s.now()
+	s.budgetUsed = runBudgetPerMin
 	s.mu.Unlock()
 
 	resp2, err := http.Post(srv.URL+"/api/run", "application/json", strings.NewReader(body))
@@ -583,14 +561,10 @@ func TestRunCacheHitBypassesBudget(t *testing.T) {
 	}
 }
 
-func TestCacheExpiryAndLRUEviction(t *testing.T) {
-	fp := newFakePlayground()
-	fps := fp.server()
-	defer fps.Close()
-
+func TestCacheExpiryAndCapacity(t *testing.T) {
 	current := time.Now()
 	clock := func() time.Time { return current }
-	s := newTestServer(t, fps.URL, clock)
+	s := newTestServer(t, "http://unused.invalid", clock)
 
 	s.cachePut("key-a", []byte(`{"a":1}`))
 	current = current.Add(cacheTTL + time.Second)
@@ -602,12 +576,13 @@ func TestCacheExpiryAndLRUEviction(t *testing.T) {
 	for i := 0; i < cacheCapacity; i++ {
 		s.cachePut(keyN(i), []byte(`{}`))
 	}
-	s.cachePut(keyN(cacheCapacity), []byte(`{}`))
+	newest := keyN(cacheCapacity)
+	s.cachePut(newest, []byte(`{}`))
 	if _, ok := s.cacheGet(keyN(0)); ok {
-		t.Fatal("expected oldest entry to be LRU-evicted once over capacity")
+		t.Fatal("expected full cache to be cleared once over capacity")
 	}
-	if _, ok := s.cacheGet(keyN(1)); !ok {
-		t.Fatal("expected next-oldest entry to survive")
+	if _, ok := s.cacheGet(newest); !ok {
+		t.Fatal("expected newest entry to survive cache reset")
 	}
 }
 
@@ -615,20 +590,18 @@ func keyN(i int) string {
 	return "key-" + string(rune('a'+i%26)) + string(rune('0'+i/26))
 }
 
-func TestHealthAndReady(t *testing.T) {
+func TestHealth(t *testing.T) {
 	s := newTestServer(t, "http://unused.invalid", time.Now)
 	srv := httptest.NewServer(s.Handler())
 	defer srv.Close()
 
-	for _, path := range []string{"/health", "/ready"} {
-		resp, err := http.Get(srv.URL + path)
-		if err != nil {
-			t.Fatal(err)
-		}
-		defer resp.Body.Close()
-		if resp.StatusCode != http.StatusOK {
-			t.Fatalf("%s status = %d, want 200", path, resp.StatusCode)
-		}
+	resp, err := http.Get(srv.URL + "/health")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("status = %d, want 200", resp.StatusCode)
 	}
 }
 
@@ -673,17 +646,13 @@ func TestStaticRoutesAndUnknownPath(t *testing.T) {
 	}
 }
 
-func TestSecurityHeadersAndRequestID(t *testing.T) {
+func TestSecurityHeaders(t *testing.T) {
 	s := newTestServer(t, "http://unused.invalid", time.Now)
 	req := httptest.NewRequest(http.MethodGet, "/health", nil)
-	req.Header.Set("X-Request-ID", "browser-123")
 	rec := httptest.NewRecorder()
 
 	s.Handler().ServeHTTP(rec, req)
 
-	if got := rec.Header().Get("X-Request-ID"); got != "browser-123" {
-		t.Fatalf("X-Request-ID = %q, want browser-123", got)
-	}
 	for _, header := range []string{
 		"Content-Security-Policy",
 		"Permissions-Policy",

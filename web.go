@@ -38,7 +38,6 @@ func main() {
 
 	srv := webapp.NewServer(lessons, webRoot, webapp.Config{
 		PlaygroundURL: os.Getenv("PLAYGROUND_URL"),
-		UserAgent:     os.Getenv("PLAYGROUND_USER_AGENT"),
 	})
 
 	addr := os.Getenv("ADDR")
@@ -58,24 +57,19 @@ func main() {
 	}
 	log.Printf("web: listening on %s (%d lessons loaded)", listener.Addr(), len(lessons))
 
-	errCh := make(chan error, 1)
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
 	go func() {
-		errCh <- server.Serve(listener)
-	}()
-
-	signals := make(chan os.Signal, 1)
-	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM)
-	select {
-	case sig := <-signals:
-		log.Printf("web: received %s, shutting down", sig)
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-		if err := server.Shutdown(ctx); err != nil {
-			log.Printf("web: shutdown: %v", err)
-		}
-	case err := <-errCh:
-		if err != nil && err != http.ErrServerClosed {
+		if err := server.Serve(listener); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("web: serve: %v", err)
 		}
+	}()
+
+	<-ctx.Done()
+	log.Printf("web: shutting down")
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := server.Shutdown(shutdownCtx); err != nil {
+		log.Printf("web: shutdown: %v", err)
 	}
 }
