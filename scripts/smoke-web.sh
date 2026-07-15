@@ -38,14 +38,21 @@ wait_for_addr() {
 }
 
 assert() {
-  desc="$1"
-  shift
-  if "$@"; then
-    echo "ok - $desc"
+	desc="$1"
+	shift
+	if "$@" >/dev/null; then
+		echo "ok - $desc"
   else
     echo "FAIL - $desc"
     FAIL=1
-  fi
+	fi
+}
+
+contains() {
+	case "$1" in
+		*"$2"*) return 0 ;;
+		*) return 1 ;;
+	esac
 }
 
 "$REPO_ROOT/dist/fakeplayground" >"$FAKE_LOG" 2>&1 &
@@ -61,45 +68,59 @@ BASE_URL="http://$WEB_ADDR"
 curl -sf "$BASE_URL/health" >/dev/null
 
 ab() { agent-browser --session "$SESSION" "$@"; }
-AB="agent-browser --session $SESSION"
+
+wait_contains() {
+	selector="$1"
+	needle="$2"
+	tries=200
+	while [ "$tries" -gt 0 ]; do
+		contains "$(ab get text "$selector")" "$needle" && return 0
+		tries=$((tries - 1))
+		sleep 0.1
+	done
+	return 1
+}
+
+is_visible() {
+	[ "$(ab is visible "$1")" = "true" ]
+}
 
 ab open "$BASE_URL/#01" >/dev/null
-assert "loads lesson 01 title" sh -c "$AB get text '#lesson-title' | grep -q '01_arrays_slices.go'"
+assert "loads lesson 01 title" contains "$(ab get text '#lesson-title')" "01_arrays_slices.go"
 
 ab click "#next-btn" >/dev/null
-assert "next button navigates to lesson 02" sh -c "$AB get url | grep -q '#02'"
+assert "next button navigates to lesson 02" contains "$(ab get url)" "#02"
 
 ab fill "#editor" 'package main
 
 func main() {}
 ' >/dev/null
 ab reload >/dev/null
-assert "edited source persists across reload" sh -c "$AB get value '#editor' | grep -q 'package main'"
+assert "edited source persists across reload" contains "$(ab get value '#editor')" "func main() {}"
 
 ab click "#format-btn" >/dev/null
-sleep 0.3
-assert "format button reports success" sh -c "$AB get text '#status-msg' | grep -qi 'formatted'"
+assert "format button reports success" wait_contains "#status-msg" "Formatted"
 
 ab click "#reset-btn" >/dev/null
-assert "reset restores original source" sh -c "$AB get value '#editor' | grep -q 'type point struct'"
+assert "reset restores original source" contains "$(ab get value '#editor')" "type point struct"
 
 ab click "#run-btn" >/dev/null
-sleep 0.5
-assert "run captures stdout" sh -c "$AB get text '#output-code' | grep -q 'Printf:'"
-assert "run captures stderr" sh -c "$AB get text '#output-code' | grep -q 'Fprintln: stderr'"
+assert "run completes" wait_contains "#status-msg" "Run complete"
+assert "run captures stdout" contains "$(ab get text '#output-code')" "Printf:"
+assert "run captures stderr" contains "$(ab get text '#output-code')" "Fprintln: stderr"
 
 ab open "$BASE_URL/#35" >/dev/null
 ab click "#run-btn" >/dev/null
-sleep 0.5
+assert "lesson 35 completes" wait_contains "#status-msg" "Expected compiler error"
 assert "lesson 35 run surfaces the intentional compiler failure" \
-  sh -c "$AB get text '#output-code' | grep -q 'cannot index'"
+	contains "$(ab get text '#output-code')" "cannot index"
 assert "lesson 35 labels the compiler failure as expected" \
-  sh -c "$AB get text '#status-msg' | grep -q 'Expected compiler error'"
+	contains "$(ab get text '#status-msg')" "Expected compiler error"
 
 ab set viewport 390 844 >/dev/null
 ab open "$BASE_URL/#01" >/dev/null
-assert "editor stays visible at mobile width" ab is visible "#editor"
-assert "run button stays visible at mobile width" ab is visible "#run-btn"
+assert "editor stays visible at mobile width" is_visible "#editor"
+assert "run button stays visible at mobile width" is_visible "#run-btn"
 
 if [ "$FAIL" -ne 0 ]; then
   echo "smoke-web: one or more assertions failed" >&2

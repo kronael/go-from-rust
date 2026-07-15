@@ -36,6 +36,10 @@ func handleCompile(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "bad form", http.StatusBadRequest)
 		return
 	}
+	if r.Form.Get("version") != "2" || r.Form.Get("withVet") != "true" {
+		http.Error(w, "bad playground request", http.StatusBadRequest)
+		return
+	}
 	source := r.FormValue("body")
 
 	dir, err := os.MkdirTemp("", "fakeplayground-*")
