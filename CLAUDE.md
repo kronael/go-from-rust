@@ -13,6 +13,10 @@ compare without framework context.
 - `35_bad_pointer_index.go` intentionally fails because Go cannot index `*[]T`.
 - Numeric prefixes are the curriculum order and must stay contiguous.
 - There is no nested `ds` package, framework, or build system.
+- `internal/webapp/` and `web.go` (`-tags web`) add an optional interactive
+  browser tour; `cmd/fakeplayground/` is a Playground stand-in for tests and
+  smoke, never the public service. See the README's Interactive Web Tour
+  section and `specs/1/web-tour.md` for the API and security boundary.
 
 ## How to Explore
 
@@ -72,6 +76,11 @@ indexed:
 ```sh
 GOCACHE=/tmp/go-from-rust-cache go run 35_bad_pointer_index.go
 ```
+
+For the web tour, `make build`, `make test`, `make check`, and `make
+smoke-web` cover the `-tags web` build, the `internal/webapp` unit tests, and
+an `agent-browser`-driven end-to-end pass against `cmd/fakeplayground`. Never
+point `PLAYGROUND_URL` at the public Playground from tests or smoke.
 
 Treat the Why Go section in `README.md` as project framing, not benchmark
 evidence. Never invent universal speed ratios or turn tradeoffs into universal

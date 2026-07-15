@@ -85,6 +85,48 @@ narrower but still worth recognizing. The removed ternary helper scored 2.
 | [`34_json.go`](34_json.go) | 5 | Does JSON use generated code, cached reflection, or repeated parsing? |
 | [`35_bad_pointer_index.go`](35_bad_pointer_index.go) | 3 | Why can Go not index through `*[]T`? |
 
+## Interactive Web Tour
+
+An optional `-tags web` build serves a browser tour of all 35 lessons: edit,
+format, run, and navigate by hash (`#01`–`#35`). It embeds the README,
+numbered lesson files, and `web/` assets into one binary; no lesson source is
+duplicated and nothing runs locally.
+
+```sh
+go build -tags web -o go-from-rust-web .
+./go-from-rust-web            # listens on 127.0.0.1:3999
+```
+
+Environment variables:
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `ADDR` | `127.0.0.1:3999` | Listen address (container sets `:8080`) |
+| `PLAYGROUND_URL` | `https://go.dev/_/compile` | Compile-service endpoint `/api/run` proxies to |
+| `PLAYGROUND_USER_AGENT` | `go-from-rust/1 (+https://github.com/kronael/go-from-rust)` | User-Agent sent to the compile service |
+
+**Playground policy and security boundary.** The server never executes
+submitted code itself. `/api/run` forwards the submitted source to the
+Playground compile protocol at `PLAYGROUND_URL`, bounded by a 128 KiB request
+cap, a 12-second upstream timeout, 8 concurrent in-flight compiles, a 120
+requests/minute budget, and a 256-entry 10-minute result cache. Point
+`PLAYGROUND_URL` at `cmd/fakeplayground` for local development and tests so no
+traffic reaches the public Playground.
+
+**Container deployment.** The multi-stage `Dockerfile` builds a static binary
+and ships only that binary in an `alpine` runtime image, running as a non-root
+user with `ADDR=:8080` and a `/health` healthcheck:
+
+```sh
+docker build -t go-from-rust-web .
+docker run -p 8080:8080 go-from-rust-web
+```
+
+`make smoke-web` builds the binaries, starts `cmd/fakeplayground` and the web
+server on loopback, and drives the tour end to end with the `agent-browser`
+CLI (navigation, edit persistence, format, reset, run, lesson 35's expected
+failure, and mobile layout).
+
 ## Why Go
 
 For services, workers, CLIs, and data plumbing, development and operational
