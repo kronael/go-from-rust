@@ -153,7 +153,7 @@
       signal,
     });
     const data = await res.json().catch(() => null);
-    return { ok: res.ok, status: res.status, data };
+    return { ok: res.ok, data };
   }
 
   async function runCode() {

@@ -12,14 +12,14 @@ build:
 
 test:
 	go test ./...
-	go test -tags web ./...
+	go test -tags web .
 
 fmt:
 	test -z "$$(gofmt -l $(GOFILES))"
 
 vet:
 	go vet ./...
-	go vet -tags web ./...
+	go vet -tags web .
 
 check: fmt vet test
 	go run .
