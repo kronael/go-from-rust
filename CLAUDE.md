@@ -8,9 +8,10 @@ compare without framework context.
 
 ## Repository Map
 
-- `main.go` is the default lesson for `go run .`.
+- `01_arrays_slices.go` is the default lesson for `go run .`.
 - Standalone lessons use `//go:build ignore` and run by explicit filename.
-- `badidx.go` intentionally fails because Go cannot index `*[]T`.
+- `31_bad_pointer_index.go` intentionally fails because Go cannot index `*[]T`.
+- Numeric prefixes are the curriculum order and must stay contiguous.
 - There is no nested `ds` package, framework, or build system.
 
 ## How to Explore
@@ -22,17 +23,15 @@ compare without framework context.
 5. Check language claims against the [Go documentation](https://go.dev/doc/) or
    [Go specification](https://go.dev/ref/spec), not README prose alone.
 6. Compare the observed output with the source and revise the prediction.
-7. Inspect `badidx.go` last and confirm its compiler failure is the lesson.
+7. Inspect `31_bad_pointer_index.go` last and confirm its compiler failure.
 
 ## Lesson Groups
 
-- **Slices and memory:** `main.go`, `demo.go`, `ptr.go`, `badidx.go`,
-  `sliceptrs.go`, `filter.go`, `pop.go`, `zero.go`, `shrink.go`, `edges.go`.
-- **Language mappings:** `printing.go`, `rangekw.go`, `option.go`, `match.go`,
-  `tuples.go`, `multireturn.go`, `ternary.go`.
-- **Ordering, iterators, and data structures:** `sortstruct.go`,
-  `genericsort.go`, `iters.go`, `datastructures.go`.
-- **Errors, logging, and panics:** `errors.go`, `logging.go`, `panic.go`.
+- **Slices and memory:** lessons 01 and 03–13.
+- **Language mappings:** lessons 02 and 14–19.
+- **Ordering, iterators, and data structures:** lessons 20–23.
+- **Control and failure:** lessons 24–26 and 31.
+- **Services and data:** lessons 27–30.
 
 ## Editing Contract
 
@@ -58,7 +57,7 @@ go test ./...
 go vet ./...
 go run .
 for file in *.go; do
-  case "$file" in main.go|badidx.go) continue ;; esac
+  case "$file" in 01_arrays_slices.go|31_bad_pointer_index.go) continue ;; esac
   go run "$file"
 done
 test -z "$(gofmt -l *.go)"
@@ -68,7 +67,7 @@ Run the intentional failure separately. It must report that `*[]int` cannot be
 indexed:
 
 ```sh
-GOCACHE=/tmp/gofrs-go-cache go run badidx.go
+GOCACHE=/tmp/gofrs-go-cache go run 31_bad_pointer_index.go
 ```
 
 Treat the Why Go section in `README.md` as project framing, not benchmark
