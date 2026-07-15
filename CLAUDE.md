@@ -10,7 +10,7 @@ compare without framework context.
 
 - `01_arrays_slices.go` is the default lesson for `go run .`.
 - Standalone lessons use `//go:build ignore` and run by explicit filename.
-- `31_bad_pointer_index.go` intentionally fails because Go cannot index `*[]T`.
+- `35_bad_pointer_index.go` intentionally fails because Go cannot index `*[]T`.
 - Numeric prefixes are the curriculum order and must stay contiguous.
 - There is no nested `ds` package, framework, or build system.
 
@@ -18,20 +18,21 @@ compare without framework context.
 
 1. Read `README.md` for the scope and complete learning path.
 2. List the final inventory with `rg --files -g '*.go' | sort`.
-3. Run the default lesson with `GOCACHE=/tmp/gofrs-go-cache go run .`.
+3. Run the default lesson with `GOCACHE=/tmp/go-from-rust-cache go run .`.
 4. Read one lesson, predict its output or compiler error, then run that file.
 5. Check language claims against the [Go documentation](https://go.dev/doc/) or
    [Go specification](https://go.dev/ref/spec), not README prose alone.
 6. Compare the observed output with the source and revise the prediction.
-7. Inspect `31_bad_pointer_index.go` last and confirm its compiler failure.
+7. Inspect `35_bad_pointer_index.go` last and confirm its compiler failure.
 
 ## Lesson Groups
 
 - **Slices and memory:** lessons 01 and 03–13.
 - **Language mappings:** lessons 02 and 14–19.
-- **Ordering, iterators, and data structures:** lessons 20–23.
-- **Control and failure:** lessons 24–26 and 31.
-- **Services and data:** lessons 27–30.
+- **Ordering and iterators:** lessons 20–22.
+- **Collections and synchronization:** lessons 23–27.
+- **Control and failure:** lessons 28–31 and 35.
+- **Services and data:** lessons 32–34.
 
 ## Editing Contract
 
@@ -52,14 +53,16 @@ compare without framework context.
 Use a writable cache:
 
 ```sh
-export GOCACHE=/tmp/gofrs-go-cache
+export GOCACHE=/tmp/go-from-rust-cache
 go test ./...
 go vet ./...
 go run .
 for file in *.go; do
-  case "$file" in 01_arrays_slices.go|31_bad_pointer_index.go) continue ;; esac
+  case "$file" in 01_arrays_slices.go|35_bad_pointer_index.go) continue ;; esac
   go run "$file"
 done
+go run -race 26_concurrent_maps.go
+go run -race 31_channels.go
 test -z "$(gofmt -l *.go)"
 ```
 
@@ -67,7 +70,7 @@ Run the intentional failure separately. It must report that `*[]int` cannot be
 indexed:
 
 ```sh
-GOCACHE=/tmp/gofrs-go-cache go run 31_bad_pointer_index.go
+GOCACHE=/tmp/go-from-rust-cache go run 35_bad_pointer_index.go
 ```
 
 Treat the Why Go section in `README.md` as project framing, not benchmark
