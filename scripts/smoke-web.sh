@@ -42,9 +42,9 @@ assert() {
 	shift
 	if "$@" >/dev/null; then
 		echo "ok - $desc"
-  else
-    echo "FAIL - $desc"
-    FAIL=1
+	else
+		echo "FAIL - $desc"
+		FAIL=1
 	fi
 }
 
