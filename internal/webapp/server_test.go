@@ -175,6 +175,23 @@ func TestFormatInvalidJSON(t *testing.T) {
 	}
 }
 
+func TestFormatRequiresExactlyOneBodyField(t *testing.T) {
+	s := newTestServer(t, "http://unused.invalid", time.Now)
+	srv := httptest.NewServer(s.Handler())
+	defer srv.Close()
+
+	for _, body := range []string{`{}`, `{"body":null}`, `{"body":"package main","extra":true}`, `{"body":"package main"}{}`} {
+		resp, err := http.Post(srv.URL+"/api/format", "application/json", strings.NewReader(body))
+		if err != nil {
+			t.Fatal(err)
+		}
+		resp.Body.Close()
+		if resp.StatusCode != http.StatusBadRequest {
+			t.Fatalf("body %q: status = %d, want 400", body, resp.StatusCode)
+		}
+	}
+}
+
 func TestFormatUnformattable(t *testing.T) {
 	s := newTestServer(t, "http://unused.invalid", time.Now)
 	srv := httptest.NewServer(s.Handler())
@@ -339,6 +356,28 @@ func TestRunUpstreamInvalidJSON(t *testing.T) {
 
 	body := `{"body":"package main\n"}`
 	resp, err := http.Post(srv.URL+"/api/run", "application/json", strings.NewReader(body))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusBadGateway {
+		t.Fatalf("status = %d, want 502", resp.StatusCode)
+	}
+	if env := decodeError(t, resp.Body); env.Error.Code != "upstream_failed" {
+		t.Fatalf("code = %q, want upstream_failed", env.Error.Code)
+	}
+}
+
+func TestRunUpstreamRequiresJSONContentType(t *testing.T) {
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/plain")
+		_, _ = w.Write([]byte(`{"Events":[]}`))
+	}))
+	defer upstream.Close()
+
+	srv := httptest.NewServer(newTestServer(t, upstream.URL, time.Now).Handler())
+	defer srv.Close()
+	resp, err := http.Post(srv.URL+"/api/run", "application/json", strings.NewReader(`{"body":"package main\n"}`))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -601,10 +640,11 @@ func TestStaticRoutesAndUnknownPath(t *testing.T) {
 	cases := []struct {
 		path        string
 		contentType string
+		cache       string
 	}{
-		{"/", "text/html; charset=utf-8"},
-		{"/static/app.js", "application/javascript; charset=utf-8"},
-		{"/static/styles.css", "text/css; charset=utf-8"},
+		{"/", "text/html; charset=utf-8", "no-cache"},
+		{"/static/app.js", "application/javascript; charset=utf-8", "public, max-age=3600"},
+		{"/static/styles.css", "text/css; charset=utf-8", "public, max-age=3600"},
 	}
 	for _, c := range cases {
 		resp, err := http.Get(srv.URL + c.path)
@@ -618,6 +658,9 @@ func TestStaticRoutesAndUnknownPath(t *testing.T) {
 		if got := resp.Header.Get("Content-Type"); got != c.contentType {
 			t.Fatalf("%s content-type = %q, want %q", c.path, got, c.contentType)
 		}
+		if got := resp.Header.Get("Cache-Control"); got != c.cache {
+			t.Fatalf("%s cache-control = %q, want %q", c.path, got, c.cache)
+		}
 	}
 
 	resp, err := http.Get(srv.URL + "/nope")
@@ -627,5 +670,29 @@ func TestStaticRoutesAndUnknownPath(t *testing.T) {
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusNotFound {
 		t.Fatalf("unknown path status = %d, want 404", resp.StatusCode)
+	}
+}
+
+func TestSecurityHeadersAndRequestID(t *testing.T) {
+	s := newTestServer(t, "http://unused.invalid", time.Now)
+	req := httptest.NewRequest(http.MethodGet, "/health", nil)
+	req.Header.Set("X-Request-ID", "browser-123")
+	rec := httptest.NewRecorder()
+
+	s.Handler().ServeHTTP(rec, req)
+
+	if got := rec.Header().Get("X-Request-ID"); got != "browser-123" {
+		t.Fatalf("X-Request-ID = %q, want browser-123", got)
+	}
+	for _, header := range []string{
+		"Content-Security-Policy",
+		"Permissions-Policy",
+		"Referrer-Policy",
+		"X-Content-Type-Options",
+		"X-Frame-Options",
+	} {
+		if rec.Header().Get(header) == "" {
+			t.Errorf("%s header is empty", header)
+		}
 	}
 }

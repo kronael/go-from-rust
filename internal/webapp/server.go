@@ -1,6 +1,7 @@
 package webapp
 
 import (
+	"bytes"
 	"container/list"
 	"context"
 	"crypto/rand"
@@ -13,6 +14,7 @@ import (
 	"io"
 	"io/fs"
 	"log"
+	"mime"
 	"net/http"
 	"net/url"
 	"strings"
@@ -122,31 +124,69 @@ func NewServer(lessons []Lesson, webFS fs.FS, cfg Config) *Server {
 	return s
 }
 
-// Handler returns the http.Handler serving all routes, wrapped with request
-// logging.
+// Handler returns the http.Handler serving all routes, wrapped with security
+// headers and request logging.
 func (s *Server) Handler() http.Handler {
-	return s.logRequests(s.mux)
+	return s.logRequests(s.securityHeaders(s.mux))
 }
 
 func (s *Server) logRequests(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := s.now()
-		reqID := newRequestID()
+		reqID := requestID(r)
+		w.Header().Set("X-Request-ID", reqID)
 		rec := &statusRecorder{ResponseWriter: w, status: http.StatusOK}
 		next.ServeHTTP(rec, r)
-		s.logger.Printf("request_id=%s method=%s path=%s status=%d duration=%s",
+		s.logger.Printf("request_id=%s method=%s path=%q status=%d duration=%s",
 			reqID, r.Method, r.URL.Path, rec.status, s.now().Sub(start))
+	})
+}
+
+func (s *Server) securityHeaders(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Security-Policy", "default-src 'self'; base-uri 'none'; connect-src 'self'; form-action 'none'; frame-ancestors 'none'; img-src 'self' data:; script-src 'self'; style-src 'self'")
+		w.Header().Set("Permissions-Policy", "camera=(), geolocation=(), microphone=()")
+		w.Header().Set("Referrer-Policy", "no-referrer")
+		w.Header().Set("X-Content-Type-Options", "nosniff")
+		w.Header().Set("X-Frame-Options", "DENY")
+		next.ServeHTTP(w, r)
 	})
 }
 
 type statusRecorder struct {
 	http.ResponseWriter
 	status int
+	wrote  bool
 }
 
 func (r *statusRecorder) WriteHeader(status int) {
+	if r.wrote {
+		return
+	}
+	r.wrote = true
 	r.status = status
 	r.ResponseWriter.WriteHeader(status)
+}
+
+func requestID(r *http.Request) string {
+	id := r.Header.Get("X-Request-ID")
+	if validRequestID(id) {
+		return id
+	}
+	return newRequestID()
+}
+
+func validRequestID(id string) bool {
+	if len(id) == 0 || len(id) > 64 {
+		return false
+	}
+	for _, char := range id {
+		if char >= 'a' && char <= 'z' || char >= 'A' && char <= 'Z' || char >= '0' && char <= '9' || strings.ContainsRune("._-", char) {
+			continue
+		}
+		return false
+	}
+	return true
 }
 
 func newRequestID() string {
@@ -187,7 +227,7 @@ func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusMethodNotAllowed, "method_not_allowed", "only GET is supported")
 		return
 	}
-	s.serveEmbedded(w, "index.html", "text/html; charset=utf-8")
+	s.serveEmbedded(w, "index.html", "text/html; charset=utf-8", "no-cache")
 }
 
 func (s *Server) handleStaticJS(w http.ResponseWriter, r *http.Request) {
@@ -195,7 +235,7 @@ func (s *Server) handleStaticJS(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusMethodNotAllowed, "method_not_allowed", "only GET is supported")
 		return
 	}
-	s.serveEmbedded(w, "app.js", "application/javascript; charset=utf-8")
+	s.serveEmbedded(w, "app.js", "application/javascript; charset=utf-8", "public, max-age=3600")
 }
 
 func (s *Server) handleStaticCSS(w http.ResponseWriter, r *http.Request) {
@@ -203,17 +243,17 @@ func (s *Server) handleStaticCSS(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusMethodNotAllowed, "method_not_allowed", "only GET is supported")
 		return
 	}
-	s.serveEmbedded(w, "styles.css", "text/css; charset=utf-8")
+	s.serveEmbedded(w, "styles.css", "text/css; charset=utf-8", "public, max-age=3600")
 }
 
-func (s *Server) serveEmbedded(w http.ResponseWriter, name, contentType string) {
+func (s *Server) serveEmbedded(w http.ResponseWriter, name, contentType, cacheControl string) {
 	data, err := fs.ReadFile(s.webFS, name)
 	if err != nil {
 		http.NotFound(w, nil)
 		return
 	}
 	w.Header().Set("Content-Type", contentType)
-	w.Header().Set("Cache-Control", "public, max-age=3600")
+	w.Header().Set("Cache-Control", cacheControl)
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write(data)
 }
@@ -261,10 +301,21 @@ func decodeBodyRequest(r *http.Request) (bodyRequest, int, string, string) {
 	if err != nil || len(raw) > maxRequestBytes {
 		return bodyRequest{}, http.StatusBadRequest, "invalid_request", "request body could not be read"
 	}
-	var req bodyRequest
-	if err := json.Unmarshal(raw, &req); err != nil {
+	var payload struct {
+		Body *string `json:"body"`
+	}
+	decoder := json.NewDecoder(bytes.NewReader(raw))
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&payload); err != nil {
 		return bodyRequest{}, http.StatusBadRequest, "invalid_request", "request body must be JSON with a \"body\" field"
 	}
+	if err := decoder.Decode(&struct{}{}); err != io.EOF {
+		return bodyRequest{}, http.StatusBadRequest, "invalid_request", "request body must contain one JSON object"
+	}
+	if payload.Body == nil {
+		return bodyRequest{}, http.StatusBadRequest, "invalid_request", "request body must include a string \"body\" field"
+	}
+	req := bodyRequest{Body: *payload.Body}
 	if len(req.Body) > maxSourceBytes {
 		return bodyRequest{}, http.StatusRequestEntityTooLarge, "source_too_large", "source exceeds 128KiB"
 	}
@@ -366,6 +417,10 @@ func (s *Server) runUpstream(ctx context.Context, source string) ([]byte, int, s
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, http.StatusBadGateway, "upstream_failed", fmt.Sprintf("upstream returned status %d", resp.StatusCode)
+	}
+	mediaType, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+	if err != nil || mediaType != "application/json" {
+		return nil, http.StatusBadGateway, "upstream_failed", "upstream response was not JSON"
 	}
 
 	body, err := io.ReadAll(io.LimitReader(resp.Body, maxUpstreamBytes+1))

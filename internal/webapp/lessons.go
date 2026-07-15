@@ -2,20 +2,24 @@
 package webapp
 
 import (
+	"crypto/sha256"
 	"fmt"
 	"io/fs"
 	"regexp"
 	"sort"
 	"strconv"
+	"strings"
 )
 
 // Lesson is one entry in the immutable, ordered lesson catalog.
 type Lesson struct {
-	ID       int
-	Filename string
-	Value    int
-	Question string
-	Source   string
+	ID              int
+	Filename        string
+	Value           int
+	Question        string
+	Source          string
+	Hash            string
+	ExpectedFailure bool
 }
 
 var lessonFileName = regexp.MustCompile(`^([0-9]{2})_[A-Za-z0-9_]+\.go$`)
@@ -54,6 +58,9 @@ func LoadLessons(files fs.FS, readme []byte) ([]Lesson, error) {
 		if err != nil {
 			return nil, fmt.Errorf("webapp: README row for %q has non-integer value: %w", linkText, err)
 		}
+		if value < 3 || value > 5 {
+			return nil, fmt.Errorf("webapp: README row for %q has value %d outside 3-5", linkText, value)
+		}
 		if _, dup := rowsByFilename[linkText]; dup {
 			return nil, fmt.Errorf("webapp: README has duplicate row for %q", linkText)
 		}
@@ -79,12 +86,16 @@ func LoadLessons(files fs.FS, readme []byte) ([]Lesson, error) {
 		if err != nil {
 			return nil, fmt.Errorf("webapp: read lesson %q: %w", name, err)
 		}
+		source := browserSource(string(src))
+		hash := sha256.Sum256([]byte(source))
 		lessons = append(lessons, Lesson{
-			ID:       r.id,
-			Filename: name,
-			Value:    r.value,
-			Question: r.question,
-			Source:   string(src),
+			ID:              r.id,
+			Filename:        name,
+			Value:           r.value,
+			Question:        r.question,
+			Source:          source,
+			Hash:            fmt.Sprintf("%x", hash[:8]),
+			ExpectedFailure: name == "35_bad_pointer_index.go",
 		})
 		delete(rowsByFilename, name)
 	}
@@ -103,4 +114,16 @@ func LoadLessons(files fs.FS, readme []byte) ([]Lesson, error) {
 	}
 
 	return lessons, nil
+}
+
+func browserSource(source string) string {
+	lines := strings.Split(source, "\n")
+	if len(lines) == 0 || !strings.HasPrefix(lines[0], "//go:build ") {
+		return source
+	}
+	lines = lines[1:]
+	if len(lines) > 0 && lines[0] == "" {
+		lines = lines[1:]
+	}
+	return strings.Join(lines, "\n")
 }

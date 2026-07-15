@@ -3,12 +3,15 @@
 package main
 
 import (
+	"context"
 	"embed"
 	"io/fs"
 	"log"
 	"net"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"go-from-rust/internal/webapp"
@@ -54,5 +57,25 @@ func main() {
 		IdleTimeout:       60 * time.Second,
 	}
 	log.Printf("web: listening on %s (%d lessons loaded)", listener.Addr(), len(lessons))
-	log.Fatal(server.Serve(listener))
+
+	errCh := make(chan error, 1)
+	go func() {
+		errCh <- server.Serve(listener)
+	}()
+
+	signals := make(chan os.Signal, 1)
+	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM)
+	select {
+	case sig := <-signals:
+		log.Printf("web: received %s, shutting down", sig)
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		if err := server.Shutdown(ctx); err != nil {
+			log.Printf("web: shutdown: %v", err)
+		}
+	case err := <-errCh:
+		if err != nil && err != http.ErrServerClosed {
+			log.Fatalf("web: serve: %v", err)
+		}
+	}
 }

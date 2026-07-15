@@ -26,6 +26,7 @@ func mapFS(filenames ...string) fstest.MapFS {
 
 func TestLoadLessonsSuccess(t *testing.T) {
 	files := mapFS("01_arrays_slices.go", "02_printing.go", "03_copy.go")
+	files["01_arrays_slices.go"] = &fstest.MapFile{Data: []byte("//go:build ignore\n\npackage main\n")}
 	readme := readmeHeader +
 		row("01_arrays_slices.go", 5, "When do assignments copy values or alias elements?") +
 		row("02_printing.go", 4, "What replaces println?") +
@@ -48,6 +49,30 @@ func TestLoadLessonsSuccess(t *testing.T) {
 	}
 	if !strings.HasPrefix(lessons[0].Source, "package main") {
 		t.Errorf("lessons[0].Source = %q", lessons[0].Source)
+	}
+	if lessons[0].Hash == "" {
+		t.Error("lessons[0].Hash is empty")
+	}
+	if strings.Contains(lessons[0].Source, "go:build") {
+		t.Errorf("lessons[0].Source contains repository build tag: %q", lessons[0].Source)
+	}
+}
+
+func TestLoadLessonsRejectsValueOutsideEditorialRange(t *testing.T) {
+	files := mapFS("01_arrays_slices.go")
+	readme := readmeHeader + row("01_arrays_slices.go", 2, "Q1?")
+
+	_, err := LoadLessons(files, []byte(readme))
+	if err == nil {
+		t.Fatal("expected error for value outside 3-5, got nil")
+	}
+}
+
+func TestBrowserSourceOnlyRemovesLeadingBuildConstraint(t *testing.T) {
+	source := "//go:build ignore\n\npackage main\n\n//go:build stays\n"
+	want := "package main\n\n//go:build stays\n"
+	if got := browserSource(source); got != want {
+		t.Fatalf("browserSource() = %q, want %q", got, want)
 	}
 }
 
