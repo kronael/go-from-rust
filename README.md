@@ -45,7 +45,7 @@ The repository requires Go 1.26, matching [`go.mod`](go.mod).
 ## Learning Path
 
 Value scores are editorial: **5** is essential, **4** is frequent, and **3** is
-narrower but still worth recognizing. The removed ternary helper scored 2.
+narrower but still worth recognizing.
 
 | Lesson | Value | Rust question it answers |
 |---|:---:|---|
@@ -103,13 +103,12 @@ Environment variables:
 |---|---|---|
 | `ADDR` | `127.0.0.1:3999` | Listen address (container sets `:8080`) |
 | `PLAYGROUND_URL` | `https://go.dev/_/compile` | Compile-service endpoint `/api/run` proxies to |
-| `PLAYGROUND_USER_AGENT` | `go-from-rust/1 (+https://github.com/kronael/go-from-rust)` | User-Agent sent to the compile service |
 
 **Playground policy and security boundary.** The server never executes
 submitted code itself. `/api/run` forwards the submitted source to the
 Playground compile protocol at `PLAYGROUND_URL`, bounded by a 128 KiB request
-cap, a 12-second upstream timeout, 8 concurrent in-flight compiles, a 120
-requests/minute budget, and a 256-entry 10-minute result cache. Point
+cap, a 12-second upstream timeout, 8 concurrent compiles, a 120-request
+one-minute budget, and a 256-entry 10-minute result cache. Point
 `PLAYGROUND_URL` at `cmd/fakeplayground` for local development and tests. That
 loopback-only test helper executes code in a temporary directory; it is not a
 sandbox and must never be exposed as a public service.

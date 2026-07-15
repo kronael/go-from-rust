@@ -12,12 +12,10 @@ compare without framework context.
 - Standalone lessons use `//go:build ignore` and run by explicit filename.
 - `35_bad_pointer_index.go` intentionally fails because Go cannot index `*[]T`.
 - Numeric prefixes are the curriculum order and must stay contiguous.
-- There is no nested `ds` package or framework. The Makefile only collects
-  build, validation, and smoke-test commands.
+- There is no nested `ds` package or framework.
 - `internal/webapp/` and `web.go` (`-tags web`) add an optional interactive
   browser tour; `cmd/fakeplayground/` is a Playground stand-in for tests and
-  smoke, never the public service. See the README's Interactive Web Tour
-  section and `specs/1/web-tour.md` for the API and security boundary.
+  smoke, never the public service. See the README's Interactive Web Tour.
 
 ## How to Explore
 
@@ -60,9 +58,9 @@ Use a writable cache:
 ```sh
 export GOCACHE=/tmp/go-from-rust-cache
 go test ./...
-go test -tags web ./...
+go test -tags web .
 go vet ./...
-go vet -tags web ./...
+go vet -tags web .
 go run .
 for file in *.go; do
   case "$file" in 01_arrays_slices.go|35_bad_pointer_index.go) continue ;; esac
