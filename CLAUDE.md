@@ -13,6 +13,9 @@ compare without framework context.
 - `35_bad_pointer_index.go` intentionally fails because Go cannot index `*[]T`.
 - Numeric prefixes are the curriculum order and must stay contiguous.
 - There is no nested `ds` package or framework.
+- Never add repository ignore rules for generated artifacts. Keep `.ship/`,
+  `dist/`, `.tmp_check/`, and similar outputs visible to Git, then delete them
+  before handoff.
 - `internal/webapp/` and `web.go` (`-tags web`) add an optional interactive
   browser tour; `cmd/fakeplayground/` is a Playground stand-in for tests and
   smoke, never the public service. See the README's Interactive Web Tour.
