@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Minimum Viable Go for Rust Engineers</title>
+<link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+<a class="skip-link" href="#editor">Skip to editor</a>
+
+<header class="topbar">
+  <h1>Minimum Viable Go for Rust Engineers</h1>
+  <nav class="lesson-nav" aria-label="Lesson navigation">
+    <button id="prev-btn" type="button" aria-label="Previous lesson">&larr; Prev</button>
+    <label class="lesson-select-label">
+      <span class="visually-hidden">Jump to lesson</span>
+      <select id="lesson-select" aria-label="Jump to lesson"></select>
+    </label>
+    <button id="next-btn" type="button" aria-label="Next lesson">Next &rarr;</button>
+  </nav>
+</header>
+
+<main id="main">
+  <section class="lesson-header">
+    <h2 id="lesson-title">Loading lessons&hellip;</h2>
+    <p id="lesson-value" class="lesson-value"></p>
+    <p id="lesson-question" class="lesson-question"></p>
+  </section>
+
+  <section class="editor-section">
+    <div class="editor-toolbar" role="toolbar" aria-label="Code actions">
+      <button id="run-btn" type="button">Run</button>
+      <button id="format-btn" type="button">Format</button>
+      <button id="reset-btn" type="button">Reset</button>
+      <span id="status-msg" class="status-msg" role="status" aria-live="polite"></span>
+    </div>
+    <label class="visually-hidden" for="editor">Lesson source code</label>
+    <textarea id="editor" spellcheck="false" autocapitalize="off" autocomplete="off"
+      autocorrect="off" wrap="off"></textarea>
+  </section>
+
+  <section class="output-section" aria-label="Program output">
+    <h3>Output</h3>
+    <pre id="output"><code id="output-code">Run the lesson to see output here.</code></pre>
+  </section>
+</main>
+
+<footer class="statusbar">
+  <span id="conn-status"></span>
+</footer>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
