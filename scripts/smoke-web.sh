@@ -85,13 +85,16 @@ assert "reset restores original source" sh -c "$AB get value '#editor' | grep -q
 
 ab click "#run-btn" >/dev/null
 sleep 0.5
-assert "run produces program output" sh -c "! $AB get text '#output-code' | grep -q 'Run the lesson'"
+assert "run captures stdout" sh -c "$AB get text '#output-code' | grep -q 'Printf:'"
+assert "run captures stderr" sh -c "$AB get text '#output-code' | grep -q 'Fprintln: stderr'"
 
 ab open "$BASE_URL/#35" >/dev/null
 ab click "#run-btn" >/dev/null
 sleep 0.5
 assert "lesson 35 run surfaces the intentional compiler failure" \
   sh -c "$AB get text '#output-code' | grep -q 'cannot index'"
+assert "lesson 35 labels the compiler failure as expected" \
+  sh -c "$AB get text '#status-msg' | grep -q 'Expected compiler error'"
 
 ab set viewport 390 844 >/dev/null
 ab open "$BASE_URL/#01" >/dev/null

@@ -8,6 +8,7 @@
   --accent-fg: #ffffff;
   --panel: #f5f5f5;
   --error: #b3261e;
+  --success: #247a3d;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -20,6 +21,7 @@
     --accent-fg: #10141f;
     --panel: #2a2a2a;
     --error: #ff7a72;
+    --success: #6fcf86;
   }
 }
 
@@ -189,11 +191,31 @@ main {
   font-size: 0.85rem;
 }
 
+#output[data-state="error"] {
+  border-color: var(--error);
+}
+
+#output[data-state="expected"], #output[data-state="success"] {
+  border-color: var(--success);
+}
+
 .statusbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
   padding: 0.5rem 1rem;
   border-top: 1px solid var(--border);
   color: var(--muted);
   font-size: 0.8rem;
+}
+
+.statusbar nav {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.statusbar a {
+  color: inherit;
 }
 
 @media (max-width: 480px) {
@@ -213,6 +235,11 @@ main {
 
   .editor-toolbar {
     justify-content: space-between;
+  }
+
+  .statusbar {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   #editor {

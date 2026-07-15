@@ -17,17 +17,19 @@
     runBtn: document.getElementById("run-btn"),
     formatBtn: document.getElementById("format-btn"),
     resetBtn: document.getElementById("reset-btn"),
+    connStatus: document.getElementById("conn-status"),
   };
 
   let lessons = [];
   let current = null;
+  let activeRequest = null;
 
   function lessonKey(id) {
     return String(id).padStart(2, "0");
   }
 
   function storageKey(lesson) {
-    return STORAGE_PREFIX + lesson.Filename;
+    return `${STORAGE_PREFIX}${lesson.Filename}:${lesson.Hash}`;
   }
 
   function setStatus(text) {
@@ -54,12 +56,16 @@
   }
 
   function renderLesson(lesson) {
+    cancelRequest();
     current = lesson;
     els.title.textContent = `${lessonKey(lesson.ID)} — ${lesson.Filename}`;
-    els.value.textContent = `Value ${lesson.Value}/5`;
+    els.value.textContent = lesson.ExpectedFailure
+      ? `Value ${lesson.Value}/5 · Expected compiler failure`
+      : `Value ${lesson.Value}/5`;
     els.question.textContent = lesson.Question;
     els.editor.value = loadEditedSource(lesson);
     els.output.textContent = "Run the lesson to see output here.";
+    els.output.parentElement.dataset.state = "idle";
     els.select.value = lessonKey(lesson.ID);
     els.prevBtn.disabled = lesson.ID <= lessons[0].ID;
     els.nextBtn.disabled = lesson.ID >= lessons[lessons.length - 1].ID;
@@ -112,41 +118,87 @@
     return events.map((e) => e.Message).join("");
   }
 
-  async function postJSON(url, body) {
+  function setBusy(busy) {
+    els.runBtn.disabled = busy;
+    els.formatBtn.disabled = busy;
+  }
+
+  function beginRequest() {
+    cancelRequest();
+    activeRequest = new AbortController();
+    setBusy(true);
+    return activeRequest;
+  }
+
+  function cancelRequest() {
+    if (activeRequest) {
+      activeRequest.abort();
+      activeRequest = null;
+    }
+    setBusy(false);
+  }
+
+  function finishRequest(controller) {
+    if (activeRequest === controller) {
+      activeRequest = null;
+      setBusy(false);
+    }
+  }
+
+  async function postJSON(url, body, signal) {
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
+      signal,
     });
     const data = await res.json().catch(() => null);
     return { ok: res.ok, status: res.status, data };
   }
 
   async function runCode() {
+    if (!current) return;
+    const lesson = current;
+    const controller = beginRequest();
     setStatus("Running…");
-    els.runBtn.disabled = true;
     try {
-      const { ok, data } = await postJSON("/api/run", { body: els.editor.value });
+      const { ok, data } = await postJSON("/api/run", { body: els.editor.value }, controller.signal);
+      if (current !== lesson) return;
       if (!ok || !data) {
         els.output.textContent = data && data.error ? data.error.message : "Run failed.";
+        els.output.parentElement.dataset.state = "error";
         setStatus("Run failed");
         return;
       }
       els.output.textContent = extractOutput(data);
-      setStatus("Run complete");
+      if (data.Errors) {
+        els.output.parentElement.dataset.state = lesson.ExpectedFailure ? "expected" : "error";
+        setStatus(lesson.ExpectedFailure ? "Expected compiler error" : "Compile failed");
+      } else if (lesson.ExpectedFailure) {
+        els.output.parentElement.dataset.state = "error";
+        setStatus("Expected compiler error did not occur");
+      } else {
+        els.output.parentElement.dataset.state = "success";
+        setStatus("Run complete");
+      }
     } catch (err) {
+      if (err.name === "AbortError") return;
       els.output.textContent = "Network error while running.";
+      els.output.parentElement.dataset.state = "error";
       setStatus("Run failed");
     } finally {
-      els.runBtn.disabled = false;
+      finishRequest(controller);
     }
   }
 
   async function formatCode() {
+    if (!current) return;
+    const lesson = current;
+    const controller = beginRequest();
     setStatus("Formatting…");
-    els.formatBtn.disabled = true;
     try {
-      const { ok, data } = await postJSON("/api/format", { body: els.editor.value });
+      const { ok, data } = await postJSON("/api/format", { body: els.editor.value }, controller.signal);
+      if (current !== lesson) return;
       if (!ok || !data) {
         setStatus(data && data.error ? data.error.message : "Format failed");
         return;
@@ -155,9 +207,10 @@
       persistEdit();
       setStatus("Formatted");
     } catch (err) {
+      if (err.name === "AbortError") return;
       setStatus("Format failed: network error");
     } finally {
-      els.formatBtn.disabled = false;
+      finishRequest(controller);
     }
   }
 
@@ -205,6 +258,7 @@
   async function init() {
     try {
       const res = await fetch("/api/lessons");
+      if (!res.ok) throw new Error(`lessons request failed: ${res.status}`);
       const data = await res.json();
       lessons = (data.lessons || []).slice().sort((a, b) => a.ID - b.ID);
     } catch (err) {
@@ -218,6 +272,7 @@
     }
     populateSelect();
     wireEvents();
+    els.connStatus.textContent = `${lessons.length} lessons · edits stay in this browser`;
     onHashChange();
   }
 

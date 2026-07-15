@@ -4,6 +4,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"log"
@@ -55,17 +56,24 @@ func handleCompile(w http.ResponseWriter, r *http.Request) {
 
 	cmd := exec.CommandContext(ctx, "go", "run", mainFile)
 	cmd.Env = append(os.Environ(), "GOCACHE="+gocacheDir())
-	stdout, err := cmd.Output()
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	err = cmd.Run()
 
 	resp := compileResponse{Events: []compileEvent{}}
 	if err != nil {
-		if exitErr, ok := err.(*exec.ExitError); ok {
-			resp.Errors = string(exitErr.Stderr)
-		} else {
+		resp.Errors = stderr.String()
+		if resp.Errors == "" {
 			resp.Errors = err.Error()
 		}
-	} else if len(stdout) > 0 {
-		resp.Events = append(resp.Events, compileEvent{Message: string(stdout), Kind: "stdout"})
+	} else {
+		if stdout.Len() > 0 {
+			resp.Events = append(resp.Events, compileEvent{Message: stdout.String(), Kind: "stdout"})
+		}
+		if stderr.Len() > 0 {
+			resp.Events = append(resp.Events, compileEvent{Message: stderr.String(), Kind: "stderr"})
+		}
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -91,7 +99,13 @@ func main() {
 	if err != nil {
 		log.Fatalf("fakeplayground: listen on %s: %v", addr, err)
 	}
-	server := &http.Server{Handler: mux}
+	server := &http.Server{
+		Handler:           mux,
+		ReadHeaderTimeout: 5 * time.Second,
+		ReadTimeout:       10 * time.Second,
+		WriteTimeout:      15 * time.Second,
+		IdleTimeout:       30 * time.Second,
+	}
 	log.Printf("fakeplayground: listening on %s", listener.Addr())
 	log.Fatal(server.Serve(listener))
 }
