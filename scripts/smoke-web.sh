@@ -85,6 +85,11 @@ is_visible() {
 	[ "$(ab is visible "$1")" = "true" ]
 }
 
+wide_shell_is_capped() {
+	width="$(ab eval 'Math.round(document.querySelector("main").getBoundingClientRect().width)')"
+	[ "$width" -le 1440 ]
+}
+
 ab open "$BASE_URL/#01" >/dev/null
 assert "loads lesson 01 title" contains "$(ab get text '#lesson-title')" "01_arrays_slices.go"
 
@@ -121,6 +126,9 @@ ab set viewport 390 844 >/dev/null
 ab open "$BASE_URL/#01" >/dev/null
 assert "editor stays visible at mobile width" is_visible "#editor"
 assert "run button stays visible at mobile width" is_visible "#run-btn"
+
+ab set viewport 2048 1048 >/dev/null
+assert "tour shell stays capped at wide width" wide_shell_is_capped
 
 if [ "$FAIL" -ne 0 ]; then
   echo "smoke-web: one or more assertions failed" >&2
