@@ -10,48 +10,57 @@
 <a class="skip-link" href="#editor">Skip to editor</a>
 
 <header class="topbar">
-  <h1>Minimum Viable Go for Rust Engineers</h1>
-  <nav class="lesson-nav" aria-label="Lesson navigation">
-    <button id="prev-btn" type="button" aria-label="Previous lesson">&larr; Prev</button>
-    <label class="lesson-select-label">
-      <span class="visually-hidden">Jump to lesson</span>
-      <select id="lesson-select" aria-label="Jump to lesson"></select>
-    </label>
-    <button id="next-btn" type="button" aria-label="Next lesson">Next &rarr;</button>
+  <a class="brand" href="#01" aria-label="Minimum Viable Go home">
+    <span class="go-mark" aria-hidden="true">GO</span>
+    <h1>Minimum Viable Go <span>for Rust Engineers</span></h1>
+  </a>
+  <nav class="project-links" aria-label="Project links">
+    <a href="https://github.com/kronael/go-from-rust">Source</a>
+    <a href="https://krons.fiu.wtf/lore/go">Why Go</a>
   </nav>
 </header>
 
 <main id="main">
-  <section class="lesson-header">
-    <h2 id="lesson-title">Loading lessons&hellip;</h2>
-    <p id="lesson-value" class="lesson-value"></p>
-    <p id="lesson-question" class="lesson-question"></p>
-  </section>
-
-  <section class="editor-section">
-    <div class="editor-toolbar" role="toolbar" aria-label="Code actions">
-      <button id="run-btn" type="button">Run</button>
-      <button id="format-btn" type="button">Format</button>
-      <button id="reset-btn" type="button">Reset</button>
-      <span id="status-msg" class="status-msg" role="status" aria-live="polite"></span>
+  <section class="lesson-pane" aria-labelledby="lesson-title">
+    <div class="lesson-copy">
+      <h2 id="lesson-title">Loading lessons&hellip;</h2>
+      <p id="lesson-value" class="lesson-value"></p>
+      <p id="lesson-question" class="lesson-question"></p>
     </div>
-    <label class="visually-hidden" for="editor">Lesson source code</label>
-    <textarea id="editor" spellcheck="false" autocapitalize="off" autocomplete="off"
-      autocorrect="off" wrap="off"></textarea>
+
+    <nav class="lesson-nav" aria-label="Lesson navigation">
+      <button id="prev-btn" type="button" aria-label="Previous lesson">&larr; Prev</button>
+      <label class="lesson-select-label">
+        <span class="visually-hidden">Jump to lesson</span>
+        <select id="lesson-select" aria-label="Jump to lesson"></select>
+      </label>
+      <button id="next-btn" type="button" aria-label="Next lesson">Next &rarr;</button>
+    </nav>
   </section>
 
-  <section class="output-section" aria-label="Program output">
-    <h3>Output</h3>
-    <pre id="output"><code id="output-code">Run the lesson to see output here.</code></pre>
+  <section class="playground" aria-label="Go playground">
+    <section class="editor-section">
+      <div class="editor-toolbar" role="toolbar" aria-label="Code actions">
+        <span class="file-label">main.go</span>
+        <span id="status-msg" class="status-msg" role="status" aria-live="polite"></span>
+        <button id="run-btn" type="button">Run</button>
+        <button id="format-btn" type="button">Format</button>
+        <button id="reset-btn" type="button">Reset</button>
+      </div>
+      <label class="visually-hidden" for="editor">Lesson source code</label>
+      <textarea id="editor" spellcheck="false" autocapitalize="off" autocomplete="off"
+        autocorrect="off" wrap="off"></textarea>
+    </section>
+
+    <section class="output-section" aria-label="Program output">
+      <h3>Output</h3>
+      <pre id="output"><code id="output-code">Run the lesson to see output here.</code></pre>
+    </section>
   </section>
 </main>
 
 <footer class="statusbar">
   <span id="conn-status"></span>
-  <nav aria-label="Project links">
-    <a href="https://github.com/kronael/go-from-rust">Source</a>
-    <a href="https://krons.fiu.wtf/lore/go">Why Go</a>
-  </nav>
 </footer>
 
 <script src="/static/app.js"></script>
