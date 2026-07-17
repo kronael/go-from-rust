@@ -2,7 +2,7 @@ GOCACHE ?= /tmp/go-from-rust-cache
 export GOCACHE
 GOFILES := $(shell find . -name '*.go' -not -path './.git/*' -not -path './.tmp_check/*')
 
-.PHONY: build test check fmt vet run smoke-web clean
+.PHONY: build test check smoke-web clean
 
 build:
 	mkdir -p dist
@@ -13,15 +13,6 @@ build:
 test:
 	go test ./...
 	go test -tags web .
-
-fmt:
-	test -z "$$(gofmt -l $(GOFILES))"
-
-vet:
-	go vet ./...
-	go vet -tags web .
-
-check: fmt vet test
 	go run .
 	for file in [0-9][0-9]_*.go; do \
 		case "$$file" in \
@@ -35,8 +26,10 @@ check: fmt vet test
 		test "$$status" -ne 0; \
 		printf '%s\n' "$$output" | grep -q 'cannot index'
 
-run:
-	go run .
+check:
+	test -z "$$(gofmt -l $(GOFILES))"
+	go vet ./...
+	go vet -tags web .
 
 smoke-web: build
 	scripts/smoke-web.sh
