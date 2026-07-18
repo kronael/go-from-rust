@@ -2,7 +2,7 @@ GOCACHE ?= /tmp/go-from-rust-cache
 export GOCACHE
 GOFILES := $(shell find . -name '*.go' -not -path './.git/*' -not -path './.tmp_check/*')
 
-.PHONY: build test check smoke-web clean
+.PHONY: build test check playtest full clean
 
 build:
 	mkdir -p dist
@@ -31,8 +31,10 @@ check:
 	go vet ./...
 	go vet -tags web .
 
-smoke-web: build
-	scripts/smoke-web.sh
+playtest: build
+	scripts/playtest.sh
+
+full: check test playtest
 
 clean:
-	rm -rf dist
+	rm -rf dist .tmp_check

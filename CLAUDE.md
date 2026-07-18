@@ -81,10 +81,9 @@ indexed:
 GOCACHE=/tmp/go-from-rust-cache go run 35_bad_pointer_index.go
 ```
 
-For the web tour, `make build`, `make test`, `make check`, and `make
-smoke-web` cover the `-tags web` build, the `internal/webapp` unit tests, and
-an `agent-browser`-driven end-to-end pass against `cmd/fakeplayground`. Never
-point `PLAYGROUND_URL` at the public Playground from tests or smoke.
+`make playtest` runs the browser against `cmd/fakeplayground`; `make full`
+combines formatting, vet, Go tests, lesson runs, race checks, and that playtest.
+Never point `PLAYGROUND_URL` at the public Playground from tests.
 
 Treat the Why Go section in `README.md` as project framing, not benchmark
 evidence. Never invent universal speed ratios or turn tradeoffs into universal

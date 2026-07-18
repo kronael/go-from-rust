@@ -1,5 +1,5 @@
 // Command fakeplayground is a minimal stand-in for the Go Playground compile
-// API, used by tests and scripts/smoke-web.sh. It never contacts the real
+// API, used by tests and scripts/playtest.sh. It never contacts the real
 // Playground and only binds to loopback addresses.
 package main
 

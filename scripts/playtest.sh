@@ -1,13 +1,13 @@
 #!/bin/sh
-# Smoke-tests the built web tour end to end against an in-repo fake
+# Playtests the built web tour end to end against an in-repo fake
 # Playground, never the public one. Exits nonzero on any failed assertion.
 set -eu
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-WORK_DIR="$REPO_ROOT/.tmp_check/smoke-web"
+WORK_DIR="$REPO_ROOT/.tmp_check/playtest"
 FAKE_LOG="$WORK_DIR/fakeplayground.log"
 WEB_LOG="$WORK_DIR/web.log"
-SESSION="smoke-web-$$"
+SESSION="playtest-$$"
 FAIL=0
 
 mkdir -p "$WORK_DIR"
@@ -33,7 +33,7 @@ wait_for_addr() {
     tries=$((tries - 1))
     sleep 0.2
   done
-  echo "smoke-web: timed out waiting for $log_file to report a listen address" >&2
+  echo "playtest: timed out waiting for $log_file to report a listen address" >&2
   return 1
 }
 
@@ -85,13 +85,42 @@ is_visible() {
 	[ "$(ab is visible "$1")" = "true" ]
 }
 
+has_tokens() {
+	selector="$1"
+	count="$(ab eval "document.querySelectorAll('$selector').length")"
+	[ "$count" -gt 0 ]
+}
+
 wide_shell_is_capped() {
 	width="$(ab eval 'Math.round(document.querySelector("main").getBoundingClientRect().width)')"
 	[ "$width" -le 1440 ]
 }
 
+highlight_is_escaped() {
+	[ "$(ab eval 'document.querySelector("#editor-highlight-code b") === null')" = "true" ]
+}
+
+highlight_scroll_is_synced() {
+	script='(() => {
+  const editor = document.querySelector("#editor");
+  const highlight = document.querySelector("#editor-highlight");
+  editor.scrollLeft = 80;
+  editor.dispatchEvent(new Event("scroll"));
+  return editor.scrollLeft === highlight.scrollLeft;
+})()'
+	synced="$(ab eval "$script")"
+	[ "$synced" = "true" ]
+}
+
 ab open "$BASE_URL/#01" >/dev/null
 assert "loads lesson 01 title" contains "$(ab get text '#lesson-title')" "01_arrays_slices.go"
+assert "shows lesson pane" is_visible ".lesson-pane"
+assert "shows editor" is_visible "#editor"
+assert "shows output" is_visible "#output"
+assert "highlights Go keywords" has_tokens ".tok-keyword"
+assert "highlights Go types" has_tokens ".tok-type"
+assert "highlights Go strings" has_tokens ".tok-string"
+assert "highlights Go comments" has_tokens ".tok-comment"
 
 ab click "#next-btn" >/dev/null
 assert "next button navigates to lesson 02" contains "$(ab get url)" "#02"
@@ -114,6 +143,31 @@ assert "run completes" wait_contains "#status-msg" "Run complete"
 assert "run captures stdout" contains "$(ab get text '#output-code')" "Printf:"
 assert "run captures stderr" contains "$(ab get text '#output-code')" "Fprintln: stderr"
 
+ab fill "#editor" 'package main
+
+import "fmt"
+
+func main() {
+	// <b>Verify the Run button uses edited source.</b>
+	fmt.Println("clicked run")
+}
+' >/dev/null
+assert "highlight follows edits" contains "$(ab get text '#editor-highlight-code')" "clicked run"
+assert "edited comments stay highlighted" has_tokens ".tok-comment"
+assert "edited strings stay highlighted" has_tokens ".tok-string"
+assert "highlighted source stays escaped" highlight_is_escaped
+ab click "#run-btn" >/dev/null
+assert "Run click executes edited source" wait_contains "#status-msg" "Run complete"
+assert "Run click shows edited output" contains "$(ab get text '#output-code')" "clicked run"
+
+ab fill "#editor" 'package main
+
+func main( {
+' >/dev/null
+ab click "#run-btn" >/dev/null
+assert "Run click reports compile failure" wait_contains "#status-msg" "Compile failed"
+assert "compile failure reaches output" contains "$(ab get text '#output-code')" "syntax error"
+
 ab open "$BASE_URL/#35" >/dev/null
 ab click "#run-btn" >/dev/null
 assert "lesson 35 completes" wait_contains "#status-msg" "Expected compiler error"
@@ -126,12 +180,13 @@ ab set viewport 390 844 >/dev/null
 ab open "$BASE_URL/#01" >/dev/null
 assert "editor stays visible at mobile width" is_visible "#editor"
 assert "run button stays visible at mobile width" is_visible "#run-btn"
+assert "highlight scroll follows editor" highlight_scroll_is_synced
 
 ab set viewport 2048 1048 >/dev/null
 assert "tour shell stays capped at wide width" wide_shell_is_capped
 
 if [ "$FAIL" -ne 0 ]; then
-  echo "smoke-web: one or more assertions failed" >&2
+  echo "playtest: one or more assertions failed" >&2
   exit 1
 fi
-echo "smoke-web: all assertions passed"
+echo "playtest: all assertions passed"

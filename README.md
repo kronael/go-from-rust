@@ -122,10 +122,13 @@ docker build -t go-from-rust-web .
 docker run -p 8080:8080 go-from-rust-web
 ```
 
-`make smoke-web` builds the binaries, starts `cmd/fakeplayground` and the web
-server on loopback, and drives the tour end to end with the `agent-browser`
-CLI (navigation, edit persistence, format, reset, run, lesson 35's expected
-failure, and mobile layout).
+`make playtest` builds the binaries, starts `cmd/fakeplayground` and the web
+server on loopback, and drives the tour end to end with `agent-browser`. It
+checks syntax highlighting, navigation, edit persistence, format, reset, Run
+success and failure, lesson 35, mobile layout, and the wide-screen cap.
+
+`make full` runs formatting, vet, every Go lesson, race checks, unit tests, and
+the browser playtest.
 
 ## Why Go
 
