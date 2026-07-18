@@ -240,6 +240,14 @@ main {
   flex-direction: column;
 }
 
+.editor-code {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--code-bg);
+}
+
 .editor-toolbar {
   display: flex;
   align-items: center;
@@ -273,20 +281,68 @@ main {
   font-weight: 700;
 }
 
+#editor-highlight,
 #editor {
-  display: block;
-  flex: 1;
+  position: absolute;
+  inset: 0;
   width: 100%;
-  min-height: 0;
+  height: 100%;
+  margin: 0;
   padding: 20px 22px;
   border: 0;
   border-radius: 0;
-  outline-offset: -2px;
-  background: var(--code-bg);
-  color: var(--fg);
   font: 14px/1.52 "SFMono-Regular", "SF Mono", "Fira Code", "JetBrains Mono", Consolas, monospace;
-  resize: none;
   tab-size: 4;
+  white-space: pre;
+}
+
+#editor-highlight {
+  overflow: hidden;
+  color: var(--fg);
+  pointer-events: none;
+}
+
+#editor {
+  z-index: 1;
+  outline-offset: -2px;
+  overflow: auto;
+  background: transparent;
+  caret-color: var(--fg);
+  color: transparent;
+  tab-size: 4;
+  resize: none;
+  -webkit-text-fill-color: transparent;
+}
+
+#editor::selection {
+  background: rgba(37, 99, 235, 0.2);
+}
+
+.tok-keyword {
+  color: #7c3aed;
+  font-weight: 600;
+}
+
+.tok-type {
+  color: #0369a1;
+}
+
+.tok-builtin {
+  color: #b45309;
+}
+
+.tok-constant,
+.tok-number {
+  color: #a21caf;
+}
+
+.tok-string {
+  color: #166534;
+}
+
+.tok-comment {
+  color: #6b7280;
+  font-style: italic;
 }
 
 .output-section {
@@ -413,6 +469,7 @@ main {
     max-width: none;
   }
 
+  #editor-highlight,
   #editor {
     padding: 16px;
     font-size: 13px;

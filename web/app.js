@@ -2,13 +2,40 @@
 (function () {
   "use strict";
 
+  function wordSet(text) {
+    return new Set(text.split(" "));
+  }
+
   const STORAGE_PREFIX = "go-from-rust:edit:";
+  const GO_KEYWORDS = wordSet(
+    "break case chan const continue default defer else fallthrough for func go goto " +
+      "if import interface map package range return select struct switch type var",
+  );
+  const GO_TYPES = wordSet(
+    "any bool byte comparable complex64 complex128 error float32 float64 int int8 " +
+      "int16 int32 int64 rune string uint uint8 uint16 uint32 uint64 uintptr",
+  );
+  const GO_BUILTINS = wordSet(
+    "append cap clear close complex copy delete imag len make max min new panic " +
+      "print println real recover",
+  );
+  const GO_CONSTANTS = wordSet("false iota nil true");
+  const NUMBER_PATTERN = new RegExp(
+    "^(?:" +
+      "0[xX][0-9a-fA-F_]+(?:\\.[0-9a-fA-F_]*)?(?:[pP][+-]?[0-9_]+)?" +
+      "|0[bB][01_]+|0[oO][0-7_]+" +
+      "|(?:[0-9][0-9_]*)(?:\\.[0-9_]*)?(?:[eE][+-]?[0-9_]+)?" +
+      "|\\.[0-9_]+(?:[eE][+-]?[0-9_]+)?" +
+      ")(?:i)?",
+  );
 
   const els = {
     title: document.getElementById("lesson-title"),
     value: document.getElementById("lesson-value"),
     question: document.getElementById("lesson-question"),
     editor: document.getElementById("editor"),
+    highlight: document.getElementById("editor-highlight"),
+    highlightCode: document.getElementById("editor-highlight-code"),
     output: document.getElementById("output-code"),
     status: document.getElementById("status-msg"),
     select: document.getElementById("lesson-select"),
@@ -34,6 +61,105 @@
 
   function setStatus(text) {
     els.status.textContent = text;
+  }
+
+  function escapeHTML(text) {
+    return text.replace(/[&<>]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[character]);
+  }
+
+  function highlightedToken(className, text) {
+    return `<span class="${className}">${escapeHTML(text)}</span>`;
+  }
+
+  function isIdentifierStart(character) {
+    return character === "_" || /[A-Za-z]/.test(character);
+  }
+
+  function isIdentifierPart(character) {
+    return character === "_" || /[A-Za-z0-9]/.test(character);
+  }
+
+  function quotedEnd(source, start, quote) {
+    let index = start + 1;
+    while (index < source.length) {
+      if (source[index] === quote) return index + 1;
+      if (quote !== "`" && source[index] === "\\") {
+        index += 2;
+      } else {
+        index += 1;
+      }
+    }
+    return source.length;
+  }
+
+  function highlightGo(source) {
+    let html = "";
+    let index = 0;
+    while (index < source.length) {
+      if (source.startsWith("//", index)) {
+        const newline = source.indexOf("\n", index);
+        const end = newline === -1 ? source.length : newline;
+        html += highlightedToken("tok-comment", source.slice(index, end));
+        index = end;
+        continue;
+      }
+      if (source.startsWith("/*", index)) {
+        const close = source.indexOf("*/", index + 2);
+        const end = close === -1 ? source.length : close + 2;
+        html += highlightedToken("tok-comment", source.slice(index, end));
+        index = end;
+        continue;
+      }
+
+      const character = source[index];
+      if (character === '"' || character === "'" || character === "`") {
+        const end = quotedEnd(source, index, character);
+        html += highlightedToken("tok-string", source.slice(index, end));
+        index = end;
+        continue;
+      }
+
+      const number = source.slice(index).match(NUMBER_PATTERN);
+      if (number) {
+        html += highlightedToken("tok-number", number[0]);
+        index += number[0].length;
+        continue;
+      }
+
+      if (isIdentifierStart(character)) {
+        let end = index + 1;
+        while (end < source.length && isIdentifierPart(source[end])) end += 1;
+        const word = source.slice(index, end);
+        if (GO_KEYWORDS.has(word)) {
+          html += highlightedToken("tok-keyword", word);
+        } else if (GO_TYPES.has(word)) {
+          html += highlightedToken("tok-type", word);
+        } else if (GO_BUILTINS.has(word)) {
+          html += highlightedToken("tok-builtin", word);
+        } else if (GO_CONSTANTS.has(word)) {
+          html += highlightedToken("tok-constant", word);
+        } else {
+          html += escapeHTML(word);
+        }
+        index = end;
+        continue;
+      }
+
+      html += escapeHTML(character);
+      index += 1;
+    }
+    return html;
+  }
+
+  function syncHighlightScroll() {
+    els.highlight.scrollTop = els.editor.scrollTop;
+    els.highlight.scrollLeft = els.editor.scrollLeft;
+  }
+
+  function renderHighlight() {
+    const source = els.editor.value;
+    els.highlightCode.innerHTML = highlightGo(source) + (source.endsWith("\n") ? " " : "");
+    syncHighlightScroll();
   }
 
   function findLesson(id) {
@@ -64,6 +190,7 @@
       : `Value ${lesson.Value}/5`;
     els.question.textContent = lesson.Question;
     els.editor.value = loadEditedSource(lesson);
+    renderHighlight();
     els.output.textContent = "Run the lesson to see output here.";
     els.output.parentElement.dataset.state = "idle";
     els.select.value = lessonKey(lesson.ID);
@@ -204,6 +331,7 @@
         return;
       }
       els.editor.value = data.body;
+      renderHighlight();
       persistEdit();
       setStatus("Formatted");
     } catch (err) {
@@ -217,6 +345,7 @@
   function resetCode() {
     if (!current) return;
     els.editor.value = current.Source;
+    renderHighlight();
     localStorage.removeItem(storageKey(current));
     setStatus("Reset to original source");
   }
@@ -230,7 +359,11 @@
 
   function wireEvents() {
     window.addEventListener("hashchange", onHashChange);
-    els.editor.addEventListener("input", persistEdit);
+    els.editor.addEventListener("input", () => {
+      renderHighlight();
+      persistEdit();
+    });
+    els.editor.addEventListener("scroll", syncHighlightScroll);
     els.runBtn.addEventListener("click", runCode);
     els.formatBtn.addEventListener("click", formatCode);
     els.resetBtn.addEventListener("click", resetCode);
@@ -250,6 +383,7 @@
         const end = els.editor.selectionEnd;
         els.editor.value = els.editor.value.slice(0, start) + "\t" + els.editor.value.slice(end);
         els.editor.selectionStart = els.editor.selectionEnd = start + 1;
+        renderHighlight();
         persistEdit();
       }
     });

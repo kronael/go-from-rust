@@ -50,8 +50,11 @@
         <button id="reset-btn" type="button">Reset</button>
       </div>
       <label class="visually-hidden" for="editor">Lesson source code</label>
-      <textarea id="editor" spellcheck="false" autocapitalize="off" autocomplete="off"
-        autocorrect="off" wrap="off"></textarea>
+      <div class="editor-code">
+        <pre id="editor-highlight" aria-hidden="true"><code id="editor-highlight-code"></code></pre>
+        <textarea id="editor" spellcheck="false" autocapitalize="off" autocomplete="off"
+          autocorrect="off" wrap="off"></textarea>
+      </div>
     </section>
 
     <section class="output-section" aria-label="Program output">
