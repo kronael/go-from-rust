@@ -81,6 +81,18 @@ wait_contains() {
 	return 1
 }
 
+wait_value_contains() {
+	selector="$1"
+	needle="$2"
+	tries=200
+	while [ "$tries" -gt 0 ]; do
+		contains "$(ab get value "$selector")" "$needle" && return 0
+		tries=$((tries - 1))
+		sleep 0.1
+	done
+	return 1
+}
+
 is_visible() {
 	[ "$(ab is visible "$1")" = "true" ]
 }
@@ -124,13 +136,14 @@ assert "highlights Go comments" has_tokens ".tok-comment"
 
 ab click "#next-btn" >/dev/null
 assert "next button navigates to lesson 02" contains "$(ab get url)" "#02"
+assert "lesson 02 finishes rendering" wait_contains "#lesson-title" "02_printing.go"
 
 ab fill "#editor" 'package main
 
 func main() {}
 ' >/dev/null
 ab reload >/dev/null
-assert "edited source persists across reload" contains "$(ab get value '#editor')" "func main() {}"
+assert "edited source persists across reload" wait_value_contains "#editor" "func main() {}"
 
 ab click "#format-btn" >/dev/null
 assert "format button reports success" wait_contains "#status-msg" "Formatted"

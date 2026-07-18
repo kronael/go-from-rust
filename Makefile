@@ -20,8 +20,8 @@ test:
 		esac; \
 		go run "$$file"; \
 	done
-	go run -race 26_concurrent_maps.go
-	go run -race 31_channels.go
+	CGO_ENABLED=1 CC="$(CC)" go run -race 26_concurrent_maps.go
+	CGO_ENABLED=1 CC="$(CC)" go run -race 31_channels.go
 	@output="$$(go run 35_bad_pointer_index.go 2>&1)"; status=$$?; \
 		test "$$status" -ne 0; \
 		printf '%s\n' "$$output" | grep -q 'cannot index'
