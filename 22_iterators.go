@@ -10,6 +10,7 @@ import (
 )
 
 func count(n int) iter.Seq[int] {
+	// Seq[int] is func(yield func(int) bool), not a stateful Iterator object.
 	return func(yield func(int) bool) {
 		for i := 0; i < n; i++ {
 			if !yield(i) {
@@ -20,7 +21,7 @@ func count(n int) iter.Seq[int] {
 }
 
 func main() {
-	// Go iterators push values to yield; break makes yield return false.
+	// range calls the sequence; break makes yield return false so count stops.
 	for value := range count(100) {
 		fmt.Println("count:", value)
 		if value == 2 {
@@ -34,6 +35,7 @@ func main() {
 	}
 
 	ages := map[string]int{"go": 15, "rust": 10}
+	// maps.Keys produces a Seq; slices.Sorted consumes it into a sorted slice.
 	keys := slices.Sorted(maps.Keys(ages))
 	fmt.Println("sorted keys:", keys)
 }

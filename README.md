@@ -18,8 +18,8 @@ filename to run one focused lesson:
 
 ```sh
 go run .
-go run 06_append_capacity.go
-go run 10_slice_edits.go
+go run 04_append_capacity.go
+go run 08_slice_edits.go
 go run 29_errors.go
 go run 33_logging.go
 ```
@@ -49,25 +49,25 @@ narrower but still worth recognizing.
 
 | Lesson | Value | Rust question it answers |
 |---|:---:|---|
-| [`01_arrays_slices.go`](01_arrays_slices.go) | 5 | When do assignments copy values or alias elements? |
-| [`02_printing.go`](02_printing.go) | 4 | What replaces `print!`, `println!`, Display, and Debug? |
-| [`03_copy.go`](03_copy.go) | 5 | How does `copy` differ from `copy_from_slice` and `copy_within`? |
-| [`04_variadic.go`](04_variadic.go) | 4 | How are variadic calls declared and expanded? |
-| [`05_range.go`](05_range.go) | 5 | What does `range` yield for each built-in type? |
-| [`06_append_capacity.go`](06_append_capacity.go) | 5 | When does `append` alias or allocate? |
-| [`07_pointers.go`](07_pointers.go) | 4 | When are slice and array pointers useful? |
-| [`08_slice_pointers.go`](08_slice_pointers.go) | 3 | How do nil checks and dereferencing work in `[]*T`? |
-| [`09_filter.go`](09_filter.go) | 4 | What replaces `filter().collect()` and in-place retain? |
-| [`10_slice_edits.go`](10_slice_edits.go) | 5 | What are the pop, delete, insert, and swap-delete idioms? |
-| [`11_delete_tail.go`](11_delete_tail.go) | 5 | How do reslicing and deletion affect retained references? |
-| [`12_slice_memory.go`](12_slice_memory.go) | 5 | Do `Clip`, `Clone`, and subslices release allocations? |
-| [`13_range_append.go`](13_range_append.go) | 4 | What happens when a range loop appends to its slice? |
-| [`14_option.go`](14_option.go) | 5 | What replaces `Option<T>` in common APIs? |
-| [`15_match.go`](15_match.go) | 4 | What replaces matching, destructuring, and enum dispatch? |
-| [`16_tuples.go`](16_tuples.go) | 4 | What stores heterogeneous or fixed-size grouped values? |
-| [`17_multiple_returns.go`](17_multiple_returns.go) | 5 | Why are multiple results syntax rather than a tuple type? |
-| [`18_interfaces.go`](18_interfaces.go) | 5 | How do implicit interfaces and method sets replace traits? |
-| [`19_typed_nil.go`](19_typed_nil.go) | 5 | Why can an interface containing a nil pointer be non-nil? |
+| [`01_arrays_slices.go`](01_arrays_slices.go) | 5 | What is a slice header, and why does assignment alias elements? |
+| [`02_copy.go`](02_copy.go) | 5 | What replaces `to_vec`, `copy_from_slice`, and `copy_within`? |
+| [`03_range.go`](03_range.go) | 5 | What does `range` yield for each built-in type? |
+| [`04_append_capacity.go`](04_append_capacity.go) | 5 | When does `append` alias or allocate? |
+| [`05_pointers.go`](05_pointers.go) | 4 | When are slice and array pointers useful? |
+| [`06_slice_pointers.go`](06_slice_pointers.go) | 3 | How do nil checks and dereferencing work in `[]*T`? |
+| [`07_filter.go`](07_filter.go) | 4 | What replaces `filter().collect()` and in-place retain? |
+| [`08_slice_edits.go`](08_slice_edits.go) | 5 | What are the pop, delete, insert, and swap-delete idioms? |
+| [`09_delete_tail.go`](09_delete_tail.go) | 5 | How do reslicing and deletion affect retained references? |
+| [`10_slice_memory.go`](10_slice_memory.go) | 5 | Do `Clip`, `Clone`, and subslices release allocations? |
+| [`11_range_append.go`](11_range_append.go) | 4 | What happens when a range loop appends to its slice? |
+| [`12_option.go`](12_option.go) | 5 | What replaces `Option<T>` in common APIs? |
+| [`13_match.go`](13_match.go) | 4 | What replaces matching, destructuring, and enum dispatch? |
+| [`14_tuples.go`](14_tuples.go) | 4 | What stores heterogeneous or fixed-size grouped values? |
+| [`15_multiple_returns.go`](15_multiple_returns.go) | 5 | Why are multiple results syntax rather than a tuple type? |
+| [`16_variadic.go`](16_variadic.go) | 4 | How are variadic calls declared and expanded? |
+| [`17_interfaces.go`](17_interfaces.go) | 5 | How do implicit interfaces and method sets replace traits? |
+| [`18_typed_nil.go`](18_typed_nil.go) | 5 | Why can an interface containing a nil pointer be non-nil? |
+| [`19_printing.go`](19_printing.go) | 4 | What replaces `print!`, `println!`, Display, and Debug? |
 | [`20_generic_sort.go`](20_generic_sort.go) | 3 | What does `cmp.Ordered` actually constrain? |
 | [`21_struct_sort.go`](21_struct_sort.go) | 4 | How are custom and multi-key orderings expressed? |
 | [`22_iterators.go`](22_iterators.go) | 4 | How do push iterators and iterator adapters work? |

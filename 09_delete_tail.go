@@ -25,7 +25,8 @@ func main() {
 	fmt.Println("reslice tail nil:", reslicedFull[2] == nil)
 	fmt.Println("reslice tail value:", *reslicedFull[2])
 
-	// To remove references manually, clear the discarded tail before reslicing.
+	// To remove references manually, clear the tail before reslicing; clear
+	// writes the element type's zero value, which is nil for *int.
 	cleared := []*int{&a, &b, &c}
 	clear(cleared[2:])
 	cleared = cleared[:2]

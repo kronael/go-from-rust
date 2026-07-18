@@ -27,8 +27,8 @@ func main() {
 	clone[0] = 9
 	fmt.Println("Clone independent:", big[0], clone[0])
 
-	// clear removes stored references but keeps an allocation. Set every slice
-	// alias to nil, or clone the values that must survive, to release the array.
+	// clear writes zero values, removing stored references but not the allocation.
+	// Set every alias to nil, or clone the values that must survive, to release it.
 	big, end, front, clipped = nil, nil, nil, nil
 	fmt.Println("clone survives:", clone)
 }

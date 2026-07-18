@@ -25,12 +25,12 @@ func mapFS(filenames ...string) fstest.MapFS {
 }
 
 func TestLoadLessonsSuccess(t *testing.T) {
-	files := mapFS("01_arrays_slices.go", "02_printing.go", "03_copy.go")
+	files := mapFS("01_arrays_slices.go", "02_copy.go", "03_range.go")
 	files["01_arrays_slices.go"] = &fstest.MapFile{Data: []byte("//go:build ignore\n\npackage main\n")}
 	readme := readmeHeader +
-		row("01_arrays_slices.go", 5, "When do assignments copy values or alias elements?") +
-		row("02_printing.go", 4, "What replaces println?") +
-		row("03_copy.go", 5, "How does copy differ from copy_from_slice?")
+		row("01_arrays_slices.go", 5, "What is a slice header?") +
+		row("02_copy.go", 5, "How do copies work?") +
+		row("03_range.go", 5, "What does range yield?")
 
 	lessons, err := LoadLessons(files, []byte(readme))
 	if err != nil {
@@ -44,7 +44,7 @@ func TestLoadLessonsSuccess(t *testing.T) {
 			t.Errorf("lessons[%d].ID = %d, want %d", i, l.ID, i+1)
 		}
 	}
-	if lessons[0].Value != 5 || lessons[0].Question != "When do assignments copy values or alias elements?" {
+	if lessons[0].Value != 5 || lessons[0].Question != "What is a slice header?" {
 		t.Errorf("lessons[0] = %+v", lessons[0])
 	}
 	if !strings.HasPrefix(lessons[0].Source, "package main") {
@@ -77,10 +77,10 @@ func TestBrowserSourceOnlyRemovesLeadingBuildConstraint(t *testing.T) {
 }
 
 func TestLoadLessonsGap(t *testing.T) {
-	files := mapFS("01_arrays_slices.go", "03_copy.go")
+	files := mapFS("01_arrays_slices.go", "03_range.go")
 	readme := readmeHeader +
 		row("01_arrays_slices.go", 5, "Q1?") +
-		row("03_copy.go", 5, "Q3?")
+		row("03_range.go", 5, "Q3?")
 
 	_, err := LoadLessons(files, []byte(readme))
 	if err == nil {
@@ -115,7 +115,7 @@ func TestLoadLessonsMismatchedLink(t *testing.T) {
 }
 
 func TestLoadLessonsUnmatchedFile(t *testing.T) {
-	files := mapFS("01_arrays_slices.go", "02_printing.go")
+	files := mapFS("01_arrays_slices.go", "02_copy.go")
 	readme := readmeHeader +
 		row("01_arrays_slices.go", 5, "Q1?")
 
@@ -129,7 +129,7 @@ func TestLoadLessonsUnmatchedRow(t *testing.T) {
 	files := mapFS("01_arrays_slices.go")
 	readme := readmeHeader +
 		row("01_arrays_slices.go", 5, "Q1?") +
-		row("02_printing.go", 4, "Q2?")
+		row("02_copy.go", 5, "Q2?")
 
 	_, err := LoadLessons(files, []byte(readme))
 	if err == nil {

@@ -24,7 +24,7 @@ func testWebFS() fstest.MapFS {
 func testLessons() []Lesson {
 	return []Lesson{
 		{ID: 1, Filename: "01_arrays_slices.go", Value: 5, Question: "Q1?", Source: "package main\n"},
-		{ID: 2, Filename: "02_printing.go", Value: 4, Question: "Q2?", Source: "package main\n"},
+		{ID: 2, Filename: "02_copy.go", Value: 5, Question: "Q2?", Source: "package main\n"},
 	}
 }
 

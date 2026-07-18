@@ -11,7 +11,8 @@ func main() {
 	arrayCopy[0] = 9
 	fmt.Println("array copy:", array, arrayCopy)
 
-	// Go slice assignment copies a header, so both slices share elements.
+	// A Go slice is a small header: pointer to an array, length, and capacity.
+	// Assignment copies that header, so both slices still reach the same elements.
 	slice := []int{1, 2, 3}
 	sliceAlias := slice
 	sliceAlias[0] = 9

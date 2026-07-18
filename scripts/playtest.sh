@@ -136,7 +136,10 @@ assert "highlights Go comments" has_tokens ".tok-comment"
 
 ab click "#next-btn" >/dev/null
 assert "next button navigates to lesson 02" contains "$(ab get url)" "#02"
-assert "lesson 02 finishes rendering" wait_contains "#lesson-title" "02_printing.go"
+assert "lesson 02 finishes rendering" wait_contains "#lesson-title" "02_copy.go"
+
+ab open "$BASE_URL/#19" >/dev/null
+assert "loads printing lesson" wait_contains "#lesson-title" "19_printing.go"
 
 ab fill "#editor" 'package main
 

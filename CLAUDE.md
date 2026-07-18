@@ -33,8 +33,8 @@ compare without framework context.
 
 ## Lesson Groups
 
-- **Slices and memory:** lessons 01 and 03–13.
-- **Language mappings:** lessons 02 and 14–19.
+- **Slices and memory:** lessons 01–11.
+- **Language mappings:** lessons 12–19.
 - **Ordering and iterators:** lessons 20–22.
 - **Collections and synchronization:** lessons 23–27.
 - **Control and failure:** lessons 28–31 and 35.
