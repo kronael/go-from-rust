@@ -357,9 +357,9 @@ func TestRunUpstreamInvalidJSON(t *testing.T) {
 	}
 }
 
-func TestRunUpstreamRequiresJSONContentType(t *testing.T) {
+func TestRunUpstreamAcceptsPlaygroundContentType(t *testing.T) {
 	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "text/plain")
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		_, _ = w.Write([]byte(`{"Events":[]}`))
 	}))
 	defer upstream.Close()
@@ -371,11 +371,15 @@ func TestRunUpstreamRequiresJSONContentType(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusBadGateway {
-		t.Fatalf("status = %d, want 502", resp.StatusCode)
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("status = %d, want 200", resp.StatusCode)
 	}
-	if env := decodeError(t, resp.Body); env.Error.Code != "upstream_failed" {
-		t.Fatalf("code = %q, want upstream_failed", env.Error.Code)
+	var payload map[string][]any
+	if err := json.NewDecoder(resp.Body).Decode(&payload); err != nil {
+		t.Fatal(err)
+	}
+	if _, ok := payload["Events"]; !ok {
+		t.Fatal("response omitted Events")
 	}
 }
 

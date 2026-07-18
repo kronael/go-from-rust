@@ -80,7 +80,8 @@ func handleCompile(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	w.Header().Set("Content-Type", "application/json")
+	// The public Playground returns JSON with a text/plain content type.
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	_ = json.NewEncoder(w).Encode(resp)
 }
 

@@ -11,7 +11,6 @@ import (
 	"go/format"
 	"io"
 	"io/fs"
-	"mime"
 	"net/http"
 	"net/url"
 	"strings"
@@ -331,11 +330,6 @@ func (s *Server) runUpstream(ctx context.Context, source string) ([]byte, int, s
 	if resp.StatusCode != http.StatusOK {
 		return nil, http.StatusBadGateway, "upstream_failed", fmt.Sprintf("upstream returned status %d", resp.StatusCode)
 	}
-	mediaType, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
-	if err != nil || mediaType != "application/json" {
-		return nil, http.StatusBadGateway, "upstream_failed", "upstream response was not JSON"
-	}
-
 	body, err := io.ReadAll(io.LimitReader(resp.Body, maxUpstreamBytes+1))
 	if err != nil || len(body) > maxUpstreamBytes {
 		return nil, http.StatusBadGateway, "upstream_failed", "upstream response too large or unreadable"
