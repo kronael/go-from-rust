@@ -186,11 +186,9 @@ assert "compile failure reaches output" contains "$(ab get text '#output-code')"
 
 ab open "$BASE_URL/#35" >/dev/null
 ab click "#run-btn" >/dev/null
-assert "lesson 35 completes" wait_contains "#status-msg" "Expected compiler error"
-assert "lesson 35 run surfaces the intentional compiler failure" \
-	contains "$(ab get text '#output-code')" "cannot index"
-assert "lesson 35 labels the compiler failure as expected" \
-	contains "$(ab get text '#status-msg')" "Expected compiler error"
+assert "HTTP lesson completes" wait_contains "#status-msg" "Run complete"
+assert "HTTP lesson serves and calls its handler" \
+	contains "$(ab get text '#output-code')" "response: 200 hello Ana"
 
 ab set viewport 390 844 >/dev/null
 ab open "$BASE_URL/#01" >/dev/null

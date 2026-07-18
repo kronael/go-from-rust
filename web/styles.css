@@ -382,7 +382,6 @@ main {
   color: #991b1b;
 }
 
-#output[data-state="expected"],
 #output[data-state="success"] {
   background: #effaf1;
   color: #166534;

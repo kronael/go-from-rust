@@ -185,9 +185,7 @@
     cancelRequest();
     current = lesson;
     els.title.textContent = `${lessonKey(lesson.ID)} — ${lesson.Filename}`;
-    els.value.textContent = lesson.ExpectedFailure
-      ? `Value ${lesson.Value}/5 · Expected compiler failure`
-      : `Value ${lesson.Value}/5`;
+    els.value.textContent = `Value ${lesson.Value}/5`;
     els.question.textContent = lesson.Question;
     els.editor.value = loadEditedSource(lesson);
     renderHighlight();
@@ -299,11 +297,8 @@
       }
       els.output.textContent = extractOutput(data);
       if (data.Errors) {
-        els.output.parentElement.dataset.state = lesson.ExpectedFailure ? "expected" : "error";
-        setStatus(lesson.ExpectedFailure ? "Expected compiler error" : "Compile failed");
-      } else if (lesson.ExpectedFailure) {
         els.output.parentElement.dataset.state = "error";
-        setStatus("Expected compiler error did not occur");
+        setStatus("Compile failed");
       } else {
         els.output.parentElement.dataset.state = "success";
         setStatus("Run complete");

@@ -13,13 +13,12 @@ import (
 
 // Lesson is one entry in the immutable, ordered lesson catalog.
 type Lesson struct {
-	ID              int
-	Filename        string
-	Value           int
-	Question        string
-	Source          string
-	Hash            string
-	ExpectedFailure bool
+	ID       int
+	Filename string
+	Value    int
+	Question string
+	Source   string
+	Hash     string
 }
 
 var lessonFileName = regexp.MustCompile(`^([0-9]{2})_[A-Za-z0-9_]+\.go$`)
@@ -89,13 +88,12 @@ func LoadLessons(files fs.FS, readme []byte) ([]Lesson, error) {
 		source := browserSource(string(src))
 		hash := sha256.Sum256([]byte(source))
 		lessons = append(lessons, Lesson{
-			ID:              r.id,
-			Filename:        name,
-			Value:           r.value,
-			Question:        r.question,
-			Source:          source,
-			Hash:            fmt.Sprintf("%x", hash[:8]),
-			ExpectedFailure: name == "35_bad_pointer_index.go",
+			ID:       r.id,
+			Filename: name,
+			Value:    r.value,
+			Question: r.question,
+			Source:   source,
+			Hash:     fmt.Sprintf("%x", hash[:8]),
 		})
 		delete(rowsByFilename, name)
 	}
