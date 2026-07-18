@@ -14,6 +14,10 @@ type Person struct {
 }
 
 func main() {
+	numbers := []int{4, 1, 3}
+	slices.Sort(numbers)
+	fmt.Println("natural order:", numbers)
+
 	people := []Person{
 		{"Cara", 30},
 		{"Ana", 25},
@@ -21,15 +25,16 @@ func main() {
 		{"Dan", 30},
 	}
 
-	// SortFunc is unstable, like Rust's sort_unstable_by.
-	// Its comparator must define a strict weak ordering.
+	// SortFunc supplies custom ordering, like Rust's sort_unstable_by.
 	slices.SortFunc(people, func(a, b Person) int {
-		// Or returns the first nonzero result, but evaluates every argument.
+		// cmp.Or selects the first nonzero comparison: age, then name.
 		return cmp.Or(
 			cmp.Compare(a.Age, b.Age),
 			cmp.Compare(a.Name, b.Name),
 		)
 	})
 
-	fmt.Println(people)
+	fmt.Println("custom order:", people)
+
+	// Sort and SortFunc are unstable; use SortStableFunc when ties must retain order.
 }

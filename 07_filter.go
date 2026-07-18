@@ -19,17 +19,7 @@ func main() {
 	}
 	fmt.Println("new slice:", evens)
 
-	// s[:0] aliases the input and does not clear the unused tail.
-	nums = []int{1, 2, 3, 4, 5, 6}
-	evens = nums[:0]
-	for _, n := range nums {
-		if n%2 == 0 {
-			evens = append(evens, n)
-		}
-	}
-	fmt.Println("in place:", evens, "stale tail:", nums[len(evens):])
-
-	// DeleteFunc's predicate drops odds and clears the vacated tail.
+	// DeleteFunc edits the input in place and clears the vacated tail.
 	nums = []int{1, 2, 3, 4, 5, 6}
 	evens = slices.DeleteFunc(nums, func(n int) bool { return n%2 != 0 })
 	full := evens[:cap(evens)]

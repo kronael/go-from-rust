@@ -18,9 +18,6 @@ func main() {
 	point := [2]int{3, 4}
 	fmt.Println("array:", point)
 
-	// Comparable structs and arrays can be map keys.
-	roles := map[Person]string{person: "admin"}
-	visited := map[[2]int]bool{point: true}
-	fmt.Println("struct key:", roles[person])
-	fmt.Println("array key:", visited[point])
+	// Go has no general tuple value. The next lesson covers multiple results,
+	// which are function-call syntax rather than stored tuples.
 }

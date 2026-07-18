@@ -5,7 +5,6 @@ package main
 import (
 	"fmt"
 	"iter"
-	"maps"
 	"slices"
 )
 
@@ -34,8 +33,6 @@ func main() {
 		fmt.Printf("name %d: %s\n", index, name)
 	}
 
-	ages := map[string]int{"go": 15, "rust": 10}
-	// maps.Keys produces a Seq; slices.Sorted consumes it into a sorted slice.
-	keys := slices.Sorted(maps.Keys(ages))
-	fmt.Println("sorted keys:", keys)
+	// Collect consumes a Seq into a slice; iterator adapters compose as functions.
+	fmt.Println("collected:", slices.Collect(count(3)))
 }

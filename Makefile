@@ -16,15 +16,13 @@ test:
 	go run .
 	for file in [0-9][0-9]_*.go; do \
 		case "$$file" in \
-			01_arrays_slices.go|35_bad_pointer_index.go) continue ;; \
+			01_arrays_slices.go) continue ;; \
 		esac; \
 		go run "$$file"; \
 	done
-	CGO_ENABLED=1 CC="$(CC)" go run -race 26_concurrent_maps.go
-	CGO_ENABLED=1 CC="$(CC)" go run -race 31_channels.go
-	@output="$$(go run 35_bad_pointer_index.go 2>&1)"; status=$$?; \
-		test "$$status" -ne 0; \
-		printf '%s\n' "$$output" | grep -q 'cannot index'
+	CGO_ENABLED=1 CC="$(CC)" go run -race 24_concurrent_maps.go
+	CGO_ENABLED=1 CC="$(CC)" go run -race 26_channels.go
+	CGO_ENABLED=1 CC="$(CC)" go run -race 28_barriers.go
 
 check:
 	test -z "$$(gofmt -l $(GOFILES))"

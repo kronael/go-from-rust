@@ -55,9 +55,8 @@ func (deque *ringDeque[T]) popBack() (T, bool) {
 }
 
 func main() {
-	// Go has no generic VecDeque. container/list supports both ends in O(1),
-	// but stores any and allocates nodes. A bounded ring stays contiguous and
-	// reuses its allocation; clearing removed slots releases references.
+	// Unlike a channel, this bounded ring is storage only: it never blocks and
+	// is not goroutine-safe. It stays contiguous and reuses one allocation.
 	deque := ringDeque[string]{values: make([]string, 3)}
 	fmt.Println("push:", deque.pushBack("middle"), deque.pushFront("front"), deque.pushBack("back"))
 	fmt.Println("full:", deque.pushBack("overflow"))
@@ -70,6 +69,6 @@ func main() {
 	_, emptyOK := deque.popFront()
 	fmt.Println("drained:", middle, middleOK, "empty:", emptyOK)
 
-	// An unbounded ring also needs growth and relinearization; use a maintained
-	// third-party deque instead of hiding that machinery in application code.
+	// Go has no generic VecDeque. container/list allocates nodes; an unbounded
+	// ring needs growth and relinearization. Prefer a maintained implementation.
 }

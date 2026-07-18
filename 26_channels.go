@@ -29,15 +29,6 @@ func main() {
 	close(additions)
 	<-stopped
 
-	// Sending copies a value. A slice copy still points at the same backing
-	// array, so ownership transfer is only a convention; Go does not enforce it.
-	shared := []int{10}
-	handoff := make(chan []int, 1)
-	handoff <- shared
-	received := <-handoff
-	received[0] = 20
-	fmt.Println("slice storage still shared:", shared[0])
-
 	values := make(chan int, 2)
 	values <- 10
 	values <- 20
@@ -52,9 +43,7 @@ func main() {
 	value, ok := <-values
 	fmt.Println("closed receive:", value, ok)
 
-	// Channels coordinate and may block or schedule goroutines. A Mutex is
-	// usually cheaper for a short critical section. With one goroutine touching
-	// state, use neither; choose channels when the ownership boundary helps.
-	// One producer plus one consumer is still concurrent: a channel is the
-	// simple queue. Consider a specialized SPSC ring only after profiling.
+	// Sending copies a value; sending a slice still copies only its header.
+	// Channels add synchronization and blocking. The next lesson's ring buffer
+	// is storage only and needs external synchronization when shared.
 }

@@ -5,11 +5,10 @@ narrower question for experienced Rust programmers: “I know how to do this in
 Rust—what should I actually write in Go?” I made it because mapping concepts I
 already knew in Rust to practical Go was the hard part.
 
-Each numbered `.go` file contains one small standalone lesson. Thirty-four are
-runnable; `35_bad_pointer_index.go` is the single intentional compile failure.
-Working through all 35 gives you practical mappings for Go slices and
-allocation, language constructs, collections, synchronization, errors,
-logging, and JSON—the parts most likely to surprise an experienced Rust user.
+Each numbered `.go` file contains one small runnable lesson. Working through all
+35 gives you practical mappings for Go slices and allocation, language
+constructs, collections, synchronization, errors, HTTP, logging, and JSON—the
+parts most likely to surprise an experienced Rust user.
 
 ## Run It
 
@@ -20,8 +19,9 @@ filename to run one focused lesson:
 go run .
 go run 04_append_capacity.go
 go run 08_slice_edits.go
-go run 29_errors.go
+go run 31_errors.go
 go run 33_logging.go
+go run 35_http.go
 ```
 
 The standalone lessons use `//go:build ignore`, so they do not collide with the
@@ -30,14 +30,9 @@ default `main`. Explicit filenames still run normally.
 Run the concurrent-state lessons with the race detector as well:
 
 ```sh
-go run -race 26_concurrent_maps.go
-go run -race 31_channels.go
-```
-
-Only `35_bad_pointer_index.go` is intended to fail:
-
-```sh
-go run 35_bad_pointer_index.go # expected: a *[]int cannot be indexed
+go run -race 24_concurrent_maps.go
+go run -race 26_channels.go
+go run -race 28_barriers.go
 ```
 
 The repository requires Go 1.26, matching [`go.mod`](go.mod).
@@ -50,40 +45,40 @@ narrower but still worth recognizing.
 | Lesson | Value | Rust question it answers |
 |---|:---:|---|
 | [`01_arrays_slices.go`](01_arrays_slices.go) | 5 | What is a slice header, and why does assignment alias elements? |
-| [`02_copy.go`](02_copy.go) | 5 | What replaces `to_vec`, `copy_from_slice`, and `copy_within`? |
+| [`02_copy.go`](02_copy.go) | 5 | When should I use `slices.Clone` instead of `copy`? |
 | [`03_range.go`](03_range.go) | 5 | What does `range` yield for each built-in type? |
 | [`04_append_capacity.go`](04_append_capacity.go) | 5 | When does `append` alias or allocate? |
 | [`05_pointers.go`](05_pointers.go) | 4 | When are slice and array pointers useful? |
-| [`06_slice_pointers.go`](06_slice_pointers.go) | 3 | How do nil checks and dereferencing work in `[]*T`? |
+| [`06_pointer_elements.go`](06_pointer_elements.go) | 3 | How do nil checks and dereferencing work in `[]*T`? |
 | [`07_filter.go`](07_filter.go) | 4 | What replaces `filter().collect()` and in-place retain? |
 | [`08_slice_edits.go`](08_slice_edits.go) | 5 | What are the pop, delete, insert, and swap-delete idioms? |
 | [`09_delete_tail.go`](09_delete_tail.go) | 5 | How do reslicing and deletion affect retained references? |
 | [`10_slice_memory.go`](10_slice_memory.go) | 5 | Do `Clip`, `Clone`, and subslices release allocations? |
 | [`11_range_append.go`](11_range_append.go) | 4 | What happens when a range loop appends to its slice? |
 | [`12_option.go`](12_option.go) | 5 | What replaces `Option<T>` in common APIs? |
-| [`13_match.go`](13_match.go) | 4 | What replaces matching, destructuring, and enum dispatch? |
+| [`13_switch.go`](13_switch.go) | 4 | Which three `switch` forms replace `match` and if chains? |
 | [`14_tuples.go`](14_tuples.go) | 4 | What stores heterogeneous or fixed-size grouped values? |
 | [`15_multiple_returns.go`](15_multiple_returns.go) | 5 | Why are multiple results syntax rather than a tuple type? |
-| [`16_variadic.go`](16_variadic.go) | 4 | How are variadic calls declared and expanded? |
+| [`16_variadic.go`](16_variadic.go) | 3 | How are variadic calls declared and expanded? |
 | [`17_interfaces.go`](17_interfaces.go) | 5 | How do implicit interfaces and method sets replace traits? |
 | [`18_typed_nil.go`](18_typed_nil.go) | 5 | Why can an interface containing a nil pointer be non-nil? |
 | [`19_printing.go`](19_printing.go) | 4 | What replaces `print!`, `println!`, Display, and Debug? |
-| [`20_generic_sort.go`](20_generic_sort.go) | 3 | What does `cmp.Ordered` actually constrain? |
-| [`21_struct_sort.go`](21_struct_sort.go) | 4 | How are custom and multi-key orderings expressed? |
-| [`22_iterators.go`](22_iterators.go) | 4 | How do push iterators and iterator adapters work? |
-| [`23_maps_sets.go`](23_maps_sets.go) | 5 | How do maps, sets, and deterministic key order work? |
-| [`24_deque.go`](24_deque.go) | 4 | What replaces `VecDeque`, and how does a bounded ring work? |
-| [`25_heap.go`](25_heap.go) | 4 | How does `container/heap` replace `BinaryHeap`? |
-| [`26_concurrent_maps.go`](26_concurrent_maps.go) | 5 | When should a map use `Mutex` or `sync.Map`? |
-| [`27_synchronization.go`](27_synchronization.go) | 5 | When should code use `Mutex`, `RWMutex`, atomics, or no spinlock? |
-| [`28_defer.go`](28_defer.go) | 5 | How do deferred calls differ from lexical `Drop`? |
-| [`29_errors.go`](29_errors.go) | 5 | How are sentinel errors created, wrapped, and inspected? |
-| [`30_panic.go`](30_panic.go) | 5 | When does a panic kill the process, and where can it recover? |
-| [`31_channels.go`](31_channels.go) | 5 | When should channels transfer ownership, and what does closing mean? |
-| [`32_context.go`](32_context.go) | 5 | How is cancellation passed through service code? |
+| [`20_sorting.go`](20_sorting.go) | 4 | How do natural, custom, and multi-key orderings work? |
+| [`21_iterators.go`](21_iterators.go) | 4 | How do push iterators and iterator adapters work? |
+| [`22_maps_sets.go`](22_maps_sets.go) | 5 | How do maps, sets, and deterministic key order work? |
+| [`23_heap.go`](23_heap.go) | 4 | How does `container/heap` replace `BinaryHeap`? |
+| [`24_concurrent_maps.go`](24_concurrent_maps.go) | 5 | When should a map use `Mutex` or `sync.Map`? |
+| [`25_synchronization.go`](25_synchronization.go) | 5 | When should code use `Mutex`, `RWMutex`, atomics, or no spinlock? |
+| [`26_channels.go`](26_channels.go) | 5 | When should channels own state, and what does closing mean? |
+| [`27_ring_buffer.go`](27_ring_buffer.go) | 4 | How does a bounded ring differ from a channel? |
+| [`28_barriers.go`](28_barriers.go) | 4 | How do goroutines wait until every worker is ready? |
+| [`29_context.go`](29_context.go) | 5 | How is cancellation passed through service code? |
+| [`30_defer.go`](30_defer.go) | 5 | How do deferred calls differ from lexical `Drop`? |
+| [`31_errors.go`](31_errors.go) | 5 | How are sentinel errors created, wrapped, and inspected? |
+| [`32_panic.go`](32_panic.go) | 5 | When does a panic kill the process, and where can it recover? |
 | [`33_logging.go`](33_logging.go) | 5 | How does standard structured logging carry fields and context? |
 | [`34_json.go`](34_json.go) | 5 | Does JSON use generated code, cached reflection, or repeated parsing? |
-| [`35_bad_pointer_index.go`](35_bad_pointer_index.go) | 3 | Why can Go not index through `*[]T`? |
+| [`35_http.go`](35_http.go) | 5 | How do I serve and call HTTP without a framework? |
 
 ## Interactive Web Tour
 
@@ -125,7 +120,7 @@ docker run -p 8080:8080 go-from-rust-web
 `make playtest` builds the binaries, starts `cmd/fakeplayground` and the web
 server on loopback, and drives the tour end to end with `agent-browser`. It
 checks syntax highlighting, navigation, edit persistence, format, reset, Run
-success and failure, lesson 35, mobile layout, and the wide-screen cap.
+success and failure, the HTTP lesson, mobile layout, and the wide-screen cap.
 
 `make full` runs formatting, vet, every Go lesson, race checks, unit tests, and
 the browser playtest.
