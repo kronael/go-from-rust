@@ -11,14 +11,14 @@ func main() {
 	big := make([]int, 1000)
 
 	// Front and end subslices both keep the backing allocation reachable.
-	end := big[:3]
-	front := big[997:]
-	fmt.Printf("end: len=%d cap=%d\n", len(end), cap(end))
+	front := big[:3]
+	end := big[997:]
 	fmt.Printf("front: len=%d cap=%d\n", len(front), cap(front))
+	fmt.Printf("end: len=%d cap=%d\n", len(end), cap(end))
 
 	// Clip reduces capacity without copying, so it still retains and aliases big.
-	end[0] = 1
-	clipped := slices.Clip(end)
+	front[0] = 1
+	clipped := slices.Clip(front)
 	clipped[0] = 2
 	fmt.Println("Clip aliases:", big[0] == 2, "cap:", cap(clipped))
 
@@ -27,8 +27,8 @@ func main() {
 	clone[0] = 9
 	fmt.Println("Clone independent:", big[0], clone[0])
 
-	// clear writes zero values, removing stored references but not the allocation.
-	// Set every alias to nil, or clone the values that must survive, to release it.
-	big, end, front, clipped = nil, nil, nil, nil
+	// Set every alias to nil, or clone the values that must survive, to make the
+	// large array eligible for garbage collection. Reclamation timing is not fixed.
+	big, front, end, clipped = nil, nil, nil, nil
 	fmt.Println("clone survives:", clone)
 }

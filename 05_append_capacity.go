@@ -2,7 +2,10 @@
 
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"slices"
+)
 
 func main() {
 	// Spare capacity lets append reuse storage, so existing slices still alias.
@@ -19,6 +22,12 @@ func main() {
 	detached := append(limited, 9)
 	detached[0] = 7
 	fmt.Println("capacity limited:", backing, detached)
+
+	// Grow ensures room for three more elements without changing the length.
+	// It may allocate, so keep the returned slice just as you do with append.
+	reserved := []int{1, 2}
+	reserved = slices.Grow(reserved, 3)
+	fmt.Println("Grow keeps length:", len(reserved), "room:", cap(reserved)-len(reserved) >= 3)
 
 	// Rust prevents a live slice borrow across a Vec mutation that may move it.
 	// Go does not specify append's capacity growth factor; never depend on it.

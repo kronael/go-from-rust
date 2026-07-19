@@ -24,7 +24,8 @@ func parseCount(text string) (int, error) {
 
 func main() {
 	// Rust often uses enum variants. Go uses sentinel errors when callers need
-	// identity, then adds context with %w without losing that identity.
+	// identity, then adds context with %w without losing that identity. Atoi's
+	// *NumError wraps strconv.ErrSyntax, so errors.Is finds it through both wraps.
 	for _, text := range []string{"42", "nope", "-1"} {
 		number, err := parseCount(text)
 		switch {

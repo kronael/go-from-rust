@@ -55,8 +55,9 @@ func (deque *ringDeque[T]) popBack() (T, bool) {
 }
 
 func main() {
+	// T is a type parameter; any permits any element type.
 	// Unlike a channel, this bounded ring is storage only: it never blocks and
-	// is not goroutine-safe. It stays contiguous and reuses one allocation.
+	// is not goroutine-safe. It reuses one array, but logical order can wrap.
 	deque := ringDeque[string]{values: make([]string, 3)}
 	fmt.Println("push:", deque.pushBack("middle"), deque.pushFront("front"), deque.pushBack("back"))
 	fmt.Println("full:", deque.pushBack("overflow"))
@@ -69,6 +70,8 @@ func main() {
 	_, emptyOK := deque.popFront()
 	fmt.Println("drained:", middle, middleOK, "empty:", emptyOK)
 
-	// Go has no generic VecDeque. container/list allocates nodes; an unbounded
-	// ring needs growth and relinearization. Prefer a maintained implementation.
+	// This is useful as a private bounded queue: fixed storage, O(1) end operations,
+	// and explicit full/empty results. Add one Mutex around its methods when shared.
+	// Use a channel when callers should block. A barrier does not protect slots;
+	// lock-free SPSC or MPMC requires a different atomic algorithm.
 }

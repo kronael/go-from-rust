@@ -19,18 +19,19 @@ func main() {
 		fmt.Println("pop back:", last, stack)
 	}
 
-	// slices.Delete is the ordered O(n-i) equivalent of Rust Vec::remove.
+	// slices.Delete preserves order, like Rust Vec::remove.
 	ordered := []int{10, 20, 30, 40}
 	i := 1
 	removed := ordered[i]
 	ordered = slices.Delete(ordered, i, i+1)
 	fmt.Println("delete:", removed, ordered)
 
-	// slices.Insert is the ordered O(n-i) equivalent of Rust Vec::insert.
+	// slices.Insert preserves order, like Rust Vec::insert.
 	ordered = slices.Insert(ordered, i, 25)
 	fmt.Println("insert:", ordered)
 
 	// Go has no swap-delete function; move the last value and zero its old slot.
+	// Zeroing keeps removed pointer-like values from being retained by the array.
 	unordered := []int{10, 20, 30, 40}
 	i = 1
 	removed = unordered[i]

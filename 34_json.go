@@ -14,18 +14,17 @@ type payload struct {
 }
 
 func main() {
-	// encoding/json generates no type-specific code. On first use it reflects on
-	// a type and caches its encoder plus field and tag metadata by reflect.Type.
+	// Default encoding visits exported fields at runtime. Tags rename or omit
+	// them; unexported fields are ignored. No derive or generated code is required.
 	encoded, err := json.Marshal(payload{Name: "Ana", password: "secret"})
 	if err != nil {
 		panic(err)
 	}
 	fmt.Println("encoded; false and unexported fields omitted:", string(encoded))
 
-	// Every Marshal still walks the value at runtime and returns a fresh []byte.
-	// Every Unmarshal parses its input. Default struct decoding writes through
-	// reflection; a custom json.Unmarshaler can take over. Cached type metadata
-	// avoids rediscovering this struct on every call.
+	// Each Unmarshal parses its input. The current implementation uses reflection
+	// and caches type metadata, but those are implementation details. Marshaler or
+	// Unmarshaler methods can replace the default behavior.
 	var decoded payload
 	input := []byte(`{"name":"Bob","password":"ignored"}`)
 	err = json.Unmarshal(input, &decoded)
@@ -35,6 +34,6 @@ func main() {
 	fmt.Println("decoded exported name:", decoded.Name)
 	fmt.Println("unexported password ignored:", decoded.password == "")
 
-	// Rust serde derives type-specific code at compile time, usually avoiding
-	// this reflection dispatch. Both approaches still parse and produce bytes.
+	// Rust serde commonly derives type-specific code. Go favors a runtime default;
+	// both approaches still parse or produce bytes, so benchmark relevant payloads.
 }

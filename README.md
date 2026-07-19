@@ -17,8 +17,8 @@ filename to run one focused lesson:
 
 ```sh
 go run .
-go run 04_append_capacity.go
-go run 08_slice_edits.go
+go run 05_append_capacity.go
+go run 10_slice_edits.go
 go run 31_errors.go
 go run 33_logging.go
 go run 35_http.go
@@ -42,43 +42,67 @@ The repository requires Go 1.26, matching [`go.mod`](go.mod).
 Value scores are editorial: **5** is essential, **4** is frequent, and **3** is
 narrower but still worth recognizing.
 
-| Lesson | Value | Rust question it answers |
+| Lesson | Value | Main point |
 |---|:---:|---|
-| [`01_arrays_slices.go`](01_arrays_slices.go) | 5 | What is a slice header, and why does assignment alias elements? |
-| [`02_copy.go`](02_copy.go) | 5 | When should I use `slices.Clone` instead of `copy`? |
-| [`03_range.go`](03_range.go) | 5 | What does `range` yield for each built-in type? |
-| [`04_append_capacity.go`](04_append_capacity.go) | 5 | When does `append` alias or allocate? |
-| [`05_pointers.go`](05_pointers.go) | 4 | When are slice and array pointers useful? |
-| [`06_pointer_elements.go`](06_pointer_elements.go) | 3 | How do nil checks and dereferencing work in `[]*T`? |
-| [`07_filter.go`](07_filter.go) | 4 | What replaces `filter().collect()` and in-place retain? |
-| [`08_slice_edits.go`](08_slice_edits.go) | 5 | What are the pop, delete, insert, and swap-delete idioms? |
-| [`09_delete_tail.go`](09_delete_tail.go) | 5 | How do reslicing and deletion affect retained references? |
-| [`10_slice_memory.go`](10_slice_memory.go) | 5 | Do `Clip`, `Clone`, and subslices release allocations? |
-| [`11_range_append.go`](11_range_append.go) | 4 | What happens when a range loop appends to its slice? |
-| [`12_option.go`](12_option.go) | 5 | What replaces `Option<T>` in common APIs? |
-| [`13_switch.go`](13_switch.go) | 4 | Which three `switch` forms replace `match` and if chains? |
-| [`14_tuples.go`](14_tuples.go) | 4 | What stores heterogeneous or fixed-size grouped values? |
-| [`15_multiple_returns.go`](15_multiple_returns.go) | 5 | Why are multiple results syntax rather than a tuple type? |
-| [`16_variadic.go`](16_variadic.go) | 3 | How are variadic calls declared and expanded? |
-| [`17_interfaces.go`](17_interfaces.go) | 5 | How do implicit interfaces and method sets replace traits? |
-| [`18_typed_nil.go`](18_typed_nil.go) | 5 | Why can an interface containing a nil pointer be non-nil? |
-| [`19_printing.go`](19_printing.go) | 4 | What replaces `print!`, `println!`, Display, and Debug? |
-| [`20_sorting.go`](20_sorting.go) | 4 | How do natural, custom, and multi-key orderings work? |
-| [`21_iterators.go`](21_iterators.go) | 4 | How do push iterators and iterator adapters work? |
-| [`22_maps_sets.go`](22_maps_sets.go) | 5 | How do maps, sets, and deterministic key order work? |
-| [`23_heap.go`](23_heap.go) | 4 | How does `container/heap` replace `BinaryHeap`? |
-| [`24_concurrent_maps.go`](24_concurrent_maps.go) | 5 | When should a map use `Mutex` or `sync.Map`? |
-| [`25_synchronization.go`](25_synchronization.go) | 5 | When should code use `Mutex`, `RWMutex`, atomics, or no spinlock? |
-| [`26_channels.go`](26_channels.go) | 5 | When should channels own state, and what does closing mean? |
-| [`27_ring_buffer.go`](27_ring_buffer.go) | 4 | How does a bounded ring differ from a channel? |
-| [`28_barriers.go`](28_barriers.go) | 4 | How do goroutines wait until every worker is ready? |
-| [`29_context.go`](29_context.go) | 5 | How is cancellation passed through service code? |
-| [`30_defer.go`](30_defer.go) | 5 | How do deferred calls differ from lexical `Drop`? |
-| [`31_errors.go`](31_errors.go) | 5 | How are sentinel errors created, wrapped, and inspected? |
-| [`32_panic.go`](32_panic.go) | 5 | When does a panic kill the process, and where can it recover? |
-| [`33_logging.go`](33_logging.go) | 5 | How does standard structured logging carry fields and context? |
-| [`34_json.go`](34_json.go) | 5 | Does JSON use generated code, cached reflection, or repeated parsing? |
-| [`35_http.go`](35_http.go) | 5 | How do I serve and call HTTP without a framework? |
+| [`01_arrays_slices.go`](01_arrays_slices.go) | 5 | Arrays copy all elements; assigned slices still describe shared backing storage. |
+| [`02_copy.go`](02_copy.go) | 5 | `Clone` creates a new backing array; `copy` fills existing storage without growing it. |
+| [`03_range.go`](03_range.go) | 5 | `range` yields indexes and copied values; strings yield byte indexes and decoded runes. |
+| [`04_iterators.go`](04_iterators.go) | 4 | A custom type exposes `All() iter.Seq` so callers can range over generated values. |
+| [`05_append_capacity.go`](05_append_capacity.go) | 5 | `append` reuses spare capacity when possible, so aliases may remain connected. |
+| [`06_pointers.go`](06_pointers.go) | 4 | Passing a slice copies its header; element writes still reach the same backing array. |
+| [`07_option.go`](07_option.go) | 5 | Comma-ok returns `(T, bool)`; `*T` is nullable but adds indirection and may escape. |
+| [`08_pointer_elements.go`](08_pointer_elements.go) | 3 | A nil pointer element must be checked before it is dereferenced. |
+| [`09_filter.go`](09_filter.go) | 4 | Build a filtered copy with `append`, or remove matches in place with `DeleteFunc`. |
+| [`10_slice_edits.go`](10_slice_edits.go) | 5 | Slice stacks and vectors use reslicing, `Delete`, `Insert`, or manual swap-delete. |
+| [`11_delete_tail.go`](11_delete_tail.go) | 5 | Reslicing hides elements but does not clear references in the backing array. |
+| [`12_slice_memory.go`](12_slice_memory.go) | 5 | Subslices and `Clip` retain their backing array; `Clone` creates independent storage. |
+| [`13_range_append.go`](13_range_append.go) | 4 | `range` fixes its iteration count before the loop, even if the slice grows. |
+| [`14_switch.go`](14_switch.go) | 4 | Go has expression, condition-only, and dynamic-type switches. |
+| [`15_tuples.go`](15_tuples.go) | 4 | Stored mixed values use structs; fixed homogeneous groups use arrays. |
+| [`16_multiple_returns.go`](16_multiple_returns.go) | 5 | Go returns multiple results directly; they are not a tuple value. |
+| [`17_variadic.go`](17_variadic.go) | 3 | A variadic parameter receives a slice; `...` expands a slice into arguments. |
+| [`18_interfaces.go`](18_interfaces.go) | 5 | Interfaces are satisfied implicitly; value and pointer method sets differ. |
+| [`19_typed_nil.go`](19_typed_nil.go) | 5 | An interface is nil only when both its dynamic type and value are absent. |
+| [`20_printing.go`](20_printing.go) | 4 | `fmt` prints values with verbs; `io.Writer` variants choose the destination. |
+| [`21_sorting.go`](21_sorting.go) | 4 | `Sort` handles natural order; `SortFunc` supplies custom and multi-key order. |
+| [`22_maps_sets.go`](22_maps_sets.go) | 5 | Maps are built in; sets use `map[T]struct{}`, and deterministic output sorts keys. |
+| [`23_heap.go`](23_heap.go) | 4 | `container/heap` adds heap operations to a type that defines storage and ordering. |
+| [`24_concurrent_maps.go`](24_concurrent_maps.go) | 5 | Use a typed map with `Mutex` by default; `sync.Map` serves specific access patterns. |
+| [`25_synchronization.go`](25_synchronization.go) | 5 | Mutexes protect mutable invariants; atomics update one value or publish an immutable snapshot. |
+| [`26_channels.go`](26_channels.go) | 5 | Channels combine value transfer, blocking, synchronization, and close notification. |
+| [`27_ring_buffer.go`](27_ring_buffer.go) | 4 | A bounded `VecDeque` mapping reuses fixed storage; blocking and concurrent access are separate choices. |
+| [`28_barriers.go`](28_barriers.go) | 4 | A barrier counts arrivals, then broadcasts release; Go composes those roles from simpler primitives. |
+| [`29_context.go`](29_context.go) | 5 | `context` carries cancellation through calls and reports why work stopped. |
+| [`30_defer.go`](30_defer.go) | 5 | `defer` runs at function return in reverse order; arguments are captured immediately. |
+| [`31_errors.go`](31_errors.go) | 5 | Create stable errors, wrap them with `%w`, and inspect the chain with `errors.Is`. |
+| [`32_panic.go`](32_panic.go) | 5 | An unrecovered panic ends the process; deferred recovery is local to the panicking goroutine. |
+| [`33_logging.go`](33_logging.go) | 5 | `slog` writes key-value fields and derives loggers with shared fields. |
+| [`34_json.go`](34_json.go) | 5 | JSON uses exported fields and tags by default; each input is parsed at runtime. |
+| [`35_http.go`](35_http.go) | 5 | `ServeMux` routes requests; clients send them and response bodies must be closed. |
+
+### Slice Operations
+
+The [Go Wiki's SliceTricks](https://go.dev/wiki/SliceTricks) shows the underlying
+append, copy, and reslice patterns. This guide groups them by the behavior that
+matters and uses the current standard library where it is clearer:
+
+| Need | Use |
+|---|---|
+| Copy or concatenate | `copy`, `slices.Clone`, or `slices.Concat`; lesson 02 distinguishes supplied from new storage. |
+| Reserve or constrain capacity | `slices.Grow` or a full slice expression; lesson 05 shows both. |
+| Filter or deduplicate | A loop, `slices.DeleteFunc`, or `slices.Compact` for adjacent duplicates; lesson 09 compares allocation. |
+| Insert, delete, pop, or swap-delete | `slices.Insert`, `slices.Delete`, or reslicing; lesson 10 shows order preservation and tail clearing. |
+| Drop references or retained storage | `clear`, `slices.Clip`, or `slices.Clone`; lessons 11–12 separate reachability from capacity. |
+| Reverse, shuffle, batch, or slide a window | `slices.Reverse`, `rand.Shuffle`, `slices.Chunk`, or `s[i:i+n]`; use lesson 27's ring for a bounded queue. |
+
+Start with a loop or the standard `slices` and `maps` packages. [samber/lo](https://lo.samber.dev/)
+is useful when operations absent from the standard library—such as `Map` or
+`GroupBy`—make application code clearer. Generics do not inherently add a
+runtime penalty. A particular helper can still add callback, allocation, or
+missed-inlining costs, so benchmark hot paths instead of assuming either loops
+or generic helpers win. For runtime internals, [this slice internals article](https://themsaid.com/slice-internals-in-go)
+is a useful implementation guide; growth rules are not language guarantees and
+can change between Go releases.
 
 ## Interactive Web Tour
 

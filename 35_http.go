@@ -22,6 +22,7 @@ func (transport handlerTransport) RoundTrip(request *http.Request) (*http.Respon
 
 func main() {
 	mux := http.NewServeMux()
+	// The method/path pattern captures one segment as name. PathValue retrieves it.
 	mux.HandleFunc("GET /hello/{name}", func(response http.ResponseWriter, request *http.Request) {
 		fmt.Fprintf(response, "hello %s\n", request.PathValue("name"))
 	})
@@ -36,11 +37,9 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	defer response.Body.Close()
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
-		panic(err)
-	}
-	if err := response.Body.Close(); err != nil {
 		panic(err)
 	}
 	fmt.Printf("response: %d %s", response.StatusCode, body)

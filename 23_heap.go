@@ -18,6 +18,8 @@ func (numbers *intHeap) Push(value any) {
 }
 
 func (numbers *intHeap) Pop() any {
+	// heap.Pop first moves the root to the end. This adapter removes that last
+	// slot; it does not search for the minimum itself.
 	old := *numbers
 	last := old[len(old)-1]
 	*numbers = old[:len(old)-1]

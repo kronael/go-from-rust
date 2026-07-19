@@ -32,9 +32,9 @@ compare without framework context.
 
 ## Lesson Groups
 
-- **Slices and memory:** lessons 01–11.
-- **Language mappings:** lessons 12–19.
-- **Collections and ordering:** lessons 20–23.
+- **Foundations and slices:** lessons 01–13.
+- **Language mappings:** lessons 14–20.
+- **Collections and ordering:** lessons 21–23.
 - **Concurrency:** lessons 24–29.
 - **Control and failure:** lessons 30–32.
 - **Services and data:** lessons 33–35.

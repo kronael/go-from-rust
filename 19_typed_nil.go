@@ -14,6 +14,7 @@ func main() {
 
 	// An interface stores a dynamic type and a dynamic value. Assigning pointer
 	// stores type *problem even though the stored pointer value is still nil.
+	// Unlike Option<Box<dyn Error>>, the resulting interface itself is non-nil.
 	fmt.Println("plain pointer is nil:", pointer == nil)
 	fmt.Printf("interface dynamic type: %T\n", err)
 	fmt.Println("interface value is nil pointer:", err.(*problem) == nil)

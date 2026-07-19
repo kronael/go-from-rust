@@ -10,8 +10,9 @@ type addition struct {
 }
 
 func main() {
-	// A channel can route every update through one goroutine. That goroutine
-	// owns count, so count needs no mutex.
+	// A channel resembles Rust mpsc: send and receive copy a value. chan<- int is
+	// send-only; <-ch receives. Unbuffered operations block until a peer is ready.
+	// Routing every update through one goroutine gives it sole ownership of count.
 	additions := make(chan addition)
 	stopped := make(chan struct{})
 	go func() {
@@ -29,6 +30,8 @@ func main() {
 	close(additions)
 	<-stopped
 
+	// Capacity 2 stores these sends in FIFO order, so neither needs a waiting
+	// receiver. The sender closes; receivers drain values and observe completion.
 	values := make(chan int, 2)
 	values <- 10
 	values <- 20
