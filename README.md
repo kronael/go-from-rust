@@ -2,8 +2,8 @@
 
 Go books and tutorials teach the language from zero. This repository answers a
 narrower question for experienced Rust programmers: “I know how to do this in
-Rust—what should I actually write in Go?” I made it because mapping concepts I
-already knew in Rust to practical Go was the hard part.
+Rust—what should I actually write in Go?” I created it for myself as I was
+struggling to map concepts I already knew in Rust to practical Go.
 
 Each numbered `.go` file contains one small runnable lesson. Working through all
 35 gives you practical mappings for Go slices and allocation, language
@@ -129,8 +129,9 @@ Playground compile protocol at `PLAYGROUND_URL`, bounded by a 128 KiB request
 cap, a 12-second upstream timeout, 8 concurrent compiles, a 120-request
 one-minute budget, and a 256-entry 10-minute result cache. Point
 `PLAYGROUND_URL` at `cmd/fakeplayground` for local development and tests. That
-loopback-only test helper executes code in a temporary directory; it is not a
-sandbox and must never be exposed as a public service.
+test helper refuses any listener that resolves to a non-loopback address and
+executes code in a temporary directory; it is not a sandbox and must never be
+exposed as a public service.
 
 **Container deployment.** The multi-stage `Dockerfile` builds a static binary
 and ships only that binary in an `alpine` runtime image, running as a non-root
@@ -143,8 +144,8 @@ docker run -p 8080:8080 go-from-rust-web
 
 `make playtest` builds the binaries, starts `cmd/fakeplayground` and the web
 server on loopback, and drives the tour end to end with `agent-browser`. It
-checks syntax highlighting, navigation, edit persistence, format, reset, Run
-success and failure, the HTTP lesson, mobile layout, and the wide-screen cap.
+checks imports, editing and running lessons, failure handling, and responsive
+layouts.
 
 `make full` runs formatting, vet, every Go lesson, race checks, unit tests, and
 the browser playtest.
@@ -161,12 +162,12 @@ runtime, packaging, or throughput limits. Rust, Java, and C# address broader or
 lower-level needs, but can require more language, runtime, or architecture work
 than a small service needs. Go is practical in the space between those tradeoffs.
 
-[Code Like Go](https://krons.fiu.wtf/lore/go) calls the underlying discipline
-“remove to accelerate”: fewer language choices leave fewer implementation and
-review decisions.
+This framing is based on [Code Like Go](https://krons.fiu.wtf/lore/go), which
+calls the underlying discipline “remove to accelerate”: fewer language choices
+leave fewer implementation and review decisions.
 
-AI makes producing code easier. It does not make generated code trustworthy.
-When production rises, verification becomes the bottleneck. Go's constrained
+AI makes producing code easier without making generated code trustworthy. As
+production rises, verification becomes the bottleneck. Go's constrained
 language, visible control flow, `gofmt`, compiler, and tests can make generated
 changes cheaper to inspect.
 
