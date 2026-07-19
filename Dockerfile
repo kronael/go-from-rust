@@ -1,6 +1,8 @@
 FROM golang:1.26.0-alpine3.23 AS build
 WORKDIR /src
-COPY . .
+COPY go.mod web.go README.md [0-9][0-9]_*.go ./
+COPY internal/webapp ./internal/webapp
+COPY web ./web
 RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -tags web -o /out/go-from-rust-web .
 
 FROM alpine:3.23.3
