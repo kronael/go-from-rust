@@ -1,0 +1,23 @@
+# Compiled binaries (the Makefile builds into dist/; these are stray root builds)
+/go-from-rust
+/go-from-rust-web
+/fakeplayground
+*.test
+*.out
+
+# Build and ephemeral working outputs
+/dist/
+/.tmp_check/
+/.ship/
+/tmp/
+
+# Screenshots and scratch
+/capture.png
+
+# Local, per-machine settings — never shared
+/.claude/settings.local.json
+/.claude/tmp/
+
+# OS and editor cruft
+.DS_Store
+*~

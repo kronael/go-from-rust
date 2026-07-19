@@ -12,9 +12,9 @@ compare without framework context.
 - Standalone lessons use `//go:build ignore` and run by explicit filename.
 - Numeric prefixes are the curriculum order and must stay contiguous.
 - There is no nested `ds` package or framework.
-- Never add repository ignore rules for generated artifacts. Keep `.ship/`,
-  `dist/`, `.tmp_check/`, and similar outputs visible to Git, then delete them
-  before handoff.
+- Generated artifacts (`dist/`, `.tmp_check/`, `.ship/`, `tmp/`) and local
+  per-machine settings are covered by `.gitignore`. Keep it lean, and still
+  delete stray outputs before handoff.
 - `internal/webapp/` and `web.go` (`-tags web`) add an optional interactive
   browser tour; `cmd/fakeplayground/` is a Playground stand-in for tests and
   smoke, never the public service. See the README's Interactive Web Tour.
