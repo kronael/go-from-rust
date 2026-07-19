@@ -516,7 +516,7 @@ main {
 
   .editor-section {
     height: min(62dvh, 440px);
-    min-height: 340px;
+    min-height: min(340px, 62dvh);
   }
 
   .editor-actions {
@@ -526,7 +526,7 @@ main {
   }
 
   .output-section {
-    min-height: 160px;
+    min-height: min(160px, 30dvh);
   }
 
   #line-numbers {

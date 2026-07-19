@@ -401,9 +401,12 @@
   function wireEvents() {
     window.addEventListener("hashchange", onHashChange);
     els.editor.addEventListener("input", () => {
-      if (!importsVisible && /^import\s/m.test(els.editor.value)) {
-        hiddenImports = "";
-        importsVisible = true;
+      if (!importsVisible) {
+        const split = splitImports(els.editor.value);
+        if (split.imports) {
+          hiddenImports = split.imports;
+          els.editor.value = split.visible;
+        }
         updateImportsButton();
       }
       renderHighlight();
@@ -423,15 +426,6 @@
       if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
         e.preventDefault();
         runCode();
-      }
-      if (e.key === "Tab") {
-        e.preventDefault();
-        const start = els.editor.selectionStart;
-        const end = els.editor.selectionEnd;
-        els.editor.value = els.editor.value.slice(0, start) + "\t" + els.editor.value.slice(end);
-        els.editor.selectionStart = els.editor.selectionEnd = start + 1;
-        renderHighlight();
-        persistEdit();
       }
     });
   }

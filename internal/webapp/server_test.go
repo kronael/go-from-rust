@@ -622,10 +622,10 @@ func TestStaticRoutesAndUnknownPath(t *testing.T) {
 		cache       string
 	}{
 		{"/", "text/html; charset=utf-8", "no-cache"},
-		{"/static/app.js", "application/javascript; charset=utf-8", "public, max-age=3600"},
-		{"/static/styles.css", "text/css; charset=utf-8", "public, max-age=3600"},
-		{"/static/go-logo-white.svg", "image/svg+xml", "public, max-age=3600"},
-		{"/static/gopher.png", "image/png", "public, max-age=3600"},
+		{"/static/app.js", "application/javascript; charset=utf-8", "no-cache"},
+		{"/static/styles.css", "text/css; charset=utf-8", "no-cache"},
+		{"/static/go-logo-white.svg", "image/svg+xml", "no-cache"},
+		{"/static/gopher.png", "image/png", "no-cache"},
 	}
 	for _, c := range cases {
 		resp, err := http.Get(srv.URL + c.path)

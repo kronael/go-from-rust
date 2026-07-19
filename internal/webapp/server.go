@@ -157,7 +157,7 @@ func (s *Server) handleStatic(name, contentType string) http.HandlerFunc {
 			writeError(w, http.StatusMethodNotAllowed, "method_not_allowed", "only GET is supported")
 			return
 		}
-		s.serveEmbedded(w, name, contentType, "public, max-age=3600")
+		s.serveEmbedded(w, name, contentType, "no-cache")
 	}
 }
 
