@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net"
 	"net/http"
@@ -92,6 +93,20 @@ func gocacheDir() string {
 	return filepath.Join(os.TempDir(), "fakeplayground-gocache")
 }
 
+func listenLoopback(addr string) (net.Listener, error) {
+	listener, err := net.Listen("tcp", addr)
+	if err != nil {
+		return nil, err
+	}
+	tcpAddr, ok := listener.Addr().(*net.TCPAddr)
+	if !ok || !tcpAddr.IP.IsLoopback() {
+		resolvedAddr := listener.Addr().String()
+		_ = listener.Close()
+		return nil, fmt.Errorf("resolved address %s is not loopback", resolvedAddr)
+	}
+	return listener, nil
+}
+
 func main() {
 	addr := os.Getenv("ADDR")
 	if addr == "" {
@@ -100,7 +115,7 @@ func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/compile", handleCompile)
 
-	listener, err := net.Listen("tcp", addr)
+	listener, err := listenLoopback(addr)
 	if err != nil {
 		log.Fatalf("fakeplayground: listen on %s: %v", addr, err)
 	}
