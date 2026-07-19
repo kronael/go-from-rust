@@ -335,7 +335,7 @@
     const controller = beginRequest();
     setStatus("Running…");
     try {
-      const { ok, data } = await postJSON("/api/run", { body: fullEditorSource() }, controller.signal);
+      const { ok, data } = await postJSON("api/run", { body: fullEditorSource() }, controller.signal);
       if (current !== lesson) return;
       if (!ok || !data) {
         els.output.textContent = data && data.error ? data.error.message : "Run failed.";
@@ -367,7 +367,7 @@
     const controller = beginRequest();
     setStatus("Formatting…");
     try {
-      const { ok, data } = await postJSON("/api/format", { body: fullEditorSource() }, controller.signal);
+      const { ok, data } = await postJSON("api/format", { body: fullEditorSource() }, controller.signal);
       if (current !== lesson) return;
       if (!ok || !data) {
         setStatus(data && data.error ? data.error.message : "Format failed");
@@ -432,7 +432,7 @@
 
   async function init() {
     try {
-      const res = await fetch("/api/lessons");
+      const res = await fetch("api/lessons");
       if (!res.ok) throw new Error(`lessons request failed: ${res.status}`);
       const data = await res.json();
       lessons = (data.lessons || []).slice().sort((a, b) => a.ID - b.ID);
