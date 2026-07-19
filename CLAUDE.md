@@ -73,9 +73,9 @@ go run -race 28_barriers.go
 test -z "$(gofmt -l $(find . -name '*.go' -not -path './.git/*'))"
 ```
 
-`make playtest` runs the browser against `cmd/fakeplayground`; `make full`
-combines formatting, vet, Go tests, lesson runs, race checks, and that playtest.
-Never point `PLAYGROUND_URL` at the public Playground from tests.
+`make integration` runs the lesson runs, race checks, and the browser playtest
+against `cmd/fakeplayground`; `make check test integration` is the full local
+gate. Never point `PLAYGROUND_URL` at the public Playground from tests.
 
 Treat the Why Go section in `README.md` as project framing, not benchmark
 evidence. Never invent universal speed ratios or turn tradeoffs into universal
