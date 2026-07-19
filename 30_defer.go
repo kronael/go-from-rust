@@ -15,5 +15,6 @@ func main() {
 	label = "after"
 	fmt.Println("body:", label)
 
-	// Rust Drop follows lexical scope. Go defers run at function return, LIFO.
+	// Rust Drop follows lexical scope. Go defers run on normal return and during
+	// panic unwinding, LIFO.
 }

@@ -11,7 +11,8 @@ type addition struct {
 
 func main() {
 	// A channel resembles Rust mpsc: send and receive copy a value. chan<- int is
-	// send-only; <-ch receives. Unbuffered operations block until a peer is ready.
+	// send-only; <-ch receives. On an open, non-nil unbuffered channel, operations
+	// block until a peer is ready.
 	// Routing every update through one goroutine gives it sole ownership of count.
 	additions := make(chan addition)
 	stopped := make(chan struct{})

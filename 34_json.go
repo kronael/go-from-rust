@@ -15,7 +15,8 @@ type payload struct {
 
 func main() {
 	// Default encoding visits exported fields at runtime. Tags rename or omit
-	// them; unexported fields are ignored. No derive or generated code is required.
+	// them; the ordinary unexported named field password is ignored. No derive or
+	// generated code is required.
 	encoded, err := json.Marshal(payload{Name: "Ana", password: "secret"})
 	if err != nil {
 		panic(err)

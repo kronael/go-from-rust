@@ -45,5 +45,5 @@ func main() {
 	fmt.Printf("response: %d %s", response.StatusCode, body)
 
 	// Reuse clients and always close response bodies. In a service, configure
-	// http.Server timeouts and call Shutdown for graceful process termination.
+	// http.Server timeouts and call Shutdown for graceful HTTP server shutdown.
 }

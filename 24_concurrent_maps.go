@@ -10,7 +10,8 @@ import (
 func main() {
 	// A typed map plus Mutex is the default: it preserves static types and can
 	// protect invariants spanning more than one operation or value. Ordinary maps
-	// do not permit unsynchronized concurrent writes; this resembles
+	// must not be written without synchronization while another goroutine reads or
+	// writes them; this resembles
 	// Arc<Mutex<HashMap<...>>> in Rust.
 	counts := map[string]int{}
 	var mutex sync.Mutex

@@ -19,10 +19,8 @@ func main() {
 	}
 	fmt.Println("new slice:", evens)
 
-	// DeleteFunc removes elements for which its predicate returns true. It edits
-	// in place and clears vacated slots; reslicing to capacity reveals that tail.
+	// DeleteFunc removes elements for which its predicate returns true, in place.
 	nums = []int{1, 2, 3, 4, 5, 6}
 	evens = slices.DeleteFunc(nums, func(n int) bool { return n%2 != 0 })
-	full := evens[:cap(evens)]
-	fmt.Println("DeleteFunc:", evens, "cleared tail:", full[len(evens):])
+	fmt.Println("DeleteFunc:", evens)
 }

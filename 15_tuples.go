@@ -18,7 +18,4 @@ func main() {
 	// [N]T stores a fixed number of values of one type.
 	point := [2]int{3, 4}
 	fmt.Println("array:", point)
-
-	// Go has no general tuple value. Multiple returns are separate results usable
-	// only in multi-value contexts, not a value that can be stored as one object.
 }

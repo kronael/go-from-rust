@@ -22,10 +22,8 @@ func main() {
 	clipped[0] = 2
 	fmt.Println("Clip aliases:", big[0] == 2, "cap:", cap(clipped))
 
-	// Like Rust to_vec, Clone copies values into independent storage.
+	// Like Rust to_vec, Clone copies surviving values away from the large array.
 	clone := slices.Clone(clipped)
-	clone[0] = 9
-	fmt.Println("Clone independent:", big[0], clone[0])
 
 	// Set every alias to nil, or clone the values that must survive, to make the
 	// large array eligible for garbage collection. Reclamation timing is not fixed.
