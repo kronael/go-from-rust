@@ -62,8 +62,7 @@ type Server struct {
 	sem         chan struct{}
 }
 
-// NewServer builds a Server serving the given lesson catalog and embedded web
-// filesystem (containing index.html, app.js, styles.css at its root).
+// NewServer builds a Server serving the given lesson catalog and web assets.
 func NewServer(lessons []Lesson, webFS fs.FS, cfg Config) *Server {
 	playgroundURL := cfg.PlaygroundURL
 	if playgroundURL == "" {
@@ -90,8 +89,10 @@ func NewServer(lessons []Lesson, webFS fs.FS, cfg Config) *Server {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/{$}", s.handleIndex)
-	mux.HandleFunc("/static/app.js", s.handleStaticJS)
-	mux.HandleFunc("/static/styles.css", s.handleStaticCSS)
+	mux.HandleFunc("/static/app.js", s.handleStatic("app.js", "application/javascript; charset=utf-8"))
+	mux.HandleFunc("/static/styles.css", s.handleStatic("styles.css", "text/css; charset=utf-8"))
+	mux.HandleFunc("/static/go-logo-white.svg", s.handleStatic("go-logo-white.svg", "image/svg+xml"))
+	mux.HandleFunc("/static/gopher.png", s.handleStatic("gopher.png", "image/png"))
 	mux.HandleFunc("/api/lessons", s.handleLessons)
 	mux.HandleFunc("/api/format", s.handleFormat)
 	mux.HandleFunc("/api/run", s.handleRun)
@@ -150,20 +151,14 @@ func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 	s.serveEmbedded(w, "index.html", "text/html; charset=utf-8", "no-cache")
 }
 
-func (s *Server) handleStaticJS(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		writeError(w, http.StatusMethodNotAllowed, "method_not_allowed", "only GET is supported")
-		return
+func (s *Server) handleStatic(name, contentType string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			writeError(w, http.StatusMethodNotAllowed, "method_not_allowed", "only GET is supported")
+			return
+		}
+		s.serveEmbedded(w, name, contentType, "public, max-age=3600")
 	}
-	s.serveEmbedded(w, "app.js", "application/javascript; charset=utf-8", "public, max-age=3600")
-}
-
-func (s *Server) handleStaticCSS(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		writeError(w, http.StatusMethodNotAllowed, "method_not_allowed", "only GET is supported")
-		return
-	}
-	s.serveEmbedded(w, "styles.css", "text/css; charset=utf-8", "public, max-age=3600")
 }
 
 func (s *Server) serveEmbedded(w http.ResponseWriter, name, contentType, cacheControl string) {

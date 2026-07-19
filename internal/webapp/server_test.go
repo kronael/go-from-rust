@@ -15,16 +15,18 @@ import (
 
 func testWebFS() fstest.MapFS {
 	return fstest.MapFS{
-		"index.html": &fstest.MapFile{Data: []byte("<html>tour</html>")},
-		"app.js":     &fstest.MapFile{Data: []byte("console.log('tour')")},
-		"styles.css": &fstest.MapFile{Data: []byte("body{}")},
+		"index.html":        &fstest.MapFile{Data: []byte("<html>tour</html>")},
+		"app.js":            &fstest.MapFile{Data: []byte("console.log('tour')")},
+		"styles.css":        &fstest.MapFile{Data: []byte("body{}")},
+		"go-logo-white.svg": &fstest.MapFile{Data: []byte("<svg></svg>")},
+		"gopher.png":        &fstest.MapFile{Data: []byte("png")},
 	}
 }
 
 func testLessons() []Lesson {
 	return []Lesson{
-		{ID: 1, Filename: "01_arrays_slices.go", Value: 5, Question: "Q1?", Source: "package main\n"},
-		{ID: 2, Filename: "02_copy.go", Value: 5, Question: "Q2?", Source: "package main\n"},
+		{ID: 1, Filename: "01_arrays_slices.go", Value: 5, Summary: "S1.", Source: "package main\n"},
+		{ID: 2, Filename: "02_copy.go", Value: 5, Summary: "S2.", Source: "package main\n"},
 	}
 }
 
@@ -622,6 +624,8 @@ func TestStaticRoutesAndUnknownPath(t *testing.T) {
 		{"/", "text/html; charset=utf-8", "no-cache"},
 		{"/static/app.js", "application/javascript; charset=utf-8", "public, max-age=3600"},
 		{"/static/styles.css", "text/css; charset=utf-8", "public, max-age=3600"},
+		{"/static/go-logo-white.svg", "image/svg+xml", "public, max-age=3600"},
+		{"/static/gopher.png", "image/png", "public, max-age=3600"},
 	}
 	for _, c := range cases {
 		resp, err := http.Get(srv.URL + c.path)

@@ -55,6 +55,10 @@ contains() {
 	esac
 }
 
+not_contains() {
+	! contains "$1" "$2"
+}
+
 "$REPO_ROOT/dist/fakeplayground" >"$FAKE_LOG" 2>&1 &
 FAKE_PID=$!
 FAKE_ADDR="$(wait_for_addr "$FAKE_LOG")"
@@ -133,13 +137,23 @@ assert "highlights Go keywords" has_tokens ".tok-keyword"
 assert "highlights Go types" has_tokens ".tok-type"
 assert "highlights Go strings" has_tokens ".tok-string"
 assert "highlights Go comments" has_tokens ".tok-comment"
+assert "hides imports by default" not_contains "$(ab get value '#editor')" 'import "fmt"'
+assert "shows matching line numbers" contains "$(ab get text '#line-numbers')" "10"
 
 ab click "#next-btn" >/dev/null
 assert "next button navigates to lesson 02" contains "$(ab get url)" "#02"
 assert "lesson 02 finishes rendering" wait_contains "#lesson-title" "02_copy.go"
+assert "grouped imports start hidden" not_contains "$(ab get value '#editor')" '"slices"'
+ab click "#imports-btn" >/dev/null
+assert "imports toggle reveals imports" contains "$(ab get value '#editor')" '"slices"'
+ab click "#imports-btn" >/dev/null
+assert "imports toggle hides imports again" not_contains "$(ab get value '#editor')" '"slices"'
+ab click "#run-btn" >/dev/null
+assert "hidden imports are restored for Run" wait_contains "#status-msg" "Run complete"
+assert "lesson 02 output is captured" contains "$(ab get text '#output-code')" "Clone creates"
 
-ab open "$BASE_URL/#19" >/dev/null
-assert "loads printing lesson" wait_contains "#lesson-title" "19_printing.go"
+ab open "$BASE_URL/#20" >/dev/null
+assert "loads printing lesson" wait_contains "#lesson-title" "20_printing.go"
 
 ab fill "#editor" 'package main
 

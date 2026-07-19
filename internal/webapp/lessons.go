@@ -16,7 +16,7 @@ type Lesson struct {
 	ID       int
 	Filename string
 	Value    int
-	Question string
+	Summary  string
 	Source   string
 	Hash     string
 }
@@ -35,13 +35,13 @@ func LoadLessons(files fs.FS, readme []byte) ([]Lesson, error) {
 	}
 
 	type row struct {
-		id       int
-		value    int
-		question string
+		id      int
+		value   int
+		summary string
 	}
 	rowsByFilename := make(map[string]row)
 	for _, m := range readmeRow.FindAllSubmatch(readme, -1) {
-		linkText, target, valueStr, question := string(m[1]), string(m[2]), string(m[3]), string(m[4])
+		linkText, target, valueStr, summary := string(m[1]), string(m[2]), string(m[3]), string(m[4])
 		if linkText != target {
 			continue
 		}
@@ -63,7 +63,7 @@ func LoadLessons(files fs.FS, readme []byte) ([]Lesson, error) {
 		if _, dup := rowsByFilename[linkText]; dup {
 			return nil, fmt.Errorf("webapp: README has duplicate row for %q", linkText)
 		}
-		rowsByFilename[linkText] = row{id: id, value: value, question: question}
+		rowsByFilename[linkText] = row{id: id, value: value, summary: summary}
 	}
 
 	var lessons []Lesson
@@ -91,7 +91,7 @@ func LoadLessons(files fs.FS, readme []byte) ([]Lesson, error) {
 			ID:       r.id,
 			Filename: name,
 			Value:    r.value,
-			Question: r.question,
+			Summary:  r.summary,
 			Source:   source,
 			Hash:     fmt.Sprintf("%x", hash[:8]),
 		})

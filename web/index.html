@@ -12,7 +12,7 @@
 <header class="topbar">
   <div class="topbar-inner">
     <a class="brand" href="#01" aria-label="Minimum Viable Go home">
-      <span class="go-mark" aria-hidden="true">GO</span>
+      <img class="go-logo" src="/static/go-logo-white.svg" alt="Go">
       <h1>Minimum Viable Go <span>for Rust Engineers</span></h1>
     </a>
     <nav class="project-links" aria-label="Project links">
@@ -27,8 +27,15 @@
     <div class="lesson-copy">
       <h2 id="lesson-title">Loading lessons&hellip;</h2>
       <p id="lesson-value" class="lesson-value"></p>
-      <p id="lesson-question" class="lesson-question"></p>
+      <p id="lesson-summary" class="lesson-summary"></p>
     </div>
+
+    <figure class="lesson-gopher">
+      <img src="/static/gopher.png" alt="The Go gopher">
+      <figcaption>
+        <a href="https://go.dev/doc/gopher/">Gopher by Renee French</a>, CC BY 4.0
+      </figcaption>
+    </figure>
 
     <nav class="lesson-nav" aria-label="Lesson navigation">
       <button id="prev-btn" type="button" aria-label="Previous lesson">&larr; Prev</button>
@@ -42,18 +49,22 @@
 
   <section class="playground" aria-label="Go playground">
     <section class="editor-section">
-      <div class="editor-toolbar" role="toolbar" aria-label="Code actions">
+      <div class="editor-toolbar" role="toolbar" aria-label="Editor view">
         <span class="file-label">main.go</span>
-        <span id="status-msg" class="status-msg" role="status" aria-live="polite"></span>
-        <button id="run-btn" type="button">Run</button>
-        <button id="format-btn" type="button">Format</button>
-        <button id="reset-btn" type="button">Reset</button>
+        <button id="imports-btn" type="button" aria-pressed="false">Imports off</button>
       </div>
       <label class="visually-hidden" for="editor">Lesson source code</label>
       <div class="editor-code">
+        <pre id="line-numbers" aria-hidden="true"></pre>
         <pre id="editor-highlight" aria-hidden="true"><code id="editor-highlight-code"></code></pre>
         <textarea id="editor" spellcheck="false" autocapitalize="off" autocomplete="off"
           autocorrect="off" wrap="off"></textarea>
+      </div>
+      <div class="editor-actions" role="toolbar" aria-label="Code actions">
+        <span id="status-msg" class="status-msg" role="status" aria-live="polite"></span>
+        <button id="reset-btn" type="button">Reset</button>
+        <button id="format-btn" type="button">Format</button>
+        <button id="run-btn" type="button">Run</button>
       </div>
     </section>
 

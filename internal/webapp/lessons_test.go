@@ -6,10 +6,10 @@ import (
 	"testing/fstest"
 )
 
-const readmeHeader = "| Lesson | Value | Rust question it answers |\n|---|:---:|---|\n"
+const readmeHeader = "| Lesson | Value | Main point |\n|---|:---:|---|\n"
 
-func row(filename string, value int, question string) string {
-	return "| [`" + filename + "`](" + filename + ") | " + itoa(value) + " | " + question + " |\n"
+func row(filename string, value int, summary string) string {
+	return "| [`" + filename + "`](" + filename + ") | " + itoa(value) + " | " + summary + " |\n"
 }
 
 func itoa(n int) string {
@@ -28,9 +28,9 @@ func TestLoadLessonsSuccess(t *testing.T) {
 	files := mapFS("01_arrays_slices.go", "02_copy.go", "03_range.go")
 	files["01_arrays_slices.go"] = &fstest.MapFile{Data: []byte("//go:build ignore\n\npackage main\n")}
 	readme := readmeHeader +
-		row("01_arrays_slices.go", 5, "What is a slice header?") +
-		row("02_copy.go", 5, "How do copies work?") +
-		row("03_range.go", 5, "What does range yield?")
+		row("01_arrays_slices.go", 5, "Assigned slices share storage.") +
+		row("02_copy.go", 5, "Clone creates; copy fills.") +
+		row("03_range.go", 5, "range yields operand-specific values.")
 
 	lessons, err := LoadLessons(files, []byte(readme))
 	if err != nil {
@@ -44,7 +44,7 @@ func TestLoadLessonsSuccess(t *testing.T) {
 			t.Errorf("lessons[%d].ID = %d, want %d", i, l.ID, i+1)
 		}
 	}
-	if lessons[0].Value != 5 || lessons[0].Question != "What is a slice header?" {
+	if lessons[0].Value != 5 || lessons[0].Summary != "Assigned slices share storage." {
 		t.Errorf("lessons[0] = %+v", lessons[0])
 	}
 	if !strings.HasPrefix(lessons[0].Source, "package main") {

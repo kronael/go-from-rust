@@ -32,7 +32,7 @@
   const els = {
     title: document.getElementById("lesson-title"),
     value: document.getElementById("lesson-value"),
-    question: document.getElementById("lesson-question"),
+    summary: document.getElementById("lesson-summary"),
     editor: document.getElementById("editor"),
     highlight: document.getElementById("editor-highlight"),
     highlightCode: document.getElementById("editor-highlight-code"),
@@ -41,15 +41,19 @@
     select: document.getElementById("lesson-select"),
     prevBtn: document.getElementById("prev-btn"),
     nextBtn: document.getElementById("next-btn"),
+    importsBtn: document.getElementById("imports-btn"),
     runBtn: document.getElementById("run-btn"),
     formatBtn: document.getElementById("format-btn"),
     resetBtn: document.getElementById("reset-btn"),
+    lineNumbers: document.getElementById("line-numbers"),
     connStatus: document.getElementById("conn-status"),
   };
 
   let lessons = [];
   let current = null;
   let activeRequest = null;
+  let importsVisible = false;
+  let hiddenImports = "";
 
   function lessonKey(id) {
     return String(id).padStart(2, "0");
@@ -154,12 +158,55 @@
   function syncHighlightScroll() {
     els.highlight.scrollTop = els.editor.scrollTop;
     els.highlight.scrollLeft = els.editor.scrollLeft;
+    els.lineNumbers.scrollTop = els.editor.scrollTop;
   }
 
   function renderHighlight() {
     const source = els.editor.value;
     els.highlightCode.innerHTML = highlightGo(source) + (source.endsWith("\n") ? " " : "");
+    els.lineNumbers.textContent = source
+      .split("\n")
+      .map((_, index) => index + 1)
+      .join("\n");
     syncHighlightScroll();
+  }
+
+  function splitImports(source) {
+    const match = /^(package\s+[A-Za-z_]\w*\n)\n?(import\s+(?:\([\s\S]*?\n\)|[^\n]+)\n)\n?/.exec(source);
+    if (!match) return { visible: source, imports: "" };
+    return {
+      visible: `${match[1]}\n${source.slice(match[0].length)}`,
+      imports: match[2].trimEnd(),
+    };
+  }
+
+  function joinImports(source, imports) {
+    if (!imports) return source;
+    return source.replace(/^(package\s+[A-Za-z_]\w*\n)\n?/, `$1\n${imports}\n\n`);
+  }
+
+  function fullEditorSource() {
+    return importsVisible ? els.editor.value : joinImports(els.editor.value, hiddenImports);
+  }
+
+  function updateImportsButton() {
+    els.importsBtn.disabled = hiddenImports === "";
+    els.importsBtn.textContent = importsVisible ? "Imports on" : "Imports off";
+    els.importsBtn.setAttribute("aria-pressed", String(importsVisible));
+  }
+
+  function setEditorSource(source) {
+    const split = splitImports(source);
+    hiddenImports = split.imports;
+    els.editor.value = importsVisible ? source : split.visible;
+    updateImportsButton();
+    renderHighlight();
+  }
+
+  function toggleImports() {
+    const source = fullEditorSource();
+    importsVisible = !importsVisible;
+    setEditorSource(source);
   }
 
   function findLesson(id) {
@@ -184,11 +231,11 @@
   function renderLesson(lesson) {
     cancelRequest();
     current = lesson;
+    importsVisible = false;
     els.title.textContent = `${lessonKey(lesson.ID)} — ${lesson.Filename}`;
     els.value.textContent = `Value ${lesson.Value}/5`;
-    els.question.textContent = lesson.Question;
-    els.editor.value = loadEditedSource(lesson);
-    renderHighlight();
+    els.summary.textContent = lesson.Summary;
+    setEditorSource(loadEditedSource(lesson));
     els.output.textContent = "Run the lesson to see output here.";
     els.output.parentElement.dataset.state = "idle";
     els.select.value = lessonKey(lesson.ID);
@@ -225,10 +272,11 @@
 
   function persistEdit() {
     if (!current) return;
-    if (els.editor.value === current.Source) {
+    const source = fullEditorSource();
+    if (source === current.Source) {
       localStorage.removeItem(storageKey(current));
     } else {
-      localStorage.setItem(storageKey(current), els.editor.value);
+      localStorage.setItem(storageKey(current), source);
     }
   }
 
@@ -287,7 +335,7 @@
     const controller = beginRequest();
     setStatus("Running…");
     try {
-      const { ok, data } = await postJSON("/api/run", { body: els.editor.value }, controller.signal);
+      const { ok, data } = await postJSON("/api/run", { body: fullEditorSource() }, controller.signal);
       if (current !== lesson) return;
       if (!ok || !data) {
         els.output.textContent = data && data.error ? data.error.message : "Run failed.";
@@ -319,14 +367,13 @@
     const controller = beginRequest();
     setStatus("Formatting…");
     try {
-      const { ok, data } = await postJSON("/api/format", { body: els.editor.value }, controller.signal);
+      const { ok, data } = await postJSON("/api/format", { body: fullEditorSource() }, controller.signal);
       if (current !== lesson) return;
       if (!ok || !data) {
         setStatus(data && data.error ? data.error.message : "Format failed");
         return;
       }
-      els.editor.value = data.body;
-      renderHighlight();
+      setEditorSource(data.body);
       persistEdit();
       setStatus("Formatted");
     } catch (err) {
@@ -339,8 +386,7 @@
 
   function resetCode() {
     if (!current) return;
-    els.editor.value = current.Source;
-    renderHighlight();
+    setEditorSource(current.Source);
     localStorage.removeItem(storageKey(current));
     setStatus("Reset to original source");
   }
@@ -355,10 +401,16 @@
   function wireEvents() {
     window.addEventListener("hashchange", onHashChange);
     els.editor.addEventListener("input", () => {
+      if (!importsVisible && /^import\s/m.test(els.editor.value)) {
+        hiddenImports = "";
+        importsVisible = true;
+        updateImportsButton();
+      }
       renderHighlight();
       persistEdit();
     });
     els.editor.addEventListener("scroll", syncHighlightScroll);
+    els.importsBtn.addEventListener("click", toggleImports);
     els.runBtn.addEventListener("click", runCode);
     els.formatBtn.addEventListener("click", formatCode);
     els.resetBtn.addEventListener("click", resetCode);
