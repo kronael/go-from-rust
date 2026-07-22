@@ -531,12 +531,21 @@ main {
 
   #line-numbers {
     width: 38px;
+    font-size: 14px;
   }
 
   #editor-highlight,
   #editor {
     padding-left: 47px;
-    font-size: 12px;
+    font-size: 14px;
+  }
+
+  #editor {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  #output {
+    font-size: 14px;
   }
 }
 
