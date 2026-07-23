@@ -6,9 +6,9 @@ Rust—what should I actually write in Go?” I created it for myself as I was
 struggling to map concepts I already knew in Rust to practical Go.
 
 Each numbered `.go` file contains one small runnable lesson. Working through all
-35 gives you practical mappings for Go slices and allocation, language
-constructs, collections, synchronization, errors, HTTP, logging, and JSON—the
-parts most likely to surprise an experienced Rust user.
+37 gives you practical mappings for Go slices and allocation, language
+constructs, collections, synchronization, errors, HTTP, configuration, logging,
+and JSON—the parts most likely to surprise an experienced Rust user.
 
 ## Run It
 
@@ -79,6 +79,8 @@ narrower but still worth recognizing.
 | [`33_logging.go`](33_logging.go) | 5 | `slog` writes key-value fields and derives loggers with shared fields. |
 | [`34_json.go`](34_json.go) | 5 | JSON uses exported fields and tags by default; each input is parsed at runtime. |
 | [`35_http.go`](35_http.go) | 5 | `ServeMux` routes requests; clients send them and response bodies must be closed. |
+| [`36_config_options.go`](36_config_options.go) | 4 | Functional options apply closures over a defaults struct, replacing the builder pattern. |
+| [`37_http_middleware.go`](37_http_middleware.go) | 4 | Middleware is `func(http.Handler) http.Handler`; wrap handlers to add cross-cutting behavior. |
 
 ### Slice Operations
 
@@ -106,8 +108,8 @@ can change between Go releases.
 
 ## Interactive Web Tour
 
-An optional `-tags web` build serves a browser tour of all 35 lessons: edit,
-format, run, and navigate by hash (`#01`–`#35`). It embeds the README,
+An optional `-tags web` build serves a browser tour of all 37 lessons: edit,
+format, run, and navigate by hash (`#01`–`#37`). It embeds the README,
 numbered lesson files, and `web/` assets into one binary; no lesson source is
 duplicated. The production web server never executes submitted code locally.
 
@@ -156,6 +158,27 @@ For services, workers, CLIs, and data plumbing, development and operational
 simplicity usually matter more than extracting peak speed. Go offers static
 types, native binaries, garbage collection, a broad standard library, and
 straightforward deployment.
+
+Coming from Rust specifically:
+
+- **Minimal by design.** Go has few features and little ceremony, so there is
+  usually one obvious way to write something and the language stays out of the
+  way. Rust hands you more expressive power and, with it, more decisions.
+- **Operational simplicity.** A Go service ships as one fast static binary, and
+  because a single instance does a lot with goroutines and a broad stdlib, most
+  deployments skip the load-balancing and packaging machinery a Rust service
+  often accretes.
+- **Value types are real.** Structs and arrays are stored inline, not forced
+  through boxing or indirection, so for value-heavy, allocation-light code
+  throughput often lands close to Rust.
+- **Concurrency just works.** Goroutines and channels reach roughly Tokio-class
+  ergonomics without borrow-checking, lifetimes, or `Send + Sync` bounds to
+  satisfy, and without manual memory management — you trade some compile-time
+  guarantees for far less cognitive load.
+- **The tradeoff, plainly.** Reaching for Rust often buys speed you do not need
+  and compile-time memory safety the garbage collector already gives you at
+  near-zero cognitive cost. For most applications, Go is the cheaper path to the
+  same outcome.
 
 Python and TypeScript remain useful choices, but long-running systems can meet
 runtime, packaging, or throughput limits. Rust, Java, and C# address broader or
