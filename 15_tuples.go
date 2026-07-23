@@ -10,8 +10,9 @@ type Person struct {
 }
 
 func main() {
-	// A stored heterogeneous Rust tuple usually becomes a named struct. This is
-	// a keyed literal: its field names make {Ana 25} meaningful when printed.
+	// A stored heterogeneous Rust tuple usually becomes a
+	// named struct. This is a keyed literal: its field names
+	// make {Ana 25} meaningful when printed.
 	person := Person{Name: "Ana", Age: 25}
 	fmt.Println("struct:", person)
 

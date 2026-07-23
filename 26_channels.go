@@ -10,10 +10,11 @@ type addition struct {
 }
 
 func main() {
-	// A channel resembles Rust mpsc: send and receive copy a value. chan<- int is
-	// send-only; <-ch receives. On an open, non-nil unbuffered channel, operations
-	// block until a peer is ready.
-	// Routing every update through one goroutine gives it sole ownership of count.
+	// A channel resembles Rust mpsc: send and receive copy a
+	// value. chan<- int is send-only; <-ch receives. On an
+	// open, non-nil unbuffered channel, operations block until
+	// a peer is ready. Routing every update through one
+	// goroutine gives it sole ownership of count.
 	additions := make(chan addition)
 	stopped := make(chan struct{})
 	go func() {
@@ -31,23 +32,27 @@ func main() {
 	close(additions)
 	<-stopped
 
-	// Capacity 2 stores these sends in FIFO order, so neither needs a waiting
-	// receiver. The sender closes; receivers drain values and observe completion.
+	// Capacity 2 stores these sends in FIFO order, so neither
+	// needs a waiting receiver. The sender closes; receivers
+	// drain values and observe completion.
 	values := make(chan int, 2)
 	values <- 10
 	values <- 20
 	close(values)
 
-	// range drains buffered values and then stops when the channel is closed.
+	// range drains buffered values and then stops when the
+	// channel is closed.
 	for value := range values {
 		fmt.Println("value:", value)
 	}
 
-	// Rust receivers report disconnection. Go returns the zero value and false.
+	// Rust receivers report disconnection. Go returns the zero
+	// value and false.
 	value, ok := <-values
 	fmt.Println("closed receive:", value, ok)
 
-	// Sending copies a value; sending a slice still copies only its header.
-	// Channels add synchronization and blocking. The next lesson's ring buffer
-	// is storage only and needs external synchronization when shared.
+	// Sending copies a value; sending a slice still copies
+	// only its header. Channels add synchronization and
+	// blocking. The next lesson's ring buffer is storage only
+	// and needs external synchronization when shared.
 }

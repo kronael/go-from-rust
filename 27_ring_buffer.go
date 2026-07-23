@@ -24,7 +24,8 @@ func (deque *ringDeque[T]) pushFront(value T) bool {
 	if deque.size == len(deque.values) {
 		return false
 	}
-	deque.head = (deque.head - 1 + len(deque.values)) % len(deque.values)
+	deque.head = (deque.head - 1 + len(deque.values)) %
+		len(deque.values)
 	deque.values[deque.head] = value
 	deque.size++
 	return true
@@ -56,8 +57,9 @@ func (deque *ringDeque[T]) popBack() (T, bool) {
 
 func main() {
 	// T is a type parameter; any permits any element type.
-	// Unlike a channel, this bounded ring is storage only: it never blocks and
-	// is not goroutine-safe. It reuses one array, but logical order can wrap.
+	// Unlike a channel, this bounded ring is storage only: it
+	// never blocks and is not goroutine-safe. It reuses one
+	// array, but logical order can wrap.
 	deque := ringDeque[string]{values: make([]string, 3)}
 	fmt.Println("push:", deque.pushBack("middle"),
 		deque.pushFront("front"), deque.pushBack("back"))
@@ -69,11 +71,13 @@ func main() {
 
 	middle, middleOK := deque.popFront()
 	_, emptyOK := deque.popFront()
-	fmt.Println("drained:", middle, middleOK, "empty:", emptyOK)
+	fmt.Println("drained:", middle, middleOK,
+		"empty:", emptyOK)
 
-	// This is useful as a private bounded queue: fixed storage, O(1)
-	// end operations, and explicit full/empty results. Add one Mutex
-	// around its methods when shared.
-	// Use a channel when callers should block. A barrier does not protect slots;
-	// lock-free SPSC or MPMC requires a different atomic algorithm.
+	// This is useful as a private bounded queue: fixed
+	// storage, O(1) end operations, and explicit full/empty
+	// results. Add one Mutex around its methods when shared.
+	// Use a channel when callers should block. A barrier does
+	// not protect slots; lock-free SPSC or MPMC requires a
+	// different atomic algorithm.
 }

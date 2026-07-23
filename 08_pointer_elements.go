@@ -10,8 +10,8 @@ func main() {
 	indices := []int{}
 
 	for i, load := range loads {
-		// []*int is roughly Vec<Option<&i32>>: nil means None. Check before
-		// *load because dereferencing nil panics.
+		// []*int is roughly Vec<Option<&i32>>: nil means None.
+		// Check before *load because dereferencing nil panics.
 		if load == nil {
 			fmt.Println("nil at:", i)
 			continue

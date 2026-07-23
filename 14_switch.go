@@ -7,8 +7,9 @@ import "fmt"
 func main() {
 	n := 7
 
-	// 1. Expression switches accept comma-separated cases and do not fall through
-	// implicitly. Go also has an explicit fallthrough statement.
+	// 1. Expression switches accept comma-separated cases and
+	// do not fall through implicitly. Go also has an explicit
+	// fallthrough statement.
 	switch n {
 	case 1, 3, 5, 7, 9:
 		fmt.Println("small odd")
@@ -18,7 +19,8 @@ func main() {
 		fmt.Println("other integer")
 	}
 
-	// 2. A switch without an expression replaces an if/else-if chain.
+	// 2. A switch without an expression replaces an if/else-if
+	// chain.
 	switch {
 	case n < 0:
 		fmt.Println("negative")
@@ -28,9 +30,11 @@ func main() {
 		fmt.Println("odd")
 	}
 
-	// 3. any is an interface that accepts any value. value.(type) inspects its
-	// dynamic type; inside a matching case, the new value has that concrete type.
-	// Type switches are open, not exhaustive like matching a Rust enum.
+	// 3. any is an interface that accepts any value.
+	// value.(type) inspects its dynamic type; inside a
+	// matching case, the new value has that concrete type.
+	// Type switches are open, not exhaustive like matching a
+	// Rust enum.
 	var value any = "go"
 	switch value := value.(type) {
 	case string:
