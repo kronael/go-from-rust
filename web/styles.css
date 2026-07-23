@@ -155,7 +155,7 @@ a:focus-visible {
 
 main {
   display: grid;
-  grid-template-columns: minmax(420px, 48%) minmax(0, 52%);
+  grid-template-columns: minmax(360px, 40%) minmax(0, 60%);
   width: 100%;
   max-width: var(--tour-width);
   min-height: calc(100vh - 78px);
@@ -530,14 +530,14 @@ main {
   }
 
   #line-numbers {
-    width: 38px;
-    font-size: 14px;
+    width: 30px;
+    font-size: 11px;
   }
 
   #editor-highlight,
   #editor {
-    padding-left: 47px;
-    font-size: 14px;
+    padding-left: 39px;
+    font-size: 11px;
   }
 
   #editor {
@@ -545,7 +545,7 @@ main {
   }
 
   #output {
-    font-size: 14px;
+    font-size: 12px;
   }
 }
 
