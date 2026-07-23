@@ -11,8 +11,9 @@ func main() {
 		fmt.Printf("slice %d=%s\n", i, letter)
 	}
 
-	// A string yields byte indexes and runes: Unicode code points. %U prints the
-	// code point as U+XXXX, so the second index is 1 even though é uses two bytes.
+	// A string yields byte indexes and runes: Unicode code points. %U
+	// prints the code point as U+XXXX, so the second index is 1 even
+	// though é uses two bytes.
 	for i, r := range "hé" {
 		fmt.Printf("string byte %d: %U\n", i, r)
 	}

@@ -25,8 +25,9 @@ func main() {
 	// Like Rust to_vec, Clone copies surviving values away from the large array.
 	clone := slices.Clone(clipped)
 
-	// Set every alias to nil, or clone the values that must survive, to make the
-	// large array eligible for garbage collection. Reclamation timing is not fixed.
+	// Set every alias to nil, or clone the values that must survive, to
+	// make the large array eligible for garbage collection. Reclamation
+	// timing is not fixed.
 	big, front, end, clipped = nil, nil, nil, nil
 	fmt.Println("clone survives:", clone)
 }

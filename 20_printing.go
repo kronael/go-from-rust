@@ -13,7 +13,8 @@ type point struct {
 }
 
 func main() {
-	// Print writes arguments as-is here. Println inserts spaces and a final newline.
+	// Print writes arguments as-is here. Println inserts spaces and a
+	// final newline.
 	fmt.Print("Print")
 	fmt.Println(" + Println", 1, 2)
 

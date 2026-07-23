@@ -37,7 +37,8 @@ func main() {
 	var current atomic.Pointer[config]
 	current.Store(&config{Host: "localhost", Port: 8080})
 	published := current.Load()
-	fmt.Println("rwmutex:", snapshot, "atomic:", requests.Load(), "config:", published.Host, published.Port)
+	fmt.Println("rwmutex:", snapshot, "atomic:", requests.Load(),
+		"config:", published.Host, published.Port)
 
 	// GC reclaims an old pure-data snapshot after readers release it. If snapshots
 	// own files or sockets, Store cannot say when every old reader is finished;

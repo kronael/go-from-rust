@@ -37,8 +37,9 @@ func main() {
 	// This combination makes both roles explicit. Unlike Rust's reusable Barrier,
 	// it is one-shot; cyclic barriers need careful sync.Cond state.
 
-	// Primitive map: Mutex protects mutable invariants; atomics publish one value
-	// or immutable snapshot; channels transfer work, apply backpressure, or signal;
-	// WaitGroup joins finite work; Once initializes once; Cond waits for a repeated
-	// state condition. Prefer the primitive that states the coordination rule.
+	// Primitive map: Mutex protects mutable invariants; atomics publish
+	// one value or immutable snapshot; channels transfer work, apply
+	// backpressure, or signal; WaitGroup joins finite work; Once
+	// initializes once; Cond waits for a repeated state condition.
+	// Prefer the primitive that states the coordination rule.
 }

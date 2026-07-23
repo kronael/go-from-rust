@@ -14,7 +14,9 @@ type handlerTransport struct {
 	handler http.Handler
 }
 
-func (transport handlerTransport) RoundTrip(request *http.Request) (*http.Response, error) {
+func (transport handlerTransport) RoundTrip(
+	request *http.Request,
+) (*http.Response, error) {
 	recorder := httptest.NewRecorder()
 	transport.handler.ServeHTTP(recorder, request)
 	return recorder.Result(), nil
@@ -22,10 +24,12 @@ func (transport handlerTransport) RoundTrip(request *http.Request) (*http.Respon
 
 func main() {
 	mux := http.NewServeMux()
-	// The method/path pattern captures one segment as name. PathValue retrieves it.
-	mux.HandleFunc("GET /hello/{name}", func(response http.ResponseWriter, request *http.Request) {
-		fmt.Fprintf(response, "hello %s\n", request.PathValue("name"))
-	})
+	// The method/path pattern captures one segment as name. PathValue
+	// retrieves it.
+	mux.HandleFunc("GET /hello/{name}",
+		func(response http.ResponseWriter, request *http.Request) {
+			fmt.Fprintf(response, "hello %s\n", request.PathValue("name"))
+		})
 
 	// A real service passes mux to http.Server. The in-memory transport keeps
 	// this lesson runnable in the Playground while exercising the same handler.

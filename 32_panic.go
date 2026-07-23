@@ -25,8 +25,9 @@ func main() {
 	<-done
 	fmt.Println("main still running")
 
-	// Like Rust catch_unwind, recovery is an exceptional boundary, not normal
-	// error handling. Go has no global panic handler. Wrap each goroutine if recovery
-	// is required; re-panic after logging when the process should still crash.
+	// Like Rust catch_unwind, recovery is an exceptional boundary, not
+	// normal error handling. Go has no global panic handler. Wrap each
+	// goroutine if recovery is required; re-panic after logging when the
+	// process should still crash.
 	// Libraries may recover internally: net/http does this around handlers.
 }

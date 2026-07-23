@@ -36,5 +36,6 @@ func main() {
 
 	fmt.Println("custom order:", people)
 
-	// Sort and SortFunc are unstable; use SortStableFunc when ties must retain order.
+	// Sort and SortFunc are unstable; use SortStableFunc when ties must
+	// retain order.
 }

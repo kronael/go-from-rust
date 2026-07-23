@@ -11,7 +11,9 @@ type intHeap []int
 
 func (numbers intHeap) Len() int           { return len(numbers) }
 func (numbers intHeap) Less(i, j int) bool { return numbers[i] < numbers[j] }
-func (numbers intHeap) Swap(i, j int)      { numbers[i], numbers[j] = numbers[j], numbers[i] }
+func (numbers intHeap) Swap(i, j int) {
+	numbers[i], numbers[j] = numbers[j], numbers[i]
+}
 
 func (numbers *intHeap) Push(value any) {
 	*numbers = append(*numbers, value.(int))

@@ -35,6 +35,7 @@ func main() {
 	fmt.Println("decoded exported name:", decoded.Name)
 	fmt.Println("unexported password ignored:", decoded.password == "")
 
-	// Rust serde commonly derives type-specific code. Go favors a runtime default;
-	// both approaches still parse or produce bytes, so benchmark relevant payloads.
+	// Rust serde commonly derives type-specific code. Go favors a
+	// runtime default; both approaches still parse or produce bytes, so
+	// benchmark relevant payloads.
 }

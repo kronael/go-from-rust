@@ -23,9 +23,11 @@ func main() {
 
 	// tracing fields map to stable key/value arguments, not assembled strings.
 	logger.Debug("request received", "method", "GET", "attempt", 1)
-	logger.Info("request complete", slog.String("method", "GET"), slog.Int("status", 200))
+	logger.Info("request complete",
+		slog.String("method", "GET"), slog.Int("status", 200))
 
-	// With returns a new logger carrying shared attributes; it is not a tracing span.
+	// With returns a new logger carrying shared attributes; it is not a
+	// tracing span.
 	requestLogger := logger.With(slog.String("request_id", "req-42"))
 	requestLogger.Warn("slow response", slog.Int("status", 503))
 }
