@@ -6,7 +6,7 @@ Rust—what should I actually write in Go?” I created it for myself as I was
 struggling to map concepts I already knew in Rust to practical Go.
 
 Each numbered `.go` file contains one small runnable lesson. Working through all
-37 gives you practical mappings for Go slices and allocation, language
+42 gives you practical mappings for Go slices and allocation, language
 constructs, collections, synchronization, errors, HTTP, configuration, logging,
 and JSON—the parts most likely to surprise an experienced Rust user.
 
@@ -81,6 +81,11 @@ narrower but still worth recognizing.
 | [`35_http.go`](35_http.go) | 5 | `ServeMux` routes requests; clients send them and response bodies must be closed. |
 | [`36_config_options.go`](36_config_options.go) | 4 | Functional options apply closures over a defaults struct, replacing the builder pattern. |
 | [`37_http_middleware.go`](37_http_middleware.go) | 4 | Middleware is `func(http.Handler) http.Handler`; wrap handlers to add cross-cutting behavior. |
+| [`38_generics.go`](38_generics.go) | 4 | Type parameters take constraints: a `~int`/`~float64` type set, `comparable`, and inferred type arguments. |
+| [`39_embedding.go`](39_embedding.go) | 4 | Embedding a struct promotes its fields and methods; a shadowing method does not override, unlike subclassing. |
+| [`40_enums_iota.go`](40_enums_iota.go) | 5 | `iota` numbers a typed constant group; a `String()` method satisfies `Stringer`; shifted `iota` builds bit flags. |
+| [`41_io.go`](41_io.go) | 5 | Implementing `Read` or `Write` composes by wrapping; `io.Copy` streams a reader into a writer. |
+| [`42_table_tests.go`](42_table_tests.go) | 4 | A slice of named `{input, want}` cases drives one loop, the shape real `t.Run` subtests use under `go test`. |
 
 ### Slice Operations
 
@@ -108,8 +113,8 @@ can change between Go releases.
 
 ## Interactive Web Tour
 
-An optional `-tags web` build serves a browser tour of all 37 lessons: edit,
-format, run, and navigate by hash (`#01`–`#37`). It embeds the README,
+An optional `-tags web` build serves a browser tour of all 42 lessons: edit,
+format, run, and navigate by hash (`#01`–`#42`). It embeds the README,
 numbered lesson files, and `web/` assets into one binary; no lesson source is
 duplicated. The production web server never executes submitted code locally.
 
