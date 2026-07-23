@@ -37,7 +37,7 @@ compare without framework context.
 - **Collections and ordering:** lessons 21–23.
 - **Concurrency:** lessons 24–29.
 - **Control and failure:** lessons 30–32.
-- **Services and data:** lessons 33–35.
+- **Services and data:** lessons 33–37.
 
 ## Editing Contract
 
