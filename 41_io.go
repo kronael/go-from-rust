@@ -19,7 +19,8 @@ type upperReader struct {
 
 func (reader upperReader) Read(buffer []byte) (int, error) {
 	n, err := reader.inner.Read(buffer)
-	// Input is ASCII, so upper-casing each byte in place is safe.
+	// Input here is ASCII, so upper-casing each byte is safe. Real UTF-8
+	// needs rune-aware decoding — per-byte upcasing mangles multi-byte runes.
 	for i := 0; i < n; i++ {
 		buffer[i] = byte(unicode.ToUpper(rune(buffer[i])))
 	}

@@ -5,8 +5,8 @@ package main
 import "fmt"
 
 // A typed int plus a const block is Go's enum. iota starts at 0 and adds 1
-// per line, so Red=0, Green=1, Blue=2. Rust's `enum Color` is a real sum
-// type; a Go enum is just an int, with no exhaustiveness checking.
+// per constant, so Red=0, Green=1, Blue=2. Rust's `enum Color` is a real
+// sum type; a Go enum is just an int, with no exhaustiveness checking.
 type Color int
 
 const (
@@ -15,8 +15,9 @@ const (
 	Blue
 )
 
-// String makes Color satisfy fmt.Stringer, like a Rust Display impl (or the
-// output of #[derive(Debug)]). fmt calls it automatically for %v and %s.
+// String makes Color satisfy fmt.Stringer, Go's analogue of Rust's Display
+// impl (not Debug, which would print the variant name). fmt calls it for
+// %v and %s automatically.
 func (color Color) String() string {
 	switch color {
 	case Red:

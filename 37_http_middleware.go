@@ -9,8 +9,9 @@ import (
 )
 
 // Middleware wraps a handler and returns a new one. Compare Rust's
-// tower::Layer, which wraps one Service into another. Go needs no trait: the
-// func signature IS the contract, and tag below matches it exactly.
+// tower::Layer, which wraps one Service into another. http.Handler is the
+// interface; Middleware needs no new type — a func value IS the contract,
+// and tag below matches its signature exactly.
 type Middleware func(http.Handler) http.Handler
 
 // tag sets a response header, then delegates to the inner handler.
@@ -22,8 +23,10 @@ func tag(next http.Handler) http.Handler {
 		})
 }
 
-// count closes over a shared counter, bumping it per request. Rust would keep
-// the state in a Service struct field; here a closure captures it.
+// count closes over a shared counter, bumping it per request. Rust would
+// keep the state in a Service struct field; here a closure captures it. A
+// real server runs handlers concurrently, so guard this with sync/atomic
+// or a mutex; this single-request demo does not.
 func count(hits *int) Middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(

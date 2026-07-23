@@ -4,9 +4,9 @@ package main
 
 import "fmt"
 
-// Rust reaches for a builder plus #[derive(Default)]. Go's idiom is a struct
-// with useful zero values plus functional options: closures that mutate a
-// *Config, applied over the defaults inside New.
+// Rust reaches for a builder plus #[derive(Default)]. Go's version: a plain
+// struct whose defaults live in New, plus functional options — closures
+// that mutate a *Config, applied over those defaults.
 type Config struct {
 	Host    string
 	Port    int

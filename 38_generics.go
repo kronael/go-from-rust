@@ -12,7 +12,7 @@ type Number interface {
 }
 
 // sum accepts any type in Number; += compiles because the set allows it.
-// The Rust analogue is a bounded fn sum<T: Add>(xs).
+// The Rust analogue bounds it, e.g. fn sum<T: Add + Copy>(xs).
 func sum[T Number](values []T) T {
 	var total T
 	for _, value := range values {
@@ -42,7 +42,8 @@ func main() {
 	// A named type satisfies Number through ~float64; no separate impl needed.
 	fmt.Println("named:", sum([]Celsius{20, 1.5}))
 
-	// comparable admits strings: == is defined, but < is not, so sum would
-	// not compile for them. The constraint states which operators are legal.
+	// comparable is wider than Number: it admits strings (== works), so
+	// index takes them. sum still rejects strings — not for lack of an
+	// operator (Go strings support < and +) but because Number excludes them.
 	fmt.Println("index:", index([]string{"a", "b", "c"}, "b"))
 }
