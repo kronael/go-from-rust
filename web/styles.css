@@ -530,14 +530,14 @@ main {
   }
 
   #line-numbers {
-    width: 26px;
-    font-size: 8pt;
+    width: 22px;
+    font-size: 6.4pt;
   }
 
   #editor-highlight,
   #editor {
-    padding-left: 34px;
-    font-size: 8pt;
+    padding-left: 29px;
+    font-size: 6.4pt;
   }
 
   #editor {
@@ -545,7 +545,7 @@ main {
   }
 
   #output {
-    font-size: 9pt;
+    font-size: 7pt;
   }
 }
 
