@@ -13,13 +13,10 @@ func sum(numbers ...int) int {
 }
 
 func main() {
-	// Inside sum, numbers is []int. Separate arguments create
-	// its slice.
+	// Inside sum, numbers is []int; args build the slice.
 	fmt.Println("individual:", sum(1, 2, 3))
 
-	// numbers... passes this existing slice as the variadic
-	// arguments without a new slice. A []T parameter is
-	// usually closest to Rust's &[T].
+	// slice... passes an existing slice, no copy made.
 	numbers := []int{4, 5, 6}
 	fmt.Println("slice:", sum(numbers...))
 }

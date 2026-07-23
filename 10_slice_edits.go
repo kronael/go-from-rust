@@ -8,9 +8,7 @@ import (
 )
 
 func main() {
-	// Go has no pop function: guard, read the end, zero it,
-	// then reslice. clear writes 0 here; for pointer elements
-	// it writes nil.
+	// No pop: guard, read the end, clear it, then reslice.
 	stack := []int{1, 2, 3, 4}
 	if len(stack) > 0 {
 		index := len(stack) - 1
@@ -20,20 +18,18 @@ func main() {
 		fmt.Println("pop back:", last, stack)
 	}
 
-	// slices.Delete preserves order, like Rust Vec::remove.
+	// slices.Delete removes and preserves order.
 	ordered := []int{10, 20, 30, 40}
 	i := 1
 	removed := ordered[i]
 	ordered = slices.Delete(ordered, i, i+1)
 	fmt.Println("delete:", removed, ordered)
 
-	// slices.Insert preserves order, like Rust Vec::insert.
+	// slices.Insert adds and preserves order.
 	ordered = slices.Insert(ordered, i, 25)
 	fmt.Println("insert:", ordered)
 
-	// Go has no swap-delete function; move the last value and
-	// zero its old slot. Zeroing keeps removed pointer-like
-	// values from being retained by the array.
+	// Swap-delete: move the last value in, then zero its slot.
 	unordered := []int{10, 20, 30, 40}
 	i = 1
 	removed = unordered[i]

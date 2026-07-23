@@ -13,9 +13,7 @@ type Countdown struct {
 }
 
 func (countdown Countdown) All() iter.Seq[int] {
-	// Seq[int] is a function that pushes ints into yield. Rust
-	// Iterator::next is pull-based instead. false tells the
-	// producer that the caller stopped.
+	// Seq[int]: pushes ints into yield; false means stop.
 	return func(yield func(int) bool) {
 		for value := countdown.Start; value > 0; value-- {
 			if !yield(value) {
@@ -28,9 +26,7 @@ func (countdown Countdown) All() iter.Seq[int] {
 func main() {
 	countdown := Countdown{Start: 5}
 
-	// Go cannot range over an arbitrary type directly. Expose
-	// an iterator method, conventionally named All, and range
-	// over its Seq; break makes yield false.
+	// range over All()'s Seq; break makes yield false.
 	for value := range countdown.All() {
 		fmt.Println("countdown:", value)
 		if value == 3 {

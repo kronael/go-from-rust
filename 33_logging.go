@@ -8,8 +8,7 @@ import (
 )
 
 func main() {
-	// This text handler writes to stdout, includes DEBUG, and
-	// removes time so the lesson output is deterministic.
+	// Text handler to stdout; drop time for determinism.
 	handler := slog.NewTextHandler(
 		os.Stdout,
 		&slog.HandlerOptions{
@@ -25,15 +24,13 @@ func main() {
 		})
 	logger := slog.New(handler)
 
-	// tracing fields map to stable key/value arguments, not
-	// assembled strings.
+	// Log key/value fields, not assembled strings.
 	logger.Debug("request received",
 		"method", "GET", "attempt", 1)
 	logger.Info("request complete",
 		slog.String("method", "GET"), slog.Int("status", 200))
 
-	// With returns a new logger carrying shared attributes; it
-	// is not a tracing span.
+	// With derives a logger carrying shared attributes.
 	requestLogger := logger.With(
 		slog.String("request_id", "req-42"))
 	requestLogger.Warn("slow response",

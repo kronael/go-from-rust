@@ -12,18 +12,14 @@ func main() {
 	var pointer *problem
 	var err error = pointer
 
-	// An interface stores a dynamic type and a dynamic value.
-	// Assigning pointer stores type *problem even though the
-	// stored pointer value is still nil. Unlike Option<Box<dyn
-	// Error>>, the resulting interface itself is non-nil.
+	// Storing a nil *problem sets the type, so err != nil.
 	fmt.Println("plain pointer is nil:", pointer == nil)
 	fmt.Printf("interface dynamic type: %T\n", err)
 	fmt.Println("interface value is nil pointer:",
 		err.(*problem) == nil)
 	fmt.Println("interface itself is nil:", err == nil)
 
-	// An unassigned interface has neither part, so it compares
-	// equal to nil.
+	// An unassigned interface has neither part; it is nil.
 	var empty error
 	fmt.Printf("empty dynamic type: %T\n", empty)
 	fmt.Println("empty interface is nil:", empty == nil)

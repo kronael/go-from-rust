@@ -22,9 +22,7 @@ func (numbers *intHeap) Push(value any) {
 }
 
 func (numbers *intHeap) Pop() any {
-	// heap.Pop first moves the root to the end. This adapter
-	// removes that last slot; it does not search for the
-	// minimum itself.
+	// heap.Pop moves root to the end; Pop drops that slot.
 	old := *numbers
 	last := old[len(old)-1]
 	*numbers = old[:len(old)-1]
@@ -32,9 +30,7 @@ func (numbers *intHeap) Pop() any {
 }
 
 func main() {
-	// container/heap supplies the algorithm. The adapter
-	// supplies storage and ordering; Less makes this a
-	// min-heap rather than Rust's max BinaryHeap.
+	// heap supplies the algorithm; the type supplies storage.
 	numbers := &intHeap{5, 1, 3}
 	heap.Init(numbers)
 	heap.Push(numbers, 2)

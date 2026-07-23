@@ -24,8 +24,7 @@ func (transport handlerTransport) RoundTrip(
 
 func main() {
 	mux := http.NewServeMux()
-	// The method/path pattern captures one segment as name.
-	// PathValue retrieves it.
+	// Pattern captures {name}; PathValue reads it.
 	mux.HandleFunc("GET /hello/{name}",
 		func(
 			response http.ResponseWriter,
@@ -35,9 +34,7 @@ func main() {
 				request.PathValue("name"))
 		})
 
-	// A real service passes mux to http.Server. The in-memory
-	// transport keeps this lesson runnable in the Playground
-	// while exercising the same handler.
+	// In-memory transport: runnable without a real network.
 	client := &http.Client{
 		Transport: handlerTransport{handler: mux},
 		Timeout:   time.Second,
@@ -52,8 +49,4 @@ func main() {
 		panic(err)
 	}
 	fmt.Printf("response: %d %s", response.StatusCode, body)
-
-	// Reuse clients and always close response bodies. In a
-	// service, configure http.Server timeouts and call
-	// Shutdown for graceful HTTP server shutdown.
 }

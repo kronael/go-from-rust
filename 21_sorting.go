@@ -25,11 +25,9 @@ func main() {
 		{"Dan", 30},
 	}
 
-	// SortFunc supplies custom ordering, like Rust's
-	// sort_unstable_by.
+	// SortFunc supplies custom ordering.
 	slices.SortFunc(people, func(a, b Person) int {
-		// cmp.Or selects the first nonzero comparison: age, then
-		// name.
+		// cmp.Or takes the first nonzero: age, then name.
 		return cmp.Or(
 			cmp.Compare(a.Age, b.Age),
 			cmp.Compare(a.Name, b.Name),
@@ -37,7 +35,4 @@ func main() {
 	})
 
 	fmt.Println("custom order:", people)
-
-	// Sort and SortFunc are unstable; use SortStableFunc when
-	// ties must retain order.
 }

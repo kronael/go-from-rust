@@ -4,18 +4,14 @@ package main
 
 import "fmt"
 
-// Rust reaches for a builder plus #[derive(Default)]. Go's
-// version: a plain struct whose defaults live in New, plus
-// functional options — closures that mutate a *Config,
-// applied over those defaults.
+// Functional options: closures over New's defaults.
 type Config struct {
 	Host    string
 	Port    int
 	Verbose bool
 }
 
-// Option mutates a Config in place, like one
-// ConfigBuilder::with_x call.
+// Option mutates a Config in place.
 type Option func(*Config)
 
 func WithHost(host string) Option {
@@ -30,10 +26,7 @@ func WithVerbose() Option {
 	return func(config *Config) { config.Verbose = true }
 }
 
-// New sets explicit defaults, then applies each option in
-// order. Verbose's zero value (false) is already the
-// default, so nothing requests it: in Go the zero value
-// often IS the default.
+// New seeds defaults, then applies each option in order.
 func New(opts ...Option) Config {
 	config := Config{
 		Host: "localhost",

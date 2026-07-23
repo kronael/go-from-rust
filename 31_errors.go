@@ -8,8 +8,7 @@ import (
 	"strconv"
 )
 
-// Sentinel errors created with errors.New give callers a
-// stable identity.
+// Sentinel error: a stable identity for callers.
 var ErrNegative = errors.New("negative count")
 
 func parseCount(text string) (int, error) {
@@ -24,11 +23,7 @@ func parseCount(text string) (int, error) {
 }
 
 func main() {
-	// Rust often uses enum variants. Go uses sentinel errors
-	// when callers need identity, then adds context with %w
-	// without losing that identity. Atoi's *NumError wraps
-	// strconv.ErrSyntax, so errors.Is finds it through both
-	// wraps.
+	// errors.Is matches sentinels through %w wrap chains.
 	for _, text := range []string{"42", "nope", "-1"} {
 		number, err := parseCount(text)
 		switch {

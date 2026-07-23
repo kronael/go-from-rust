@@ -14,16 +14,12 @@ func work(ctx context.Context, done chan<- struct{}) {
 }
 
 func main() {
-	// Go passes cancellation explicitly, conventionally as the
-	// first argument, like passing a cancellation token; Rust
-	// has no direct std equivalent.
+	// context carries cancellation, passed as the first arg.
 	ctx, cancel := context.WithCancel(context.Background())
 	done := make(chan struct{})
 	go work(ctx, done)
 
-	// cancel closes ctx.Done. The worker wakes and ctx.Err
-	// reports context.Canceled, then main waits for its done
-	// notification.
+	// cancel closes ctx.Done; ctx.Err reports why.
 	cancel()
 	<-done
 	fmt.Println("main: stopped worker")
