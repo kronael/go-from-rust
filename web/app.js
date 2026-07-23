@@ -228,13 +228,23 @@
     return saved !== null ? saved : lesson.Source;
   }
 
+  // Render a lesson summary: escape HTML, then style `backtick` spans as
+  // inline <code>. Summaries contain `<T: Add>` etc., so escaping is required.
+  function renderSummary(text) {
+    const escaped = text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+    return escaped.replace(/`([^`]+)`/g, "<code>$1</code>");
+  }
+
   function renderLesson(lesson) {
     cancelRequest();
     current = lesson;
     importsVisible = false;
     els.title.textContent = `${lessonKey(lesson.ID)} — ${lesson.Filename}`;
     els.value.textContent = `Value ${lesson.Value}/5`;
-    els.summary.textContent = lesson.Summary;
+    els.summary.innerHTML = renderSummary(lesson.Summary);
     setEditorSource(loadEditedSource(lesson));
     els.output.textContent = "Run the lesson to see output here.";
     els.output.parentElement.dataset.state = "idle";

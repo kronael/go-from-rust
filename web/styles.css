@@ -195,8 +195,19 @@ main {
 
 .lesson-summary {
   margin: 0;
-  color: var(--bright);
-  font: 18px/1.55 Arial, Helvetica, sans-serif;
+  max-width: 36em;
+  color: var(--dim);
+  font: 16px/1.68 Arial, Helvetica, sans-serif;
+}
+
+.lesson-summary code {
+  font-family: Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 0.84em;
+  background: #eef2f6;
+  color: #2f5c8f;
+  padding: 1px 5px;
+  border-radius: 4px;
+  white-space: nowrap;
 }
 
 .lesson-gopher {
@@ -499,7 +510,8 @@ main {
   }
 
   .lesson-summary {
-    font-size: 17px;
+    font-size: 14.5px;
+    line-height: 1.62;
   }
 
   .lesson-gopher {
