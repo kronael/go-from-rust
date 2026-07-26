@@ -1,5 +1,25 @@
 # Changelog
 
+## [v0.1.1] — 20260726
+
+> Minimum Viable Go v0.1.1 — a real testing lesson
+>
+> The table-test lesson is now a complete, runnable Go test you can lift straight into a `_test.go`.
+>
+> • Lesson 42 defines a real `TestParsePort` with `t.Run` subtests over a realistic port parser
+> • Description explains why Go testing differs from Rust — no macros, `t.Errorf` accumulates, batteries-included `go test`
+>
+> Full notes: CHANGELOG.md
+
+- Rewrote lesson 42 (table-driven tests) as a complete example: a real
+  `TestParsePort(t *testing.T)` with `t.Run` subtests and `t.Errorf` over a
+  realistic `parsePort` (normalize, validate, error, boundary cases); `main`
+  calls `testing.Main` as a tour adapter so it runs under `go run` while the
+  test body lifts verbatim into a `*_test.go`. The description now explains why
+  Go testing differs from Rust: plain Go (no macros), per-case `t.Run` names,
+  `t.Errorf` accumulates instead of panicking like `assert_eq!`, white-box
+  same-package testing, and batteries-included `go test`.
+
 ## [v0.1.0] — 20260726
 
 > Minimum Viable Go v0.1.0 — Go, mapped from Rust
