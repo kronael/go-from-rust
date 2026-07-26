@@ -14,6 +14,7 @@ func (engine Engine) Start() string {
 }
 
 // Car embeds Engine; its fields and methods are promoted.
+// Prefer a plain named field unless you want that promotion.
 type Car struct {
 	Engine
 	Name string

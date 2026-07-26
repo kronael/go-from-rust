@@ -7,13 +7,17 @@ import "fmt"
 func main() {
 	values := map[string]int{"zero": 0}
 
-	// comma-ok: (value, bool) distinguishes zero from absent.
+	// Bare index yields the zero value, not a None.
+	fmt.Println("bare missing:", values["missing"])
+
+	// comma-ok tells a stored zero apart from absent.
 	value, ok := values["zero"]
 	fmt.Println("stored zero:", value, ok)
-	value, ok = values["missing"]
-	fmt.Println("missing:", value, ok)
+	if _, ok := values["missing"]; !ok {
+		fmt.Println("missing: absent")
+	}
 
-	// *T is a nullable pointer, not a general Option<T>.
+	// *T: nullable pointer for optional/reference use.
 	var absent *int
 	zero := 0
 	present := &zero
