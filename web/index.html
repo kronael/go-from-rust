@@ -27,6 +27,14 @@
   <section class="lesson-pane" aria-labelledby="lesson-title">
     <div class="lesson-copy">
       <h2 id="lesson-title">Loading lessons&hellip;</h2>
+      <nav class="lesson-nav" aria-label="Lesson navigation">
+        <button id="prev-btn" type="button" aria-label="Previous lesson">&larr; Prev</button>
+        <label class="lesson-select-label">
+          <span class="visually-hidden">Jump to lesson</span>
+          <select id="lesson-select" aria-label="Jump to lesson"></select>
+        </label>
+        <button id="next-btn" type="button" aria-label="Next lesson">Next &rarr;</button>
+      </nav>
       <p id="lesson-value" class="lesson-value"></p>
       <p id="lesson-summary" class="lesson-summary"></p>
     </div>
@@ -37,15 +45,6 @@
         <a href="https://go.dev/doc/gopher/">Gopher by Renee French</a>, CC BY 4.0
       </figcaption>
     </figure>
-
-    <nav class="lesson-nav" aria-label="Lesson navigation">
-      <button id="prev-btn" type="button" aria-label="Previous lesson">&larr; Prev</button>
-      <label class="lesson-select-label">
-        <span class="visually-hidden">Jump to lesson</span>
-        <select id="lesson-select" aria-label="Jump to lesson"></select>
-      </label>
-      <button id="next-btn" type="button" aria-label="Next lesson">Next &rarr;</button>
-    </nav>
   </section>
 
   <section class="playground" aria-label="Go playground">

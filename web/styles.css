@@ -237,7 +237,7 @@ main {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   gap: 7px;
-  margin-top: 18px;
+  margin: 4px 0 20px;
 }
 
 .lesson-select-label,
@@ -469,10 +469,6 @@ main {
   .lesson-gopher {
     display: none;
   }
-
-  .lesson-nav {
-    margin-top: auto;
-  }
 }
 
 @media (max-width: 760px) {
@@ -519,7 +515,7 @@ main {
   }
 
   .lesson-nav {
-    margin-top: 22px;
+    margin: 2px 0 18px;
   }
 
   .playground {
