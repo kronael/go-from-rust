@@ -8,19 +8,23 @@ type problem struct{}
 
 func (*problem) Error() string { return "problem" }
 
+// find succeeds, but returns a typed nil pointer as error.
+func find() error {
+	// p is nil; nothing went wrong.
+	var p *problem
+	// Returning it types the error, so callers see != nil.
+	return p
+}
+
 func main() {
-	var pointer *problem
-	var err error = pointer
+	err := find()
 
-	// Storing a nil *problem sets the type, so err != nil.
-	fmt.Println("plain pointer is nil:", pointer == nil)
-	fmt.Printf("interface dynamic type: %T\n", err)
-	fmt.Println("interface value is nil pointer:",
-		err.(*problem) == nil)
-	fmt.Println("interface itself is nil:", err == nil)
+	// find "returned nil" yet err is non-nil: the trap.
+	fmt.Println("err != nil:", err != nil)
+	fmt.Printf("dynamic type: %T\n", err)
+	fmt.Println("ptr is nil:", err.(*problem) == nil)
 
-	// An unassigned interface has neither part; it is nil.
-	var empty error
-	fmt.Printf("empty dynamic type: %T\n", empty)
-	fmt.Println("empty interface is nil:", empty == nil)
+	// An interface is nil only with no type and no value.
+	var ok error
+	fmt.Println("bare error is nil:", ok == nil)
 }
