@@ -4,23 +4,27 @@ package main
 
 import "fmt"
 
-func main() {
-	values := map[string]int{"zero": 0}
-
-	// Bare index yields the zero value, not a None.
-	fmt.Println("bare missing:", values["missing"])
-
-	// comma-ok tells a stored zero apart from absent.
-	value, ok := values["zero"]
-	fmt.Println("stored zero:", value, ok)
-	if _, ok := values["missing"]; !ok {
-		fmt.Println("missing: absent")
+// maybeDouble reports a value and whether it exists. The
+// (T, bool) pair is Go's inline optional; no pointer.
+func maybeDouble(n int, ok bool) (int, bool) {
+	if !ok {
+		return 0, false
 	}
+	return n * 2, true
+}
 
-	// *T: nullable pointer for optional/reference use.
-	var absent *int
-	zero := 0
-	present := &zero
-	fmt.Println("absent:", absent == nil)
-	fmt.Println("present zero:", present != nil, *present)
+func main() {
+	// The bool tells a real 0 apart from "not present".
+	value, ok := maybeDouble(0, true)
+	fmt.Println("present zero:", value, ok)
+	value, ok = maybeDouble(5, false)
+	fmt.Println("absent:", value, ok)
+
+	// *T represents optional by pointer: nil is absent.
+	// Use it for optional fields or reference semantics.
+	var missing *int
+	n := 0
+	set := &n
+	fmt.Println("nil is absent:", missing == nil)
+	fmt.Println("ptr present:", set != nil, *set)
 }
