@@ -33,10 +33,10 @@ compare without framework context.
 ## Lesson Groups
 
 - **Foundations and slices:** lessons 01–13.
-- **Language mappings:** lessons 14–20.
-- **Collections and ordering:** lessons 21–23.
-- **Concurrency:** lessons 24–29.
-- **Control and failure:** lessons 30–32.
+- **Language mappings:** lessons 14–21.
+- **Collections and ordering:** lessons 22–24.
+- **Concurrency:** lessons 25–30.
+- **Control and failure:** lessons 31–32.
 - **Services and data:** lessons 33–37.
 - **Generics and tooling:** lessons 38–42.
 
@@ -68,9 +68,9 @@ for file in [0-9][0-9]_*.go; do
   case "$file" in 01_arrays_slices.go) continue ;; esac
   go run "$file"
 done
-go run -race 24_concurrent_maps.go
-go run -race 26_channels.go
-go run -race 28_barriers.go
+go run -race 25_concurrent_maps.go
+go run -race 27_channels.go
+go run -race 29_barriers.go
 test -z "$(gofmt -l $(find . -name '*.go' -not -path './.git/*'))"
 ```
 

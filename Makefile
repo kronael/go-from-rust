@@ -47,9 +47,9 @@ integration: build
 		esac; \
 		go run "$$file"; \
 	done
-	CGO_ENABLED=1 CC="$(CC)" go run -race 24_concurrent_maps.go
-	CGO_ENABLED=1 CC="$(CC)" go run -race 26_channels.go
-	CGO_ENABLED=1 CC="$(CC)" go run -race 28_barriers.go
+	CGO_ENABLED=1 CC="$(CC)" go run -race 25_concurrent_maps.go
+	CGO_ENABLED=1 CC="$(CC)" go run -race 27_channels.go
+	CGO_ENABLED=1 CC="$(CC)" go run -race 29_barriers.go
 	scripts/playtest.sh
 
 image:
