@@ -3,48 +3,100 @@
 package main
 
 import (
+	"errors"
 	"fmt"
-	"os"
+	"regexp"
+	"strconv"
+	"strings"
+	"testing"
 )
 
-// The function under test.
-func abs(x int) int {
-	if x < 0 {
-		return -x
+var errPortRange = errors.New("port outside 1..65535")
+
+func parsePort(input string) (int, error) {
+	input = strings.TrimSpace(input)
+	port, err := strconv.Atoi(input)
+	if err != nil {
+		return 0, fmt.Errorf("parse port: %w", err)
 	}
-	return x
+	if port < 1 || port > 65_535 {
+		return 0, errPortRange
+	}
+	return port, nil
 }
 
-// A test case is a named row; the slice drives one loop.
-type testCase struct {
-	name  string
-	input int
-	want  int
+func TestParsePort(t *testing.T) {
+	cases := []struct {
+		name    string
+		input   string
+		want    int
+		wantErr bool
+	}{
+		{
+			name:  "usual",
+			input: "8080",
+			want:  8080,
+		},
+		{
+			name:  "trims space",
+			input: " 443\n",
+			want:  443,
+		},
+		{
+			name:  "maximum",
+			input: "65535",
+			want:  65_535,
+		},
+		{
+			name:    "zero",
+			input:   "0",
+			wantErr: true,
+		},
+		{
+			name:    "above maximum",
+			input:   "65536",
+			wantErr: true,
+		},
+		{
+			name:    "not a number",
+			input:   "http",
+			wantErr: true,
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			got, err := parsePort(c.input)
+			if (err != nil) != c.wantErr {
+				t.Errorf(
+					"error = %v; want error = %v",
+					err,
+					c.wantErr,
+				)
+			}
+			if got != c.want {
+				t.Errorf(
+					"parsePort(%q) = %d; want %d",
+					c.input,
+					got,
+					c.want,
+				)
+			}
+		})
+	}
 }
 
 func main() {
-	cases := []testCase{
-		{name: "positive", input: 3, want: 3},
-		{name: "negative", input: -4, want: 4},
-		{name: "zero", input: 0, want: 0},
-	}
-
-	// Real tests use t.Run per row; t.Errorf on mismatch.
-	allPassed := true
-	for _, c := range cases {
-		got := abs(c.input)
-		status := "PASS"
-		if got != c.want {
-			status = "FAIL"
-			allPassed = false
-		}
-		fmt.Printf("%s %-8s abs(%d) = %d\n",
-			status, c.name, c.input, got)
-	}
-	fmt.Println("all passed:", allPassed)
-
-	// A real harness exits nonzero on any mismatch.
-	if !allPassed {
-		os.Exit(1)
-	}
+	// Tour adapter; real projects use *_test.go.
+	testing.Main(
+		regexp.MatchString,
+		[]testing.InternalTest{
+			{
+				Name: "TestParsePort",
+				F:    TestParsePort,
+			},
+		},
+		nil,
+		nil,
+	)
 }
