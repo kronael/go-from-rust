@@ -6,7 +6,7 @@ Rust—what should I actually write in Go?” I created it for myself as I was
 struggling to map concepts I already knew in Rust to practical Go.
 
 Each numbered `.go` file contains one small runnable lesson. Working through all
-42 gives you practical mappings for Go slices and allocation, language
+44 gives you practical mappings for Go slices and allocation, language
 constructs, collections, synchronization, errors, HTTP, configuration, logging,
 and JSON—the parts most likely to surprise an experienced Rust user.
 
@@ -116,7 +116,7 @@ can change between Go releases.
 
 ## Interactive Web Tour
 
-An optional `-tags web` build serves a browser tour of all 42 lessons: edit,
+An optional `-tags web` build serves a browser tour of all 44 lessons: edit,
 format, run, and navigate by hash (`#01`–`#42`). It embeds the README,
 numbered lesson files, and `web/` assets into one binary; no lesson source is
 duplicated. The production web server never executes submitted code locally.
