@@ -38,7 +38,7 @@ compare without framework context.
 - **Concurrency:** lessons 25–30.
 - **Control and failure:** lessons 31–32.
 - **Services and data:** lessons 33–37.
-- **Generics and tooling:** lessons 38–42.
+- **Generics and tooling:** lessons 38–44.
 
 ## Editing Contract
 
