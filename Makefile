@@ -39,18 +39,33 @@ build:
 # yet, so their in-browser Run fails. This probes when that stops being true;
 # when it reports READY, follow TODO.md to drop the caveats.
 playground-check:
-	@sed '1,2d' 43_generic_methods.go > $(GOCACHE)/pgcheck.go
-	@if curl -fsS -X POST https://go.dev/_/compile \
-	    --data-urlencode version=2 --data-urlencode withVet=false \
-	    --data-urlencode body@$(GOCACHE)/pgcheck.go \
-	    | grep -q 'no type parameters'; then \
-	  echo "not yet: public Playground is still pre-1.27"; \
-	else \
+	@mkdir -p tmp
+	@ready=1; \
+	for f in 43_generic_methods.go 44_json_v2.go; do \
+	  sed '1,2d' $$f > tmp/pgcheck.go; \
+	  resp=$$(curl -fsS -X POST https://go.dev/_/compile \
+	      --data-urlencode version=2 --data-urlencode withVet=false \
+	      --data-urlencode body@tmp/pgcheck.go) || { \
+	    echo "playground-check: request failed; cannot tell"; exit 2; }; \
+	  case "$$resp" in \
+	    *'"Errors":""'*) ;; \
+	    *) ready=0; echo "  $$f still fails on the Playground";; \
+	  esac; \
+	done; \
+	if [ $$ready -eq 1 ]; then \
 	  echo "READY: Playground compiles Go 1.27 — see TODO.md"; \
+	else \
+	  echo "not yet: public Playground is still pre-1.27"; \
 	fi
 
+# gofmt reports a parse error on stderr and prints nothing on stdout, so a bare
+# `test -z "$(gofmt -l ...)"` passes on unparseable code. Fail on either.
 check:
-	test -z "$$($(GOFMT) -l $(GOFILES))"
+	@out=$$($(GOFMT) -l $(GOFILES)) || { \
+	  echo "check: gofmt could not parse (see error above)"; exit 1; }; \
+	if [ -n "$$out" ]; then \
+	  echo "check: not gofmt-formatted:"; echo "$$out"; exit 1; \
+	fi
 	go vet ./...
 	go vet -tags web .
 
