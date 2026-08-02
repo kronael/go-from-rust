@@ -290,9 +290,20 @@
     }
   }
 
+  // Lessons written against Go 1.27 cannot compile on the public Playground
+  // until it updates. Say so, rather than showing a bare syntax error.
+  const go127Note =
+    "This lesson uses Go 1.27 syntax. The public Go Playground has not " +
+    "updated to 1.27 yet, so Run fails here. The code itself is correct " +
+    "and runs locally with Go 1.27.\n\n";
+
+  function needsGo127() {
+    return !!current && /Needs Go 1\.27/.test(current.Summary || "");
+  }
+
   function extractOutput(payload) {
     if (payload.Errors) {
-      return payload.Errors;
+      return needsGo127() ? go127Note + payload.Errors : payload.Errors;
     }
     const events = payload.Events || [];
     if (events.length === 0) {

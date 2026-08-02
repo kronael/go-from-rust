@@ -17,7 +17,7 @@ DOCKER_SUDO = $(filter sudo,$(DOCKER))
 DOCKER_BIN  = $(filter-out sudo,$(DOCKER))
 DOCKER_BUILD = $(DOCKER_SUDO) env DOCKER_BUILDKIT=1 $(DOCKER_BIN) build
 
-.PHONY: help build check test integration image clean
+.PHONY: help build check test integration image clean playground-check
 
 help:
 	@echo "Usage:"
@@ -26,6 +26,7 @@ help:
 	@echo "    test         fast unit tests"
 	@echo "    integration  lesson runs, race checks, and browser playtest"
 	@echo "    image        build the web Docker image ($(IMAGE))"
+	@echo "    playground-check  does the public Playground speak Go 1.27 yet"
 	@echo "    clean        remove build artifacts"
 
 build:
@@ -33,6 +34,20 @@ build:
 	go build -o dist/go-from-rust .
 	go build -tags web -o dist/go-from-rust-web .
 	go build -o dist/fakeplayground ./cmd/fakeplayground
+
+# Lessons 43 and 44 use Go 1.27 syntax the public Playground cannot compile
+# yet, so their in-browser Run fails. This probes when that stops being true;
+# when it reports READY, follow TODO.md to drop the caveats.
+playground-check:
+	@sed '1,2d' 43_generic_methods.go > $(GOCACHE)/pgcheck.go
+	@if curl -fsS -X POST https://go.dev/_/compile \
+	    --data-urlencode version=2 --data-urlencode withVet=false \
+	    --data-urlencode body@$(GOCACHE)/pgcheck.go \
+	    | grep -q 'no type parameters'; then \
+	  echo "not yet: public Playground is still pre-1.27"; \
+	else \
+	  echo "READY: Playground compiles Go 1.27 — see TODO.md"; \
+	fi
 
 check:
 	test -z "$$($(GOFMT) -l $(GOFILES))"
