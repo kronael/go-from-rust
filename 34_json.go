@@ -4,6 +4,7 @@ package main
 
 import (
 	"encoding/json"
+	jsonv2 "encoding/json/v2"
 	"fmt"
 )
 
@@ -34,4 +35,19 @@ func main() {
 	fmt.Println("decoded exported name:", decoded.Name)
 	fmt.Println("unexported password ignored:",
 		decoded.password == "")
+
+	// Go 1.27: json (v1) runs on the v2 engine but
+	// keeps lenient defaults; a duplicate key just
+	// takes the last value, no error.
+	var dup payload
+	_ = json.Unmarshal(
+		[]byte(`{"name":"a","name":"b"}`), &dup)
+	fmt.Println("v1 duplicate key, last wins:", dup.Name)
+
+	// encoding/json/v2 opts into stricter defaults:
+	// a duplicate key is a hard error instead.
+	var strict payload
+	dupErr := jsonv2.Unmarshal(
+		[]byte(`{"name":"a","name":"b"}`), &strict)
+	fmt.Println("v2 rejects duplicate key:", dupErr != nil)
 }
