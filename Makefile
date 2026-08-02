@@ -2,6 +2,10 @@ GOCACHE ?= /tmp/go-from-rust-cache
 export GOCACHE
 GOFILES := $(shell find . -name '*.go' -not -path './.git/*' -not -path './.tmp_check/*')
 
+# Use the active toolchain's gofmt: a gofmt from an older Go on PATH cannot
+# parse Go 1.27 syntax (generic methods) and reports a parse error instead.
+GOFMT := $(shell go env GOROOT)/bin/gofmt
+
 IMAGE ?= go-from-rust-web
 
 # DOCKER may be overridden for hosts where the invoking user is in the docker
@@ -31,7 +35,7 @@ build:
 	go build -o dist/fakeplayground ./cmd/fakeplayground
 
 check:
-	test -z "$$(gofmt -l $(GOFILES))"
+	test -z "$$($(GOFMT) -l $(GOFILES))"
 	go vet ./...
 	go vet -tags web .
 

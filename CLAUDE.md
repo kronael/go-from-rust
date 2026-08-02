@@ -71,7 +71,7 @@ done
 go run -race 25_concurrent_maps.go
 go run -race 27_channels.go
 go run -race 29_barriers.go
-test -z "$(gofmt -l $(find . -name '*.go' -not -path './.git/*'))"
+test -z "$($(go env GOROOT)/bin/gofmt -l $(find . -name '*.go' -not -path './.git/*'))"
 ```
 
 `make integration` runs the lesson runs, race checks, and the browser playtest
