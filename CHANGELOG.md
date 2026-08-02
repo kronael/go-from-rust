@@ -1,5 +1,31 @@
 # Changelog
 
+## [v0.2.1] — 20260802
+
+> Minimum Viable Go v0.2.1 — honest failures
+>
+> The two Go 1.27 lessons now explain why in-browser Run fails, and the checks that were supposed to catch mistakes actually catch them.
+>
+> • Lessons 43 and 44 explain the Playground is behind — but only for errors it really caused, not your typos
+> • `make check` no longer passes on Go it could not even parse
+> • `make playground-check` tells you when the Playground reaches 1.27, and says "cannot tell" instead of guessing when offline
+>
+> Full notes: CHANGELOG.md
+
+- `make check` silently passed on unparseable Go: `gofmt` reports parse errors on
+  stderr and prints nothing on stdout, so `test -z` on its output saw an empty
+  string. It now fails on a nonzero `gofmt` exit as well.
+- `make playground-check` reported READY whenever the request failed (network
+  down, DNS, non-2xx), because nothing matched the expected error text. A failed
+  request now reports "cannot tell" and exits 2. It also probes lesson 44 —
+  `encoding/json/v2` availability is a separate condition from generic-method
+  syntax — and writes under the project's `tmp/` rather than assuming `GOCACHE`
+  exists.
+- The Go 1.27 note in the tour was prepended to *every* compile error on lessons
+  43 and 44, so a typo the reader introduced was reported as the Playground being
+  behind. It now also requires the error to match a known 1.27 signal.
+- README advertised "all 42 lessons" in two places; there are 44.
+
 ## [v0.2.0] — 20260802
 
 > Minimum Viable Go v0.2.0 — Go 1.27, and two lessons for it
