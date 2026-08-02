@@ -301,9 +301,24 @@
     return !!current && /Needs Go 1\.27/.test(current.Summary || "");
   }
 
+  // Only blame the Playground for errors it actually causes; a typo the reader
+  // introduced must still read as their own error.
+  const go127Signals = [
+    "method must have no type parameters",
+    "encoding/json/v2",
+    "jsontext",
+  ];
+
+  function isGo127Failure(errors) {
+    return go127Signals.some((signal) => errors.includes(signal));
+  }
+
   function extractOutput(payload) {
     if (payload.Errors) {
-      return needsGo127() ? go127Note + payload.Errors : payload.Errors;
+      if (needsGo127() && isGo127Failure(payload.Errors)) {
+        return go127Note + payload.Errors;
+      }
+      return payload.Errors;
     }
     const events = payload.Events || [];
     if (events.length === 0) {
