@@ -1,5 +1,37 @@
 # Changelog
 
+## [v0.3.0] — 20260806
+
+> Minimum Viable Go v0.3.0 — sum types without a Kind field
+>
+> A new lesson on modelling Rust enums in Go, plus the reason Go's own `(T, error)` is a sum type nothing enforces.
+>
+> • Lesson 45 — variant structs behind optional pointers; presence is the tag, so it cannot disagree with the payload
+> • Independent nil checks over a switch: none-set and both-set are ordinary states, not bugs
+> • Covers the alternatives — sealed interfaces, constructors, and the one encoding that gets real exhaustiveness
+>
+> Full notes: CHANGELOG.md
+
+- Added lesson 45 (sum types). A Rust `enum` maps to one struct holding each
+  variant behind its own optional pointer, with no separate `Kind`
+  discriminant: pointer presence *is* the tag, so it can never contradict the
+  payload the way a flat struct with a `Kind` field plus inlined variant fields
+  can. Handling is independent nil checks rather than a type switch, because
+  none-set and both-set are ordinary states whenever nothing requires exactly
+  one variant.
+- The lesson's description names the costs honestly — a pointer indirection and
+  allocation per present variant, no compiler guarantee that only one is set —
+  and the alternatives it does not show: a sealed interface (unexported marker
+  method) closes the variant set at the package boundary but boxes and still
+  gives no exhaustiveness; unexported fields plus constructors is what actually
+  prevents both-set from outside the package; a `Match[R any]` matcher is the
+  only construction that gets compile-time exhaustiveness, at the cost of
+  losing `return` from the enclosing function.
+- Recorded a known defect in `BUGS.md`: `cmd/fakeplayground`'s 10-second run
+  timeout does not bound a run, because killing `go run` leaves its compile
+  children holding the output pipes. A cold build cache makes `make
+  integration` fail the two `HTTP lesson` assertions; a warm one passes.
+
 ## [v0.2.1] — 20260802
 
 > Minimum Viable Go v0.2.1 — honest failures
