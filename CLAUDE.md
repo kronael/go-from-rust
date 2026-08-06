@@ -39,6 +39,7 @@ compare without framework context.
 - **Control and failure:** lessons 31–32.
 - **Services and data:** lessons 33–37.
 - **Generics and tooling:** lessons 38–44.
+- **Type modeling:** lesson 45.
 
 ## Editing Contract
 
