@@ -35,17 +35,45 @@ func area(shape Shape) float64 {
 	return total
 }
 
+// Match is the one encoding Go checks exhaustively: a
+// new variant adds a parameter, so every call site
+// stops compiling until it handles the new case. The
+// price is that neither-set and both-set now need an
+// answer, and no return here leaves the caller.
+func Match[R any](
+	shape Shape,
+	onCircle func(Circle) R,
+	onRect func(Rect) R,
+	otherwise func() R,
+) R {
+	switch {
+	case shape.Circle != nil && shape.Rect == nil:
+		return onCircle(*shape.Circle)
+	case shape.Rect != nil && shape.Circle == nil:
+		return onRect(*shape.Rect)
+	default:
+		return otherwise()
+	}
+}
+
 func main() {
-	circle := Shape{Circle: &Circle{R: 2}}
-	rect := Shape{Rect: &Rect{W: 3, H: 4}}
-	empty := Shape{}
 	both := Shape{
 		Circle: &Circle{R: 1},
 		Rect:   &Rect{W: 2, H: 2},
 	}
+	shapes := []Shape{
+		{Circle: &Circle{R: 2}},
+		{Rect: &Rect{W: 3, H: 4}},
+		{},
+		both,
+	}
 
-	fmt.Printf("circle: %.2f\n", area(circle))
-	fmt.Printf("rect:   %.2f\n", area(rect))
-	fmt.Printf("empty:  %.2f\n", area(empty))
-	fmt.Printf("both:   %.2f\n", area(both))
+	for _, shape := range shapes {
+		name := Match(shape,
+			func(Circle) string { return "circle" },
+			func(Rect) string { return "rect" },
+			func() string { return "not exactly one" },
+		)
+		fmt.Printf("%-15s %.2f\n", name, area(shape))
+	}
 }
