@@ -1,5 +1,39 @@
 # Changelog
 
+## [v0.4.0] — 20260808
+
+> Minimum Viable Go v0.4.0 — what Go does not enforce
+>
+> Five new lessons on guarantees Rust makes and Go does not. None of them has a fix to teach, so each shows the behaviour and stops.
+>
+> • The zero value cannot be forbidden — `var x T` always compiles, so no type can require initialization
+> • Struct copies are silent, shallow, and unstoppable: a copied `strings.Builder` panics on the next write
+> • Go generics stencil by GC shape rather than monomorphize, so specialization is a runtime type switch
+> • A Go string is bytes with no UTF-8 guarantee, and decoding substitutes rather than fails
+> • There are no destructors, and `defer` is function-scoped, not block-scoped
+>
+> Full notes: CHANGELOG.md
+
+- Lessons 46-50 added under a new curriculum group, "what Go does not enforce."
+  The five fill mappings the tour had no entry for: `46_zero_values.go`,
+  `47_struct_copies.go`, `48_generic_dispatch.go`, `49_string_bytes.go`, and
+  `50_no_destructors.go`.
+- Each demonstrates rather than asserts, and each stays inside the gate:
+  no `go vet` violation (the check vets, so copylocks could not be shown
+  directly — `strings.Builder`'s address check gives 47 a real runtime failure
+  instead), no finalizer timing, no benchmarks, deterministic output.
+- Twelve README rows had grown from summary into a second copy of the lesson.
+  The longest fell from 1028 to 592 characters, cut by whole clauses rather
+  than by compressing the language.
+- Dropped the Why Go claim that Go deployments skip the load-balancing
+  machinery "a Rust service often accretes." It states a tradeoff as a
+  universal performance claim, which this repository's own contributor rules
+  forbid.
+- Logged four duplicate lesson pairs in `BUGS.md` — 09+10, 11+12, 07+08, and
+  15+16 each teach one concept across two files. Merging them would take the
+  curriculum to 46 and renumber every lesson after 07, so it waits for a
+  decision rather than shipping as a cleanup.
+
 ## [v0.3.1] — 20260808
 
 > Minimum Viable Go v0.3.1 — the exhaustive matcher, shown
