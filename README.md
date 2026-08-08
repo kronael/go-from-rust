@@ -4,10 +4,21 @@ Go books and tutorials teach the language from zero. This repository answers a
 narrower question for experienced Rust programmers: “I know how to do this in
 Rust—what should I actually write in Go?”
 
-Each numbered `.go` file contains one small runnable lesson. Working through all
-50 gives you practical mappings for Go slices and allocation, language
-constructs, collections, synchronization, errors, HTTP, configuration, logging,
-and JSON—the parts most likely to surprise an experienced Rust user.
+I built it for myself. Coming from Rust the syntax was never the problem—a
+week of it and you write Go that compiles. What kept catching me was the gap
+underneath: reaching for `Option<T>` and finding two idioms instead of one,
+expecting a clone to be deep, assuming a value that owns something cannot be
+copied out from under me. Each of those is a habit Rust made correct and Go
+quietly does not, and none of them appears in a tutorial that starts at hello
+world.
+
+So each numbered `.go` file is one of those collisions, small enough to read,
+predict, and run inside a minute. Working through all 50 gives you practical
+mappings for Go slices and allocation, language constructs, collections,
+synchronization, errors, HTTP, configuration, logging, and JSON—the parts most
+likely to surprise an experienced Rust user. The last five are a different
+kind: guarantees Rust makes and Go does not, where there is no mapping to
+learn, only a habit to unlearn.
 
 ## Run It
 
