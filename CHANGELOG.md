@@ -1,5 +1,25 @@
 # Changelog
 
+## [v0.4.1] — 20260808
+
+> Minimum Viable Go v0.4.1 — the intro says why it exists again
+>
+> v0.4.0's refinement pass cut the only first-person line in the repository. Restored, and given the detail it was missing.
+>
+> • The three collisions that prompted the repo: two idioms for `Option`, a clone that is not deep, a value that owns state being copied anyway
+> • Names what the last five lessons are — guarantees Rust makes and Go does not, where there is no mapping to learn
+>
+> Full notes: CHANGELOG.md
+
+- Restored the intro's origin sentence and expanded it. v0.4.0 cut it as a
+  restatement of the question above it, which was true as far as it went — the
+  sentence added no information. But it was the only place the repository said
+  why this particular repo exists rather than why Go is worth using, and the
+  linked "Code Like Go" carries the philosophy, not the motive.
+- The expansion is concrete rather than warmer: syntax was never the obstacle,
+  the habits underneath were, and the intro now names three of them that map
+  to lessons 07, 02, and 47.
+
 ## [v0.4.0] — 20260808
 
 > Minimum Viable Go v0.4.0 — what Go does not enforce
