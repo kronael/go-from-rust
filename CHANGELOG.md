@@ -22,6 +22,8 @@
 - The lesson's README description contradicted itself: it stated Go has no
   compile-time exhaustiveness "for any encoding of this" and then described an
   encoding that has it. Rewritten around what the code now demonstrates.
+- Tightened lesson 45's inline comments and its description. Same claims, fewer
+  words: the comments label the code, the description carries the depth.
 
 ## [v0.3.0] — 20260806
 
