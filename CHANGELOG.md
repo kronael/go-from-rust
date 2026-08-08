@@ -22,6 +22,10 @@
 - The lesson's README description contradicted itself: it stated Go has no
   compile-time exhaustiveness "for any encoding of this" and then described an
   encoding that has it. Rewritten around what the code now demonstrates.
+- `Match` returns `(R, error)` and rejects neither-set and both-set instead of
+  folding them into a catch-all handler. Exactly-one is not a compile-time
+  property, so a matcher that assumes it has to say when it does not hold —
+  reported, fittingly, through the same unenforced two-variant sum.
 - Tightened lesson 45's inline comments and its description. Same claims, fewer
   words: the comments label the code, the description carries the depth.
 

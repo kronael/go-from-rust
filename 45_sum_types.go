@@ -3,6 +3,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"math"
 )
@@ -35,42 +36,42 @@ func area(shape Shape) float64 {
 
 // One handler per variant is what Go checks
 // exhaustively: a new variant adds a parameter, so
-// every call site stops compiling. Its price is the
-// otherwise arm below.
+// every call site stops compiling. Exactly-one is not
+// checkable, so Match reports it as an error.
 func Match[R any](
 	shape Shape,
 	onCircle func(Circle) R,
 	onRect func(Rect) R,
-	otherwise func() R,
-) R {
+) (R, error) {
+	var zero R
 	switch {
-	case shape.Circle != nil && shape.Rect == nil:
-		return onCircle(*shape.Circle)
-	case shape.Rect != nil && shape.Circle == nil:
-		return onRect(*shape.Rect)
+	case shape.Circle != nil && shape.Rect != nil:
+		return zero, errors.New("both variants set")
+	case shape.Circle != nil:
+		return onCircle(*shape.Circle), nil
+	case shape.Rect != nil:
+		return onRect(*shape.Rect), nil
 	default:
-		return otherwise()
+		return zero, errors.New("no variant set")
 	}
 }
 
 func main() {
-	both := Shape{
-		Circle: &Circle{R: 1},
-		Rect:   &Rect{W: 2, H: 2},
-	}
 	shapes := []Shape{
 		{Circle: &Circle{R: 2}},
 		{Rect: &Rect{W: 3, H: 4}},
 		{},
-		both,
+		{Circle: &Circle{R: 1}, Rect: &Rect{W: 2, H: 2}},
 	}
 
 	for _, shape := range shapes {
-		name := Match(shape,
+		label, err := Match(shape,
 			func(Circle) string { return "circle" },
 			func(Rect) string { return "rect" },
-			func() string { return "not exactly one" },
 		)
-		fmt.Printf("%-15s %.2f\n", name, area(shape))
+		if err != nil {
+			label = err.Error()
+		}
+		fmt.Printf("%-17s %.2f\n", label, area(shape))
 	}
 }
