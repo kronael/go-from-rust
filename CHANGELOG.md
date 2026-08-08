@@ -1,5 +1,28 @@
 # Changelog
 
+## [v0.3.1] — 20260808
+
+> Minimum Viable Go v0.3.1 — the exhaustive matcher, shown
+>
+> Lesson 45 described a matcher that gets real compile-time exhaustiveness but never showed one. It does now.
+>
+> • `Match` takes one handler per variant — a new variant adds a parameter, so every call site stops compiling
+> • Its cost is on screen too: neither-set and both-set need an explicit answer
+> • README no longer claims Go has no exhaustiveness "for any encoding" and then describes one
+>
+> Full notes: CHANGELOG.md
+
+- Lesson 45 now shows `Match[R any]` alongside the independent nil checks.
+  One handler per variant is the single construction Go checks exhaustively:
+  adding a variant adds a parameter, so every call site fails to compile until
+  it handles the new case. The lesson prints all four states through it, which
+  puts the cost on screen — presence-as-tag admits neither-set and both-set, so
+  the matcher must be told what they mean, and a `return` inside a handler
+  leaves only that handler.
+- The lesson's README description contradicted itself: it stated Go has no
+  compile-time exhaustiveness "for any encoding of this" and then described an
+  encoding that has it. Rewritten around what the code now demonstrates.
+
 ## [v0.3.0] — 20260806
 
 > Minimum Viable Go v0.3.0 — sum types without a Kind field
