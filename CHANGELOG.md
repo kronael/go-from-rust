@@ -1,5 +1,27 @@
 # Changelog
 
+## [v0.4.2] — 20260809
+
+> Minimum Viable Go v0.4.2 — claims you can trace
+>
+> The final five lessons now show how their output supports each language claim instead of asking readers to accept it.
+>
+> • Lessons 46–47 expose constructor bypass and shallow copying directly in output
+> • Lesson 48 separates runtime type inspection from compiler implementation details
+> • Lessons 49–50 make byte decoding and function-scoped cleanup visible in order
+>
+> Full notes: CHANGELOG.md
+
+- Reworded lessons 46–47 so each printed result names the zero-value or copy
+  behavior it establishes, then narrowed their descriptions to that evidence.
+- Removed GC-shape and dictionary claims from lesson 48's runnable explanation.
+  The lesson now demonstrates the language-level behavior it can prove: a type
+  parameter converted to `any` retains its concrete dynamic type for `%T` and
+  a runtime type switch.
+- Made lessons 49–50 print the relevant boundaries explicitly: byte count versus
+  rune count, invalid UTF-8 decoding, and each function return that fires a
+  deferred cleanup. README descriptions now connect observation, rule, and use.
+
 ## [v0.4.1] — 20260808
 
 > Minimum Viable Go v0.4.1 — the intro says why it exists again
