@@ -4,22 +4,16 @@ package main
 
 import "fmt"
 
-// Rust monomorphizes: one specialized copy per type
-// argument, with the type erased by the time it runs.
-// Go stencils by GC shape — every pointer-shaped type
-// argument shares one instantiation and reaches its type
-// through a runtime dictionary.
+// A Go type parameter can be converted to any without
+// losing its concrete type. %T observes that type at run time.
 func describe[T any](v T) string {
-	// %T works inside a generic body precisely because
-	// the instantiation still carries its type argument.
 	return fmt.Sprintf("%T", v)
 }
 
 type Meters float64
 
-// Specialization is therefore a runtime type switch, not
-// a second impl block: one body that asks, rather than N
-// bodies the compiler picked between.
+// Go has no generic specialization syntax. When behavior
+// really depends on T, a type switch asks at run time.
 func unit[T any](v T) string {
 	switch any(v).(type) {
 	case Meters:
@@ -32,14 +26,8 @@ func unit[T any](v T) string {
 }
 
 func main() {
-	fmt.Println(describe(1), describe("a"))
-	fmt.Println(describe(Meters(2)))
-
-	// *Meters and *int are the same GC shape, so these two
-	// calls share one stenciled body — and still report
-	// themselves apart, which is the dictionary talking.
-	m := Meters(2)
-	fmt.Println(describe(&m), describe(new(int)))
-
-	fmt.Println(unit(Meters(5)), unit(3), unit("x"))
+	fmt.Println("concrete types remain:",
+		describe(1), describe("a"), describe(Meters(2)))
+	fmt.Println("runtime type switch:",
+		unit(Meters(5)), unit(3), unit("x"))
 }

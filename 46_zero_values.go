@@ -8,8 +8,8 @@ import (
 )
 
 // Rust: private fields plus Ratio::new() -> Result<Ratio>
-// make an invalid Ratio unconstructible. Go has no such
-// guarantee — every type is constructible without you.
+// can force other modules through the constructor. In Go,
+// every type also has a zero value that needs no constructor.
 type Ratio struct{ num, den int }
 
 func NewRatio(num, den int) (Ratio, error) {
@@ -49,12 +49,12 @@ func main() {
 	_, err = NewRatio(1, 0)
 	fmt.Println("rejected:", err)
 
-	// No constructor ran, and this compiles everywhere.
+	// This declaration creates Ratio{0, 0} without NewRatio.
 	var zero Ratio
-	fmt.Println("zero value:", zero, zero.Float())
+	fmt.Println("var skips constructor:", zero, zero.Float())
 
 	var c Counter
 	c.Add("go")
 	c.Add("go")
-	fmt.Println("zero counter:", c.seen["go"], c.log)
+	fmt.Println("zero value made useful:", c.seen["go"], c.log)
 }

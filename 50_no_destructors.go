@@ -4,9 +4,9 @@ package main
 
 import "fmt"
 
-// Rust: Drop runs at end of scope, guaranteed, and
-// composes through ownership without a call site. Go has
-// no destructors — cleanup is a call someone must make.
+// Rust: Drop runs automatically at the end of a scope.
+// Go has no destructor hook: Close is an ordinary call,
+// and defer schedules that call for function return.
 type File struct{ name string }
 
 func open(name string) *File {
@@ -24,7 +24,7 @@ func perFunction(names []string) {
 		f := open(name)
 		defer f.Close()
 	}
-	fmt.Println("loop done, nothing closed yet")
+	fmt.Println("perFunction loop ended")
 }
 
 // Narrowing the scope takes a function call, because a
@@ -36,14 +36,15 @@ func perIteration(names []string) {
 			defer f.Close()
 		}()
 	}
-	fmt.Println("loop done, all closed")
+	fmt.Println("perIteration loop ended")
 }
 
 func main() {
+	fmt.Println("defer belongs to perFunction:")
 	perFunction([]string{"a", "b"})
-	perIteration([]string{"c", "d"})
+	fmt.Println("perFunction returned")
 
-	// runtime.AddCleanup and SetFinalizer are not a
-	// substitute: no ordering, and no guarantee they run
-	// before the process exits. Nothing here uses them.
+	fmt.Println("one function return per iteration:")
+	perIteration([]string{"c", "d"})
+	fmt.Println("perIteration returned")
 }

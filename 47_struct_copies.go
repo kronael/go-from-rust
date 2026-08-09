@@ -7,10 +7,9 @@ import (
 	"strings"
 )
 
-// Rust splits Copy (implicit, bitwise) from Clone
-// (explicit, and often deep). Go has one behavior:
-// assignment, arguments, channel sends, and range values
-// all copy the struct bitwise, always shallowly.
+// Rust distinguishes an implicit Copy from an explicit
+// Clone. Go assignment copies the struct value; fields that
+// refer to other storage still refer to that same storage.
 type Doc struct {
 	Title string
 	Tags  []string
@@ -30,23 +29,21 @@ func main() {
 	// was copied but still points at the same array.
 	copied.Title = "draft"
 	copied.Tags[0] = "rust"
-	fmt.Println("original:", original.Title, original.Tags)
-	fmt.Println("copied:  ", copied.Title, copied.Tags)
+	fmt.Println("titles differ:", original.Title, copied.Title)
+	fmt.Println("tags share storage:", original.Tags, copied.Tags)
 
 	var r Report
 	r.body.WriteString("first")
 
-	// Rust's move semantics make this a compile error.
-	// Go compiles it and fails on the next write.
+	// This copy is legal Go too. strings.Builder adds its own
+	// runtime check, so the later write exposes the bad copy.
 	broken := r
 	func() {
-		defer func() { fmt.Println("recovered:", recover()) }()
+		defer func() {
+			fmt.Println("copy compiled; write panicked:", recover())
+		}()
 		broken.body.WriteString("second")
 	}()
 
-	// sync.Mutex and sync.WaitGroup have no such check —
-	// a copy silently guards nothing. `go vet` catches the
-	// common cases (copylocks) but it is a heuristic, so
-	// pointer receivers are the rule for those types.
 	fmt.Println("original still works:", r.body.String())
 }
