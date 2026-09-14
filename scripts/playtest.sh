@@ -59,6 +59,12 @@ not_contains() {
 	! contains "$1" "$2"
 }
 
+# fakeplayground bounds each run at 10 seconds. A cold build cache makes
+# the HTTP lesson exceed that on its first compile, so warm the cache the
+# server will use before any assertion depends on a run finishing.
+FAKE_GOCACHE="${FAKEPLAYGROUND_GOCACHE:-${TMPDIR:-/tmp}/fakeplayground-gocache}"
+GOCACHE="$FAKE_GOCACHE" go build -o /dev/null "$REPO_ROOT/31_http.go"
+
 "$REPO_ROOT/dist/fakeplayground" >"$FAKE_LOG" 2>&1 &
 FAKE_PID=$!
 FAKE_ADDR="$(wait_for_addr "$FAKE_LOG")"
@@ -165,8 +171,8 @@ ab click "#run-btn" >/dev/null
 assert "hidden imports are restored for Run" wait_contains "#status-msg" "Run complete"
 assert "lesson 02 output is captured" contains "$(ab get text '#output-code')" "Clone creates"
 
-ab open "$BASE_URL/#20" >/dev/null
-assert "loads printing lesson" wait_contains "#lesson-title" "20_printing.go"
+ab open "$BASE_URL/#16" >/dev/null
+assert "loads printing lesson" wait_contains "#lesson-title" "16_printing.go"
 
 ab fill "#editor" 'package main
 
@@ -237,7 +243,7 @@ ab click "#run-btn" >/dev/null
 assert "Run click reports compile failure" wait_contains "#status-msg" "Compile failed"
 assert "compile failure reaches output" contains "$(ab get text '#output-code')" "syntax error"
 
-ab open "$BASE_URL/#35" >/dev/null
+ab open "$BASE_URL/#31" >/dev/null
 ab click "#run-btn" >/dev/null
 assert "HTTP lesson completes" wait_contains "#status-msg" "Run complete"
 assert "HTTP lesson serves and calls its handler" \

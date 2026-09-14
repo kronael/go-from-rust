@@ -14,13 +14,13 @@ make playground-check
 When it reports READY:
 
 1. Drop the "Needs Go 1.27 — this lesson's in-browser Run fails …" sentence
-   from the lesson 43 and 44 rows in `README.md`.
+   from the lesson 39 and 40 rows in `README.md`.
 2. Delete `go127Note` / `needsGo127` and their use in `extractOutput`
    (`web/app.js`) — the fallback message is then dead code.
 3. Optionally fold the 1.27 features back into the lessons they belong to,
    now that Run works: the struct-literal promoted-field key into
-   `15_tuples.go` (it was reverted for exactly this reason), and the
-   `encoding/json` v1-versus-v2 contrast into `34_json.go` if lesson 44
+   `12_tuples.go` (it was reverted for exactly this reason), and the
+   `encoding/json` v1-versus-v2 contrast into `30_json.go` if lesson 40
    then reads as redundant.
 4. Re-run `make check test integration` and redeploy.
 

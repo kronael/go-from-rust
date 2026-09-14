@@ -41,7 +41,7 @@ build:
 playground-check:
 	@mkdir -p tmp
 	@ready=1; \
-	for f in 43_generic_methods.go 44_json_v2.go; do \
+	for f in 39_generic_methods.go 40_json_v2.go; do \
 	  sed '1,2d' $$f > tmp/pgcheck.go; \
 	  resp=$$(curl -fsS -X POST https://go.dev/_/compile \
 	      --data-urlencode version=2 --data-urlencode withVet=false \
@@ -81,9 +81,9 @@ integration: build
 		esac; \
 		go run "$$file"; \
 	done
-	CGO_ENABLED=1 CC="$(CC)" go run -race 25_concurrent_maps.go
-	CGO_ENABLED=1 CC="$(CC)" go run -race 27_channels.go
-	CGO_ENABLED=1 CC="$(CC)" go run -race 29_barriers.go
+	CGO_ENABLED=1 CC="$(CC)" go run -race 21_concurrent_maps.go
+	CGO_ENABLED=1 CC="$(CC)" go run -race 23_channels.go
+	CGO_ENABLED=1 CC="$(CC)" go run -race 25_barriers.go
 	scripts/playtest.sh
 
 image:

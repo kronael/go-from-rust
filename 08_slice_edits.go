@@ -8,6 +8,22 @@ import (
 )
 
 func main() {
+	// Append-filter builds a new slice (this allocates).
+	nums := []int{1, 2, 3, 4, 5, 6}
+	var evens []int
+	for _, n := range nums {
+		if n%2 == 0 {
+			evens = append(evens, n)
+		}
+	}
+	fmt.Println("new slice:", evens)
+
+	// DeleteFunc removes matches in place, reusing nums.
+	nums = []int{1, 2, 3, 4, 5, 6}
+	evens = slices.DeleteFunc(nums,
+		func(n int) bool { return n%2 != 0 })
+	fmt.Println("DeleteFunc:", evens)
+
 	// No pop: guard, read the end, clear it, then reslice.
 	stack := []int{1, 2, 3, 4}
 	if len(stack) > 0 {
@@ -29,7 +45,7 @@ func main() {
 	ordered = slices.Insert(ordered, i, 25)
 	fmt.Println("insert:", ordered)
 
-	// Swap-delete: move the last value in, then zero its slot.
+	// Swap-delete: move the last value in, then zero it.
 	unordered := []int{10, 20, 30, 40}
 	i = 1
 	removed = unordered[i]

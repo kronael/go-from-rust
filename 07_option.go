@@ -27,4 +27,18 @@ func main() {
 	set := &n
 	fmt.Println("nil is absent:", missing == nil)
 	fmt.Println("ptr present:", set != nil, *set)
+
+	// Only the pointer form fits in a container: a slice
+	// holds one value per slot, so []*int is roughly
+	// Vec<Option<&i32>>. Deref of nil panics, so each
+	// element needs its own check.
+	a, b := 3, -1
+	loads := []*int{&a, &b, nil}
+	for i, load := range loads {
+		if load == nil {
+			fmt.Println("nil at:", i)
+			continue
+		}
+		fmt.Println("element:", i, *load)
+	}
 }

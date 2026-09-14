@@ -28,19 +28,19 @@ compare without framework context.
 5. Check language claims against the [Go documentation](https://go.dev/doc/) or
    [Go specification](https://go.dev/ref/spec), not README prose alone.
 6. Compare the observed output with the source and revise the prediction.
-7. Inspect `35_http.go` last and trace the handler through the client call.
+7. Inspect `31_http.go` last and trace the handler through the client call.
 
 ## Lesson Groups
 
-- **Foundations and slices:** lessons 01–13.
-- **Language mappings:** lessons 14–21.
-- **Collections and ordering:** lessons 22–24.
-- **Concurrency:** lessons 25–30.
-- **Control and failure:** lessons 31–32.
-- **Services and data:** lessons 33–37.
-- **Generics and tooling:** lessons 38–44.
-- **Type modeling:** lesson 45.
-- **What Go does not enforce:** lessons 46–50. Each shows a guarantee Rust
+- **Foundations and slices:** lessons 01–10.
+- **Language mappings:** lessons 11–17.
+- **Collections and ordering:** lessons 18–20.
+- **Concurrency:** lessons 21–26.
+- **Control and failure:** lessons 27–28.
+- **Services and data:** lessons 29–33.
+- **Generics and tooling:** lessons 34–40.
+- **Type modeling:** lesson 41.
+- **What Go does not enforce:** lessons 42–46. Each shows a guarantee Rust
   makes and Go does not, then the Go idiom that lives with it where one
   exists.
 
@@ -72,9 +72,9 @@ for file in [0-9][0-9]_*.go; do
   case "$file" in 01_arrays_slices.go) continue ;; esac
   go run "$file"
 done
-go run -race 25_concurrent_maps.go
-go run -race 27_channels.go
-go run -race 29_barriers.go
+go run -race 21_concurrent_maps.go
+go run -race 23_channels.go
+go run -race 25_barriers.go
 test -z "$($(go env GOROOT)/bin/gofmt -l $(find . -name '*.go' -not -path './.git/*'))"
 ```
 
