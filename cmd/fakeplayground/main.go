@@ -14,6 +14,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"syscall"
 	"time"
 )
 
@@ -61,6 +62,17 @@ func handleCompile(w http.ResponseWriter, r *http.Request) {
 
 	cmd := exec.CommandContext(ctx, "go", "run", mainFile)
 	cmd.Env = append(os.Environ(), "GOCACHE="+gocacheDir())
+
+	// `go run` spawns compile and link children. Killing it alone
+	// leaves them holding the output pipes, and Wait blocks on those
+	// pipes long past the deadline. Give the run its own process
+	// group, signal the group, and bound the wait that follows.
+	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+	cmd.Cancel = func() error {
+		return syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL)
+	}
+	cmd.WaitDelay = 2 * time.Second
+
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
