@@ -22,25 +22,25 @@ type Report struct {
 }
 
 func main() {
-	original := Doc{Title: "spec", Tags: []string{"go"}}
-	copied := original
+	doc := Doc{Title: "spec", Tags: []string{"go"}}
+	dup := doc
 
 	// The string field is independent; the slice header
 	// was copied but still points at the same array.
-	copied.Title = "draft"
-	copied.Tags[0] = "rust"
-	fmt.Println("titles differ:", original.Title, copied.Title)
-	fmt.Println("tags share storage:", original.Tags, copied.Tags)
+	dup.Title = "draft"
+	dup.Tags[0] = "rust"
+	fmt.Println("titles differ:", doc.Title, dup.Title)
+	fmt.Println("tags share storage:", doc.Tags, dup.Tags)
 
 	var r Report
 	r.body.WriteString("first")
 
-	// This copy is legal Go too. strings.Builder adds its own
-	// runtime check, so the later write exposes the bad copy.
+	// This copy is legal Go too. strings.Builder adds
+	// its own runtime check, so the write exposes it.
 	broken := r
 	func() {
 		defer func() {
-			fmt.Println("copy compiled; write panicked:", recover())
+			fmt.Println("write panicked:", recover())
 		}()
 		broken.body.WriteString("second")
 	}()

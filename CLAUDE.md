@@ -40,9 +40,9 @@ compare without framework context.
 - **Services and data:** lessons 33–37.
 - **Generics and tooling:** lessons 38–44.
 - **Type modeling:** lesson 45.
-- **What Go does not enforce:** lessons 46–50. These demonstrate guarantees
-  Rust makes and Go does not; there is no fix to teach, so each lesson shows
-  the behavior and stops.
+- **What Go does not enforce:** lessons 46–50. Each shows a guarantee Rust
+  makes and Go does not, then the Go idiom that lives with it where one
+  exists.
 
 ## Editing Contract
 
