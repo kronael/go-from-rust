@@ -1,5 +1,50 @@
 # Changelog
 
+## [v0.6.0] — 20260915
+
+> Minimum Viable Go v0.6.0 — audited, and off the release candidate
+>
+> An independent model checked every lesson claim against the spec and the running code. It found four that were wrong. Go 1.27 also went GA, and the Playground caught up.
+>
+> • Lesson 46 claimed a function return is the only thing that fires a defer — a panic fires them too
+> • Lesson 16 claimed `fmt.Print` writes arguments as-is — it spaces two operands when neither is a string
+> • Lessons 03 and 08 asserted behaviour their output never showed; both now print it
+> • Every lesson runs in the browser again — the Go 1.27 caveats are gone, and the toolchain is 1.27.1
+>
+> Full notes: CHANGELOG.md
+
+- Corrected four false or overstated claims, each verified against the spec or
+  a probe before the edit. Lesson 46 said "a function return is the only thing
+  that fires a defer", which contradicted lesson 17's own description and
+  lesson 28's output. Lesson 16 said `fmt.Print` "writes arguments as-is";
+  `fmt.Print(1, 2)` prints `1 2`, and the lesson passed a single argument, so
+  its output hid the rule. The comma-ok bool does not force the caller to
+  check — `v, _ := f()` compiles. `Match` is not the only encoding Go checks
+  exhaustively; a visitor interface gets the same check, because what the
+  compiler can count is a variant set that appears in a signature.
+- Fixed three lessons that stated a claim their output could not show. Lesson
+  03 ranged over `"hé"`, whose only multi-byte rune was last, so the index
+  jump it described never appeared; it now ranges `"héllo"` and prints
+  1 → 3. Lesson 08 asserted `DeleteFunc` reuses the backing array and now
+  prints the reused slice. A keyed struct literal does not make a value print
+  differently, so lesson 12's description now gives the real reason to use one.
+- Smaller corrections: `maps.Keys` returns an `iter.Seq[K]` and `slices.Sorted`
+  does the allocating; `cmp.Or` matches Rust's `Ordering::then`, not
+  `sort_unstable_by`; Rust's mpsc `send` moves where Go's copies; the zero
+  value removes a default from `New`, not the option that overrides it; the
+  middleware lesson does define the named type its description said was
+  unnecessary. A `lesson37` header value survived the renumbering.
+- Moved to Go 1.27.1. `go.mod` and the Docker builder leave the release
+  candidate behind.
+- `make playground-check` reports READY, so every lesson runs in the browser
+  again. The "in-browser Run fails until the public Playground supports Go
+  1.27" sentences are gone from lessons 39 and 40, and the `go127Note`
+  fallback in `web/app.js` went with them.
+- Logged two lessons in `BUGS.md` whose output cannot show what they claim:
+  `22_synchronization.go` prints the same thing with every lock deleted, and
+  `38_table_tests.go` never exercises the continue-on-failure behaviour its
+  description promises. Both need a design call, not an edit.
+
 ## [v0.5.0] — 20260915
 
 > Minimum Viable Go v0.5.0 — 46 lessons, no lesson taught twice
