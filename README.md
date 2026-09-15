@@ -112,10 +112,10 @@ matters and uses the current standard library where it is clearer:
 |---|---|
 | Copy or concatenate | `copy`, `slices.Clone`, or `slices.Concat`; lesson 02 distinguishes supplied from new storage. |
 | Reserve or constrain capacity | `slices.Grow` or a full slice expression; lesson 05 shows both. |
-| Filter or deduplicate | A loop, `slices.DeleteFunc`, or `slices.Compact` for adjacent duplicates; lesson 09 compares allocation. |
-| Insert, delete, pop, or swap-delete | `slices.Insert`, `slices.Delete`, or reslicing; lesson 10 shows order preservation and tail clearing. |
+| Filter or deduplicate | A loop, `slices.DeleteFunc`, or `slices.Compact` for adjacent duplicates; lesson 08 compares allocation. |
+| Insert, delete, pop, or swap-delete | `slices.Insert`, `slices.Delete`, or reslicing; lesson 08 shows order preservation and tail clearing. |
 | Drop references or retained storage | `clear`, `slices.Clip`, or `slices.Clone`; lesson 09 separates reachability from capacity. |
-| Reverse, shuffle, batch, or slide a window | `slices.Reverse`, `rand.Shuffle`, `slices.Chunk`, or `s[i:i+n]`; use lesson 27's ring for a bounded queue. |
+| Reverse, shuffle, batch, or slide a window | `slices.Reverse`, `rand.Shuffle`, `slices.Chunk`, or `s[i:i+n]`; use lesson 24's ring for a bounded queue. |
 
 Start with a loop or the standard `slices` and `maps` packages. [samber/lo](https://lo.samber.dev/)
 is useful when operations absent from the standard library—such as `Map` or
