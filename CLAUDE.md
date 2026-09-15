@@ -73,6 +73,7 @@ for file in [0-9][0-9]_*.go; do
   go run "$file"
 done
 go run -race 21_concurrent_maps.go
+go run -race 22_synchronization.go
 go run -race 23_channels.go
 go run -race 25_barriers.go
 test -z "$($(go env GOROOT)/bin/gofmt -l $(find . -name '*.go' -not -path './.git/*'))"

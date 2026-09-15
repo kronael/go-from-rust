@@ -82,6 +82,7 @@ integration: build
 		go run "$$file"; \
 	done
 	CGO_ENABLED=1 CC="$(CC)" go run -race 21_concurrent_maps.go
+	CGO_ENABLED=1 CC="$(CC)" go run -race 22_synchronization.go
 	CGO_ENABLED=1 CC="$(CC)" go run -race 23_channels.go
 	CGO_ENABLED=1 CC="$(CC)" go run -race 25_barriers.go
 	scripts/playtest.sh
