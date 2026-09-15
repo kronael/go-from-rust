@@ -1,38 +1,12 @@
 # TODO
 
-## Switch when the public Playground supports Go 1.27
+## Fold the 1.27 features back into their home lessons
 
-The tour runs code on the public Go Playground
-(`defaultPlaygroundURL` in `internal/webapp/server.go`), which is still
-pre-1.27. Lessons 43 and 44 use 1.27-only syntax, so their in-browser Run
-fails; everything else runs. Check with:
-
-```sh
-make playground-check
-```
-
-When it reports READY:
-
-1. Drop the "Needs Go 1.27 — this lesson's in-browser Run fails …" sentence
-   from the lesson 39 and 40 rows in `README.md`.
-2. Delete `go127Note` / `needsGo127` and their use in `extractOutput`
-   (`web/app.js`) — the fallback message is then dead code.
-3. Optionally fold the 1.27 features back into the lessons they belong to,
-   now that Run works: the struct-literal promoted-field key into
-   `12_tuples.go` (it was reverted for exactly this reason), and the
-   `encoding/json` v1-versus-v2 contrast into `30_json.go` if lesson 40
-   then reads as redundant.
-4. Re-run `make check test integration` and redeploy.
-
-Not blocked on the Playground: pointing `PLAYGROUND_URL` at any 1.27-capable
-backend also makes Run work — no code change needed.
-
-## Move off the release candidate
-
-`go.mod` pins `toolchain go1.27rc2` and `Dockerfile` builds on
-`golang:1.27rc2-alpine3.23`. When Go 1.27 goes GA, bump both to the final
-release and drop the "currently the `go1.27rc2` release candidate" wording
-from `README.md`.
+Now that the public Playground runs Go 1.27, lessons 39 and 40 exist only
+because their syntax used to fail in the browser. Consider folding the
+struct-literal promoted-field key into `12_tuples.go` (it was reverted for
+exactly that reason) and the `encoding/json` v1-versus-v2 contrast into
+`30_json.go`, if lesson 40 then reads as redundant.
 
 ## SIMD lesson — needs a decision
 
@@ -42,11 +16,3 @@ concept lesson whose executed code is plain Go, or a self-hosted sandboxed
 runner (`PLAYGROUND_URL`) that sets the experiment. `cmd/fakeplayground`
 executes submissions and inherits `os.Environ()`, but binds loopback only and
 has no sandbox — exposing it as-is would be remote code execution.
-
-4. Run a factual audit of the lessons through a second model. No lesson claim
-   has had an independent check. Ask it to find claims that are wrong, not
-   claims that are missing: false or overstated statements about Go or Rust,
-   output that does not demonstrate the claim its description makes,
-   non-idiomatic Go taught as normal, and lessons that contradict each other.
-   `codex exec --sandbox read-only` is out of credits until 2026-09-19; `pi`
-   needs an API key in the environment.

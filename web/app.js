@@ -290,34 +290,8 @@
     }
   }
 
-  // Lessons written against Go 1.27 cannot compile on the public Playground
-  // until it updates. Say so, rather than showing a bare syntax error.
-  const go127Note =
-    "This lesson uses Go 1.27 syntax. The public Go Playground has not " +
-    "updated to 1.27 yet, so Run fails here. The code itself is correct " +
-    "and runs locally with Go 1.27.\n\n";
-
-  function needsGo127() {
-    return !!current && /Needs Go 1\.27/.test(current.Summary || "");
-  }
-
-  // Only blame the Playground for errors it actually causes; a typo the reader
-  // introduced must still read as their own error.
-  const go127Signals = [
-    "method must have no type parameters",
-    "encoding/json/v2",
-    "jsontext",
-  ];
-
-  function isGo127Failure(errors) {
-    return go127Signals.some((signal) => errors.includes(signal));
-  }
-
   function extractOutput(payload) {
     if (payload.Errors) {
-      if (needsGo127() && isGo127Failure(payload.Errors)) {
-        return go127Note + payload.Errors;
-      }
       return payload.Errors;
     }
     const events = payload.Events || [];
