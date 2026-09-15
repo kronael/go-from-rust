@@ -12,7 +12,7 @@ func main() {
 	}
 
 	// range over a string yields byte index and rune.
-	for i, r := range "hé" {
+	for i, r := range "héllo" {
 		fmt.Printf("string byte %d: %U\n", i, r)
 	}
 

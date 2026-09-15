@@ -15,7 +15,7 @@ type Middleware func(http.Handler) http.Handler
 func tag(next http.Handler) http.Handler {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("X-Tag", "lesson37")
+			w.Header().Set("X-Tag", "lesson33")
 			next.ServeHTTP(w, r)
 		})
 }

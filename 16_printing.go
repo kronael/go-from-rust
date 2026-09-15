@@ -13,9 +13,10 @@ type point struct {
 }
 
 func main() {
-	// Print writes args as-is; Println adds spaces + newline.
-	fmt.Print("Print")
-	fmt.Println(" + Println", 1, 2)
+	// Print spaces two operands only when neither is a
+	// string; Println always spaces them, and adds \n.
+	fmt.Print("Print", 1, 2, "\n")
+	fmt.Println("Println", 1, 2)
 
 	// Printf uses verbs; the newline is explicit.
 	fmt.Printf("Printf: %s %d\n", "answer", 42)

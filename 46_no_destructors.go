@@ -28,7 +28,8 @@ func perFunction(names []string) {
 }
 
 // Narrowing the scope takes a function call, because a
-// function return is the only thing that fires a defer.
+// defer fires when its own function exits, and a block
+// is not a function.
 func perIteration(names []string) {
 	for _, name := range names {
 		func() {

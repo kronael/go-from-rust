@@ -23,6 +23,7 @@ func main() {
 	evens = slices.DeleteFunc(nums,
 		func(n int) bool { return n%2 != 0 })
 	fmt.Println("DeleteFunc:", evens)
+	fmt.Println("nums reused:", nums)
 
 	// No pop: guard, read the end, clear it, then reslice.
 	stack := []int{1, 2, 3, 4}
