@@ -1,5 +1,34 @@
 # Changelog
 
+## [v0.6.1] — 20260915
+
+> Minimum Viable Go v0.6.1 — the locks now do something
+>
+> Lesson 22 asserted what `RWMutex` and atomics give you without ever exercising them. Its output was identical with every lock deleted.
+>
+> • One writer now runs against eight readers, so removing the locks trips `go run -race`
+> • The printed result stays fixed, because only one writer ran
+> • `make integration` race-checks lesson 22 as well
+>
+> Full notes: CHANGELOG.md
+
+- Rewrote `22_synchronization.go`. It took and released every lock from a
+  single goroutine in sequence, so the run proved none of what it claimed. A
+  writer goroutine now updates the shared value while eight readers read it:
+  delete the locks and `go run -race` reports a data race, which is the
+  evidence the lesson was missing. Output stays deterministic because only one
+  writer runs, and the reader count comes from an `atomic.Int64` that a plain
+  `int++` would lose updates on. The race check joined `make integration` and
+  the documented gate.
+- Bumped the runtime base image to `alpine:3.23.5`. The Go toolchain is
+  already on the newest stable release, and the module has no dependencies to
+  update — the lessons are stdlib-only and the tour ships no third-party
+  assets.
+- `BUGS.md` now names what blocks the one remaining entry rather than calling
+  it a design call. `38_table_tests.go` cannot show `t.Errorf` continuing past
+  a failure because `make integration` runs every lesson with `go run` and
+  requires exit 0, and a failing test exits nonzero.
+
 ## [v0.6.0] — 20260915
 
 > Minimum Viable Go v0.6.0 — audited, and off the release candidate
