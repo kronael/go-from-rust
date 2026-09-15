@@ -50,6 +50,11 @@ compare without framework context.
 - Put code first. Never add a prose preamble at the top of a lesson.
 - Use short inline comments between code blocks to map Rust concepts to Go.
 - Keep output deterministic unless unspecified/nondeterministic behavior is itself the concept.
+- A lesson's comments and its README row may state a fact, but must never
+  claim the run shows something the run does not. If the point is worth
+  asserting, make the output prove it, or say plainly that the code does not
+  exercise it. Delete a lesson's mechanism and see whether the output changes;
+  if it does not, the lesson demonstrates nothing.
 - Avoid unnecessary helpers and abstractions. If a helper hides the concept,
   keep the operation inline.
 - Do not add error handling, generalization, or completeness that obscures the
