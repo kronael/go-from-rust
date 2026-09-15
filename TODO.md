@@ -42,3 +42,11 @@ concept lesson whose executed code is plain Go, or a self-hosted sandboxed
 runner (`PLAYGROUND_URL`) that sets the experiment. `cmd/fakeplayground`
 executes submissions and inherits `os.Environ()`, but binds loopback only and
 has no sandbox — exposing it as-is would be remote code execution.
+
+4. Run a factual audit of the lessons through a second model. No lesson claim
+   has had an independent check. Ask it to find claims that are wrong, not
+   claims that are missing: false or overstated statements about Go or Rust,
+   output that does not demonstrate the claim its description makes,
+   non-idiomatic Go taught as normal, and lessons that contradict each other.
+   `codex exec --sandbox read-only` is out of credits until 2026-09-19; `pi`
+   needs an API key in the environment.
