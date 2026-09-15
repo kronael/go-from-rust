@@ -32,55 +32,37 @@ func TestParsePort(t *testing.T) {
 		want    int
 		wantErr bool
 	}{
-		{
-			name:  "usual",
-			input: "8080",
-			want:  8080,
-		},
-		{
-			name:  "trims space",
-			input: " 443\n",
-			want:  443,
-		},
-		{
-			name:  "maximum",
-			input: "65535",
-			want:  65_535,
-		},
-		{
-			name:    "zero",
-			input:   "0",
-			wantErr: true,
-		},
-		{
-			name:    "above maximum",
-			input:   "65536",
-			wantErr: true,
-		},
-		{
-			name:    "not a number",
-			input:   "http",
-			wantErr: true,
-		},
+		{name: "usual", input: "8080", want: 8080},
+		{name: "trims space", input: " 443\n", want: 443},
+		{name: "maximum", input: "65535", want: 65_535},
+		{name: "zero", input: "0", wantErr: true},
+		{name: "too big", input: "65536", wantErr: true},
+		{name: "not numeric", input: "http", wantErr: true},
 	}
 
+	// Rust's assert_eq! panics, so one mismatch ends the
+	// test. Go splits that into two calls: Fatalf stops
+	// this subtest, Errorf records and runs on. Choosing
+	// between them is how a Go test reports every real
+	// mismatch in one run instead of only the first.
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			got, err := parsePort(c.input)
+
+			// Wrong error state: comparing the value now
+			// would only add noise, so stop here.
 			if (err != nil) != c.wantErr {
-				t.Errorf(
-					"error = %v; want error = %v",
-					err,
-					c.wantErr,
-				)
+				t.Fatalf("error = %v; want error = %v",
+					err, c.wantErr)
 			}
+			if c.wantErr {
+				return
+			}
+
+			// An independent check, so record and continue.
 			if got != c.want {
-				t.Errorf(
-					"parsePort(%q) = %d; want %d",
-					c.input,
-					got,
-					c.want,
-				)
+				t.Errorf("parsePort(%q) = %d; want %d",
+					c.input, got, c.want)
 			}
 		})
 	}
