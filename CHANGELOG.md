@@ -1,5 +1,37 @@
 # Changelog
 
+## [v0.7.0] — 20260915
+
+> Minimum Viable Go v0.7.0 — SIMD, honestly
+>
+> Lesson 47 closes the last open item. Neither Rust nor Go gives you portable vectors on its stable default, and the lesson says which parts of itself actually run.
+>
+> • Rust's `std::simd` is `E0658` on stable; Go's `simd` package needs `GOEXPERIMENT=simd`
+> • The executed code is plain Go, and the lesson says so rather than implying the run vectorises
+> • The vector version sits in a comment, checked against the real package — it compiles and returns the same answer
+>
+> Full notes: CHANGELOG.md
+
+- Added `47_simd.go`. Rust's portable SIMD is nightly-only (`use std::simd` is
+  `E0658` on stable 1.97, and `#![feature]` is `E0554` there) and Go 1.27's
+  `simd` package is gated behind `GOEXPERIMENT=simd`, so the honest mapping is
+  that neither language hands you portable vectors by default.
+- The lesson executes plain Go, because the tour runs on the public Playground
+  and the Playground cannot set the experiment. It states that in the output
+  rather than leaving a reader to assume the run vectorises. The vector
+  version sits in a comment and was verified against the real package: it
+  compiles under `GOEXPERIMENT=simd` on go1.27.1 and returns the same `190` as
+  the scalar sum, at width 8 on this machine.
+- Two differences from Rust are the reason the lesson exists: `Len` is a
+  run-time value rather than a const generic like `f32x4`, so one binary
+  adapts to the machine it lands on, and no `unsafe` block appears, because
+  the package falls back to pure Go where the hardware is absent.
+- The editing contract now requires a lesson's claims to match its output. A
+  lesson may state a fact, but must never claim the run shows what the run
+  does not. The check is mechanical: delete the mechanism and see whether the
+  output changes.
+- `TODO.md` and `BUGS.md` are both empty.
+
 ## [v0.6.2] — 20260915
 
 > Minimum Viable Go v0.6.2 — the test lesson teaches the choice
