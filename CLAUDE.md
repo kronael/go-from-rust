@@ -43,6 +43,7 @@ compare without framework context.
 - **What Go does not enforce:** lessons 42–46. Each shows a guarantee Rust
   makes and Go does not, then the Go idiom that lives with it where one
   exists.
+- **Hardware:** lesson 47.
 
 ## Editing Contract
 

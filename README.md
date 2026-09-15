@@ -13,10 +13,10 @@ quietly does not, and none of them appears in a tutorial that starts at hello
 world.
 
 So each numbered `.go` file is one of those collisions, small enough to read,
-predict, and run inside a minute. Working through all 46 gives you practical
+predict, and run inside a minute. Working through all 47 gives you practical
 mappings for Go slices and allocation, language constructs, collections,
 synchronization, errors, HTTP, configuration, logging, and JSON—the parts most
-likely to surprise an experienced Rust user. The last five are a different
+likely to surprise an experienced Rust user. Five of them are a different
 kind: guarantees Rust makes and Go does not, where there is no mapping to
 learn, only a habit to unlearn.
 
@@ -101,6 +101,7 @@ narrower but still worth recognizing.
 | [`44_generic_dispatch.go`](44_generic_dispatch.go) | 3 | The output establishes one language fact: a type parameter converted to `any` retains its concrete dynamic type, so `%T` can report it and a type switch can choose behavior at run time. Go has no generic-specialization syntax; use constraints and methods for shared behavior, or an explicit type switch when behavior truly depends on the concrete type. GC-shape sharing, dictionaries, and devirtualization are compiler implementation details that this program cannot prove—inspect and benchmark the toolchain when they matter. |
 | [`45_string_bytes.go`](45_string_bytes.go) | 5 | The same `"héllo"` value reports 6 bytes and 5 runes, and `s[1]` returns one byte rather than one character. More importantly, converting `41 ff 42` from `[]byte` to `string` succeeds even though `utf8.ValidString` says false; `range` then substitutes U+FFFD instead of returning an error. A Go string stores bytes, not guaranteed UTF-8 text, so validate text at input boundaries and choose deliberately between byte, rune, and user-perceived-character operations. |
 | [`46_no_destructors.go`](46_no_destructors.go) | 4 | Watch the print order: the loop in `perFunction` finishes before either deferred `Close`, then the closes run when that function returns. Wrapping one iteration in its own function creates an earlier return point, so each close happens before the next open. Go has no Rust-style automatic `Drop`; cleanup is an explicit call, and `defer` attaches it to the surrounding function rather than the nearest block. Put the defer in the function whose lifetime matches the resource. |
+| [`47_simd.go`](47_simd.go) | 3 | Rust's portable SIMD is nightly-only — `use std::simd` is `E0658` on stable 1.97 — and Go 1.27's `simd` package is gated the same way, behind `GOEXPERIMENT=simd`, so neither language hands you portable vectors on its stable default. The code this lesson executes is plain Go, because the tour runs on the public Playground and the Playground cannot set the experiment; the vector version sits in a comment, where it was checked to compile and to agree with the scalar sum. Read it for the shape: load a full-width vector, add lanes in parallel, zero-fill a short tail with `LoadFloat32sPart`, then reduce. Two things differ from Rust — `Len` is a run-time value rather than a const generic like `f32x4`, so one binary adapts to the machine, and no `unsafe` block appears, because the package falls back to pure Go where the hardware is absent. |
 
 ### Slice Operations
 
@@ -128,8 +129,8 @@ can change between Go releases.
 
 ## Interactive Web Tour
 
-An optional `-tags web` build serves a browser tour of all 46 lessons: edit,
-format, run, and navigate by hash (`#01`–`#46`). It embeds the README,
+An optional `-tags web` build serves a browser tour of all 47 lessons: edit,
+format, run, and navigate by hash (`#01`–`#47`). It embeds the README,
 numbered lesson files, and `web/` assets into one binary; no lesson source is
 duplicated.
 
