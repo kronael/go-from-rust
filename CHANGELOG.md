@@ -1,5 +1,42 @@
 # Changelog
 
+## [v0.5.0] — 20260915
+
+> Minimum Viable Go v0.5.0 — 46 lessons, no lesson taught twice
+>
+> Four pairs of lessons each taught one concept across two files. They are now four lessons, and every lesson after 07 renumbers.
+>
+> • Lesson 07 adds the container case: only the pointer form of optional fits in a slice
+> • Lesson 08 joins filtering to the other slice edits, lesson 09 joins tail retention to the large-array case
+> • Lesson 12 joins the tuple replacements to multiple returns — one stores, the other does not
+> • The in-browser tour now runs `#01`–`#46`; old `#NN` links past 07 point at a different lesson
+>
+> Full notes: CHANGELOG.md
+
+- Merged four duplicate lesson pairs, taking the curriculum from 50 to 46.
+  Two merges sharpen the point rather than only removing repetition: lesson 07
+  now shows that a slice holds one value per slot, so `(T, bool)` cannot live
+  in a container and `*T` can; lesson 12 can now say plainly that a struct
+  stores and multiple results do not. Lessons 08 (filter plus the other slice
+  edits) and 09 (pointer-tail retention plus the large-array case, the same
+  rule at two scales) are consolidations.
+- Renumbered every lesson after 07. `README.md`, `CLAUDE.md`, `TODO.md`, the
+  `Makefile` race targets, and the playtest hashes follow. Hash links into the
+  tour above `#07` now address a different lesson than before.
+- `cmd/fakeplayground` now bounds a run at its deadline. `go run` spawns
+  compile and link children; killing it alone left them holding the output
+  pipes, so `Wait` blocked past the timeout — a cold build cache made the HTTP
+  lesson run 70 seconds and return an empty reply instead of failing at 10.
+  The run now gets its own process group, cancel signals the group, and
+  `WaitDelay` bounds the wait. `scripts/playtest.sh` warms that cache, which
+  removes a flaky gate rather than hiding an unbounded run.
+- Narrowed lesson 43, the repository's widest file at 68 columns, to the
+  60-column band the tour needs on a phone.
+- Corrected the lesson-group note that claimed lessons 42–46 show a behavior
+  and stop with no fix to teach: 42 teaches the correct-zero-value idiom and
+  44 teaches the runtime type switch.
+- Repointed the slice-operations table at the merged lessons.
+
 ## [v0.4.2] — 20260809
 
 > Minimum Viable Go v0.4.2 — claims you can trace
