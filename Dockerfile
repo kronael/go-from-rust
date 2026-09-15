@@ -6,7 +6,7 @@ COPY internal/webapp ./internal/webapp
 COPY web ./web
 RUN go build -trimpath -ldflags="-s -w" -tags web -o /out/go-from-rust-web .
 
-FROM alpine:3.23.3
+FROM alpine:3.23.5
 RUN apk add --no-cache ca-certificates \
     && addgroup -S app && adduser -S -G app app
 COPY --from=build /out/go-from-rust-web /usr/local/bin/go-from-rust-web
