@@ -1,5 +1,30 @@
 # Changelog
 
+## [v0.6.2] — 20260915
+
+> Minimum Viable Go v0.6.2 — the test lesson teaches the choice
+>
+> Lesson 38 claimed `t.Errorf` keeps going where Rust's `assert_eq!` panics, then printed `PASS` and never showed it. The claim is now a documented feature, and the test is written the way that knowledge changes it.
+>
+> • `Fatalf` for the error-state precondition, because comparing a value after that only adds noise
+> • `Errorf` for the independent value check, where a second mismatch still informs
+> • The case table is one line per case, which is what a table test should look like
+>
+> Full notes: CHANGELOG.md
+
+- Rewrote lesson 38's subtest around the choice Rust does not offer. Rust's
+  `assert_eq!` panics, so the first mismatch ends the test; Go splits that into
+  `t.Fatalf`, which stops the subtest, and `t.Errorf`, which records and runs
+  on. The lesson now uses `Fatalf` when the error state is wrong and returns
+  early for the error cases, then `Errorf` for the value comparison. The
+  README says plainly that all cases pass and the run prints `PASS`, so the
+  difference lives in how the test is written rather than in the output — a
+  description should not promise evidence the run cannot give.
+- Compacted the case table to one line per case. That is the shape a table
+  test is supposed to have, and it brought the file from 102 lines to 84,
+  inside the editing contract it had been exceeding.
+- `BUGS.md` is empty.
+
 ## [v0.6.1] — 20260915
 
 > Minimum Viable Go v0.6.1 — the locks now do something
