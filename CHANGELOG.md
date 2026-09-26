@@ -1,5 +1,41 @@
 # Changelog
 
+## [v0.7.1] — 20260926
+
+> Minimum Viable Go v0.7.1 — SIMD, running
+>
+> Lesson 47 now runs Go's real `simd` package instead of keeping the vector code in a comment.
+>
+> • Run it with `GOEXPERIMENT=simd go run 47_simd.go`; the vector sum and the scalar sum agree
+> • The printed width and lanes change with the CPU, because the binary picks its vector width at startup
+> • The public Playground cannot set the experiment, so the lesson says the in-browser Run fails
+>
+> Full notes: CHANGELOG.md
+
+- Rewrote `47_simd.go` to import package `simd` and run it under
+  `GOEXPERIMENT=simd`: full-width `Float32s` adds, a zero-filled
+  `LoadFloat32sPart` tail, `Store` back to a slice, and the vector sum printed
+  beside the scalar sum. Both are `153` at every width. The lanes line shows
+  the tail lanes that got no third addend, so deleting the tail load changes
+  the output.
+- The width and lanes lines depend on the CPU. The compiler emits one copy of
+  `main` per vector width and the binary picks one at startup, which is why
+  `Len` is a run-time value rather than a const generic like Rust's `f32x4`.
+  `GODEBUG=simd=128` forces width 4 on the same binary, and the lesson says so
+  in a comment. There is no horizontal sum like Rust's `reduce_sum`, so the
+  lanes go back to a slice.
+- The public Playground answers the lesson with a build error, because it
+  cannot set the experiment. The lesson comments and its README row say the
+  in-browser Run fails and give the local command.
+- `make integration` and the `CLAUDE.md` gate run lesson 47 on its own line
+  with `GOEXPERIMENT=simd`, the way the race lessons get theirs, and the README
+  run section lists the command.
+- Go 1.27.1 is still the newest stable release, so `go.mod` and the Docker
+  builder stay on it.
+- `BUGS.md` logs two stale references: the README names `make playtest` and
+  `make full`, which do not exist, and the `playground-check` comment points
+  at lessons and `TODO.md` steps that are gone.
+
 ## [v0.7.0] — 20260915
 
 > Minimum Viable Go v0.7.0 — SIMD, honestly
