@@ -77,10 +77,11 @@ integration: build
 	go run .
 	for file in [0-9][0-9]_*.go; do \
 		case "$$file" in \
-			01_arrays_slices.go) continue ;; \
+			01_arrays_slices.go|47_simd.go) continue ;; \
 		esac; \
 		go run "$$file"; \
 	done
+	GOEXPERIMENT=simd go run 47_simd.go
 	CGO_ENABLED=1 CC="$(CC)" go run -race 21_concurrent_maps.go
 	CGO_ENABLED=1 CC="$(CC)" go run -race 22_synchronization.go
 	CGO_ENABLED=1 CC="$(CC)" go run -race 23_channels.go

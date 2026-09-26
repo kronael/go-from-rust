@@ -46,6 +46,12 @@ go run -race 23_channels.go
 go run -race 25_barriers.go
 ```
 
+The SIMD lesson imports package `simd`, which exists only under its experiment:
+
+```sh
+GOEXPERIMENT=simd go run 47_simd.go
+```
+
 The repository requires Go 1.27, matching [`go.mod`](go.mod).
 
 ## Learning Path
@@ -101,7 +107,7 @@ narrower but still worth recognizing.
 | [`44_generic_dispatch.go`](44_generic_dispatch.go) | 3 | The output establishes one language fact: a type parameter converted to `any` retains its concrete dynamic type, so `%T` can report it and a type switch can choose behavior at run time. Go has no generic-specialization syntax; use constraints and methods for shared behavior, or an explicit type switch when behavior truly depends on the concrete type. GC-shape sharing, dictionaries, and devirtualization are compiler implementation details that this program cannot prove—inspect and benchmark the toolchain when they matter. |
 | [`45_string_bytes.go`](45_string_bytes.go) | 5 | The same `"héllo"` value reports 6 bytes and 5 runes, and `s[1]` returns one byte rather than one character. More importantly, converting `41 ff 42` from `[]byte` to `string` succeeds even though `utf8.ValidString` says false; `range` then substitutes U+FFFD instead of returning an error. A Go string stores bytes, not guaranteed UTF-8 text, so validate text at input boundaries and choose deliberately between byte, rune, and user-perceived-character operations. |
 | [`46_no_destructors.go`](46_no_destructors.go) | 4 | Watch the print order: the loop in `perFunction` finishes before either deferred `Close`, then the closes run when that function returns. Wrapping one iteration in its own function creates an earlier return point, so each close happens before the next open. Go has no Rust-style automatic `Drop`; cleanup is an explicit call, and `defer` attaches it to the surrounding function rather than the nearest block. Put the defer in the function whose lifetime matches the resource. |
-| [`47_simd.go`](47_simd.go) | 3 | Rust's portable SIMD is nightly-only — `use std::simd` is `E0658` on stable 1.97 — and Go 1.27's `simd` package is gated the same way, behind `GOEXPERIMENT=simd`, so neither language hands you portable vectors on its stable default. The code this lesson executes is plain Go, because the tour runs on the public Playground and the Playground cannot set the experiment; the vector version sits in a comment, where it was checked to compile and to agree with the scalar sum. Read it for the shape: load a full-width vector, add lanes in parallel, zero-fill a short tail with `LoadFloat32sPart`, then reduce. Two things differ from Rust — `Len` is a run-time value rather than a const generic like `f32x4`, so one binary adapts to the machine, and no `unsafe` block appears, because the package falls back to pure Go where the hardware is absent. |
+| [`47_simd.go`](47_simd.go) | 3 | Rust's portable SIMD is nightly-only — `use std::simd` is `E0658` on stable 1.97 — and Go 1.27's `simd` package is gated the same way, behind `GOEXPERIMENT=simd`, so neither language hands you portable vectors on its stable default. This lesson runs the real package: it adds full-width `Float32s` vectors lane-wise, zero-fills the short tail with `LoadFloat32sPart`, stores the lanes back to a slice because there is no horizontal sum like Rust's `reduce_sum`, and prints the vector sum beside the scalar one — both `153`. Two things differ from Rust. `Len` is a run-time value rather than a const generic like `f32x4`: the compiler emits one copy of `main` per width and the binary picks one at startup, so the printed width and lanes depend on the CPU, and `GODEBUG=simd=128` forces width 4 on the same binary. No `unsafe` block appears, because the package emulates in pure Go where the hardware is absent. The public Playground cannot set the experiment, so the in-browser Run fails with a build error; run it locally with `GOEXPERIMENT=simd`. |
 
 ### Slice Operations
 

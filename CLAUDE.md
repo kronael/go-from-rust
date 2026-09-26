@@ -75,9 +75,10 @@ go vet ./...
 go vet -tags web .
 go run .
 for file in [0-9][0-9]_*.go; do
-  case "$file" in 01_arrays_slices.go) continue ;; esac
+  case "$file" in 01_arrays_slices.go|47_simd.go) continue ;; esac
   go run "$file"
 done
+GOEXPERIMENT=simd go run 47_simd.go
 go run -race 21_concurrent_maps.go
 go run -race 22_synchronization.go
 go run -race 23_channels.go
